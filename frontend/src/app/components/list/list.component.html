@@ -69,7 +69,8 @@
                         </select>
                     </div>
                     <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter Phone No"
-                        formControlName="phone" pattern="[0-9]+" minlength="10" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                        formControlName="phone" pattern="[0-9]+" minlength="10" maxlength="10"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                 </div>
             </div>
         </div>
@@ -106,7 +107,8 @@
         <div class="form-group row m-2">
             <label for="countrymenu" class="col-sm-2 col-form-label" ml-5>Country</label>
             <div class="col-sm-10">
-                <select class="form-control" formControlName="country_id" id="countrymenu" (change)="onCountrySelected()">
+                <select class="form-control" formControlName="country_id" id="countrymenu"
+                    (change)="onCountrySelected()">
                     <option value="" disabled selected>Select Country</option>
                     <option *ngFor="let countrydata of countriesrcvd" [value]="countrydata._id">
                         {{countrydata.country}}
@@ -138,7 +140,48 @@
     </form>
 </div>
 
-<div *ngIf="isShowEditType">
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Vehicle Type</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- <div *ngIf="isShowEditType"> -->
+                    <form [formGroup]="vehicletypeForm" (ngSubmit)="onSubmitvehicletypeForm()">
+                        <div class="form-group row m-2">
+                            <label for="vehicletypemenu" class="col-sm-2 col-form-label" ml-5> Vehicle Type</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" formControlName="vehicletype_id" id="vehicletypemenu">
+                                    <option value="" disabled selected>Select Vehicle Type</option>
+                                    <option *ngFor="let vehicle of vehicles" [value]="vehicle._id">
+                                        {{vehicle.vehicletype}}
+                                    </option>
+                                    <!-- <option *ngFor="let country of countries" [value]="country.name.common">{{ country.name.common }}</option> -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row m-2">
+                            <div class="col-sm-10">
+                                <button class="btn btn-secondary mx-2"
+                                    [disabled]="!vehicletypeForm.valid" data-bs-dismiss="modal">AddType</button>
+                                <button class="btn btn-secondary mx-2" data-bs-dismiss="modal" (click)="onCancelBtn()">Cancel</button>
+
+                            </div>
+                        </div>
+                    </form>
+                <!-- </div> -->
+            </div>
+            <!-- <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div> -->
+        </div>
+    </div>
+</div>
+
+<!-- <div *ngIf="isShowEditType">
     <form [formGroup]="vehicletypeForm" (ngSubmit)="onSubmitvehicletypeForm()">
         <div class="form-group row m-2">
             <label for="vehicletypemenu" class="col-sm-2 col-form-label" ml-5> Vehicle Type</label>
@@ -148,7 +191,6 @@
                     <option *ngFor="let vehicle of vehicles" [value]="vehicle._id">
                         {{vehicle.vehicletype}}
                     </option>
-                    <!-- <option *ngFor="let country of countries" [value]="country.name.common">{{ country.name.common }}</option> -->
                 </select>
             </div>
         </div>
@@ -160,7 +202,7 @@
             </div>
         </div>
     </form>
-</div>
+</div> -->
 
 <div class="container">
     <div class="row my-4">
@@ -195,7 +237,8 @@
                             </td>
                             <td>{{driver.countrydata.country}}</td>
                             <td>{{driver.citydata.city}}</td>
-                            <td>{{driver.vehicletypedata?.vehicletype ? driver.vehicletypedata.vehicletype:driver.type}}</td>
+                            <td>{{driver.vehicletypedata?.vehicletype ? driver.vehicletypedata.vehicletype:driver.type}}
+                            </td>
                             <td>{{driver.rideStatus}}</td>
                             <td>
                                 <div class="form-check form-switch">
@@ -207,12 +250,18 @@
                                     </label>
                                 </div>
                             </td>
-                            <td> 
-                                <button [matMenuTriggerFor]="lvl2master" color="accent"  mat-button><mat-icon>edit</mat-icon></button>
+                            <td>
+                                <button [matMenuTriggerFor]="lvl2master" color="accent"
+                                    mat-button><mat-icon>edit</mat-icon></button>
                                 <mat-menu #lvl2master="matMenu">
-                                    <button mat-menu-item  (click)="onEditDriver(driver,$event)"><mat-icon>edit</mat-icon>Edit Driver</button>
-                                    <button mat-menu-item  (click)="onDeleteDriver(driver._id,$event)"><mat-icon>delete_forever</mat-icon>Delete</button>
-                                    <button mat-menu-item  (click)="onEditType(driver,$event)"><mat-icon>drive_eta</mat-icon>Edit Type</button>
+                                    <button mat-menu-item
+                                        (click)="onEditDriver(driver,$event)"><mat-icon>edit</mat-icon>Edit
+                                        Driver</button>
+                                    <button mat-menu-item
+                                        (click)="onDeleteDriver(driver._id,$event)"><mat-icon>delete_forever</mat-icon>Delete</button>
+                                    <button mat-menu-item data-bs-toggle="modal" data-bs-target="#exampleModal"
+                                        (click)="onEditType(driver,$event)"><mat-icon>drive_eta</mat-icon>Edit
+                                        Type</button>
                                 </mat-menu>
                             </td>
                             <!-- <td>
@@ -225,7 +274,7 @@
                             <a href="#" class="text-success edit" id="" (click)="onEditType(driver,$event)"><i
                                     class="fas fa-edit fa-lg mx-1"></i>Edit Type</a>
                                </td>    -->
-                            
+
                         </tr>
                     </tbody>
                 </table>
@@ -235,10 +284,12 @@
                 <button class="btn btn-secondary" [disabled]="currentPage === 1" (click)="prevPage()">Previous</button>
                 <!-- <span>{{ currentPage }} / {{ totalPages }}</span> -->
                 <ng-container *ngFor="let page of generatePageArray()">
-                  <button class="btn btn-secondary" [class.active]="page === currentPage" (click)="goToPage(page)">{{ page }}</button>
+                    <button class="btn btn-secondary" [class.active]="page === currentPage" (click)="goToPage(page)">{{
+                        page }}</button>
                 </ng-container>
-                <button class="btn btn-secondary" [disabled]="currentPage === totalPages" (click)="nextPage()">Next</button>
-              </div>
+                <button class="btn btn-secondary" [disabled]="currentPage === totalPages"
+                    (click)="nextPage()">Next</button>
+            </div>
         </div>
     </div>
 </div>
