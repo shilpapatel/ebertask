@@ -1,0 +1,384 @@
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-5">
+            <div class="card m-2">
+                <div class="card-body">
+                    <div class="userphoneformcontainer">
+                        <form [formGroup]="userphoneForm" (ngSubmit)="onGetUserDetails()"  novalidate>
+                            <div class="form-group row">
+                                <label for="phone" class="col-form-label col-sm-2">Phone</label>
+                                <div class="col-sm-10">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <select class="form-control input-group-text" formControlName="code"
+                                                name="code">
+                                                <option value="" disabled selected>Code</option>
+                                                <option *ngFor="let code of callingCodes" [value]="code">{{ code }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <input type="tel" class="form-control" id="phone" name="phone"
+                                            placeholder="Enter Phone No" formControlName="phone" pattern="[0-9]+" minlength="10" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group m-2">
+                                <div class="col-sm-10">
+                                    <button class="btn btn-secondary btn-block" >Get Details</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="userformcontainer" *ngIf="isShow">
+                        <form [formGroup]="usersForm" (ngSubmit)="onSubmit()" novalidate>
+                            <div class="form-group">
+                                <label for="name" class="col-form-label">Name</label>
+                                <input type="Text" class="form-control" id="name" name="name" placeholder="Enter Name"
+                                    formControlName="name" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="email" class="col-form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                    placeholder="Enter Email" formControlName="email" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone" class="col-form-label">Phone</label>
+                                <input type="tel" class="form-control" id="phone" name="phone"
+                                    placeholder="Enter Phone No" formControlName="phone" readonly>
+                            </div>
+                            <div class="form-group m-1">
+                                <div class="col-sm-10">
+                                    <button class="btn btn-secondary mx-2">Next</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="directionformcontainer">
+                        <!-- *ngIf="isShowDirection"> -->
+                        <form>
+                            <div class="form-group">
+                                <label for="from" class="col-form-label">From <i
+                                        class="far fa-dot-circle"></i></label>
+                                <!-- <div class="col-sm-10 "> -->
+                                    <input type="text" id="from" placeholder="Origin" class="form-control">
+                                <!-- </div> -->
+
+                            </div>
+                            <div class="form-group">
+                                <label for="to" class="col-form-label">To <i
+                                        class="fas fa-map-marker-alt"></i></label>
+
+                                <!-- <div class="col-sm-4"> -->
+                                    <input type="text" id="to" placeholder="Destination" class="form-control">
+                                <!-- </div> -->
+                            </div>
+                            
+                            <div class="form-group" *ngFor="let stop of stops; let i = index">
+                                <label for="stop{{ i }}" class="col-form-label" ml-5>Stop {{ i + 1 }}</label>
+
+                                <!-- <div class="col-sm-4"> -->
+                                    <input type="text" id="stop{{ i }}" [(ngModel)]="stop.name"
+                                        placeholder="Stop {{ i + 1 }}" (input)="initAutocomplete()" class="form-control"
+                                        [ngModelOptions]="{standalone: true}">
+                                <!-- </div> -->
+                            </div>
+
+                            <div class="form-group row my-2">
+                                <div class="col-sm-10">
+                                    <button id="calcButton" class="btn btn-secondary mx-2"
+                                        (click)="ondirectionbtn()"  [disabled]="isbuttonshow" >Direction</button>
+                                    <button class="btn btn-secondary mx-2" (click)="onAddStop()">Add Stop</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+
+                    <div>
+                        <form [formGroup]="bookrideForm" (ngSubmit)="onBookRideSubmit()">
+                            <div class="form-group">
+                                <label for="totalDistance" class="col-form-label" ml-5>Total Distance</label>
+
+                                    <input type="text" id="totalDistance" formControlName="totalDistance" placeholder="Total Distance"
+                                        class="form-control" readonly>
+
+                            </div>
+                    
+                            <div class="form-group">
+                                <label for="totalTime" class="col-form-label" ml-5>Total Time</label>
+
+                                    <input type="text" id="totalTime" formControlName="totalTime" placeholder="Total Time"
+                                        class="form-control" readonly>
+
+                            </div>
+                    
+                            <div class="form-group " *ngIf="showEstimatedPrices">
+                                <h3>Estimated Price</h3>
+                                <div class="form-group">
+                                    <p *ngFor="let vehicleType of vehicleTypesService">{{ vehicleType }} : {{ getEstimatedPrice(vehicleType)
+                                        }}</p>
+                                </div>
+                            </div>
+                    
+                            <div class="form-group">
+                                <label for="vehicletypemenu" class="col-form-label" ml-5> Vehicle Type</label>
+
+                                    <select class="form-control" formControlName="vehicletype" id="vehicletypemenu">
+                                        <option value="" disabled selected>Select Vehicle Type</option>
+                                        <option *ngFor="let vehicleType of vehicleTypesService" [value]="vehicleType">
+                                            {{vehicleType}}
+                                        </option>
+                                    </select>
+                               
+                            </div>
+                    
+                            <div class="form-group">
+                                <label for="paymentmethodmenu" class="col-form-label" ml-5> Payment Method</label>
+
+                                    <select class="form-control" formControlName="paymentoption" id="paymentmethodmenu">
+                                        <option value="" disabled selected>Select Payment Option</option>
+                                        <option value="Cash">Cash</option>
+                                        <option value="Card">Card</option>
+                                    </select>
+
+                            </div>
+                    
+                            <div class="form-group">
+                                <label for="bookridemenu" class="col-form-label ml-5">Book Ride</label>
+                                    <select class="form-control" formControlName="bookride" id="bookridemenu" (change)="onOptionChange()">
+                                        <option value="" disabled selected>Select Book Ride</option>
+                                        <option value="now">Now</option>
+                                        <option value="schedule">Schedule</option>
+                                    </select>
+                            </div>
+                    
+                            <div class="form-group">
+                                <label for="datetimepicker" class="col-form-label ml-5">Date and Time</label>
+                                    <input type="datetime-local" class="form-control" formControlName="datetime" id="datetimepicker">
+                            </div>
+                    
+                            <div class="form-group row my-2">
+                                <div class="col-sm-10">
+                                    <button id="calcButton" class="btn btn-secondary mx-2">Book Ride</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <div id="googleMap" class="map-container"></div>
+        </div>
+    </div>
+</div>
+
+
+<!-- <div class="userphoneformcontainer ms-3">
+    <form [formGroup]="userphoneForm" (ngSubmit)="onGetUserDetails()" novalidate>
+        <div class="form-group row m-2">
+            <label for="phone" class="col-sm-1 col-form-label">Phone</label>
+            <div class="col-sm-7">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <select class="form-control input-group-text" formControlName="code" name="code">
+                            <option value="" disabled selected>Code</option>
+                            <option *ngFor="let code of callingCodes" [value]="code">{{ code }}</option>
+                        </select>
+                    </div>
+                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter Phone No"
+                        formControlName="phone">
+                </div>
+            </div>
+
+            <div class="col-sm-4">
+                <button class="btn btn-secondary">Get Details</button>
+            </div>
+        </div>
+    </form>
+</div> -->
+<!-- <div class="userformcontainer ms-3" *ngIf="isShow">
+    <form [formGroup]="usersForm" (ngSubmit)="onSubmit()" novalidate>
+        <div class="form-group row m-2">
+            <label for="name" class="col-sm-1 col-form-label">Name</label>
+            <div class="col-sm-4">
+                <input type="Text" class="form-control" id="name" name="name" placeholder="Enter Name"
+                    formControlName="name" readonly>
+            </div>
+        </div>
+        <div class="form-group row m-2">
+            <label for="email" class="col-sm-1 col-form-label">Email</label>
+            <div class="col-sm-4">
+                <input type="email" class="form-control" id="email" name="email" placeholder="Enter Email"
+                    formControlName="email" readonly>
+            </div>
+        </div>
+        <div class="form-group row m-2">
+            <label for="phone" class="col-sm-1 col-form-label">Phone</label>
+            <div class="col-sm-4">
+                <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter Phone No"
+                    formControlName="phone" readonly>
+            </div>
+        </div>
+        <div class="form-group row m-2">
+            <div class="col-sm-10">
+                <button class="btn btn-secondary mx-2">Next</button>
+            </div>
+        </div>
+    </form>
+</div> -->
+<!-- <div class="container">
+
+    <form>
+        <div class="form-group row m-2">
+            <label for="from" class="col-sm-1 col-form-label" ml-5>From <i class="far fa-dot-circle"></i></label>
+            <div class="col-sm-4 ">
+                <input type="text" id="from" placeholder="Origin" class="form-control">
+            </div>
+
+        </div>
+        <div class="form-group row m-2">
+            <label for="to" class="col-sm-1 col-form-label" ml-5>To <i class="fas fa-map-marker-alt"></i></label>
+
+            <div class="col-sm-4">
+                <input type="text" id="to" placeholder="Destination" class="form-control">
+            </div>
+        </div>
+
+        <div class="form-group row m-2" *ngFor="let stop of stops; let i = index">
+            <label for="stop{{ i }}" class="col-sm-1 col-form-label" ml-5>Stop {{ i + 1 }}</label>
+
+            <div class="col-sm-4">
+                <input type="text" id="stop{{ i }}" [(ngModel)]="stop.name" placeholder="Stop {{ i + 1 }}"
+                    (input)="initAutocomplete()" class="form-control" [ngModelOptions]="{standalone: true}">
+            </div>
+        </div>
+
+        <div class="form-group row m-2">
+            <div class="col-sm-10">
+                <button id="calcButton" class="btn btn-secondary mx-2" (click)="ondirectionbtn()">Direction</button>
+                <button class="btn btn-secondary mx-2" (click)="onAddStop()">Add Stop</button>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="container-fluid">
+    <div id="googleMap"></div>
+</div> -->
+
+<!-- <div>
+    <form [formGroup]="bookrideForm" (ngSubmit)="onBookRideSubmit()">
+        <div class="form-group row m-2">
+            <label for="totalDistance" class="col-sm-1 col-form-label" ml-5>Total Distance</label>
+            <div class="col-sm-4">
+                <input type="text" id="totalDistance" formControlName="totalDistance" placeholder="Total Distance"
+                    class="form-control" readonly>
+            </div>
+        </div>
+
+        <div class="form-group row m-2">
+            <label for="totalTime" class="col-sm-1 col-form-label" ml-5>Total Time</label>
+            <div class="col-sm-4">
+                <input type="text" id="totalTime" formControlName="totalTime" placeholder="Total Time"
+                    class="form-control" readonly>
+            </div>
+        </div>
+
+        <div class="form-group row m-2" *ngIf="showEstimatedPrices">
+            <h3>Estimated Price</h3>
+            <div class="form-group row m-2">
+                <p *ngFor="let vehicleType of vehicleTypesService">{{ vehicleType }} : {{ getEstimatedPrice(vehicleType)
+                    }}</p>
+            </div>
+        </div>
+
+        <div class="form-group row m-2">
+            <label for="vehicletypemenu" class="col-sm-1 col-form-label" ml-5> Vehicle Type</label>
+            <div class="col-sm-4">
+                <select class="form-control" formControlName="vehicletype" id="vehicletypemenu">
+                    <option value="" disabled selected>Select Vehicle Type</option>
+                    <option *ngFor="let vehicleType of vehicleTypesService" [value]="vehicleType">
+                        {{vehicleType}}
+                    </option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group row m-2">
+            <label for="paymentmethodmenu" class="col-sm-1 col-form-label" ml-5> Payment Method</label>
+            <div class="col-sm-4">
+                <select class="form-control" formControlName="paymentoption" id="paymentmethodmenu">
+                    <option value="" disabled selected>Select Payment Option</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Card">Card</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group row m-2">
+            <label for="bookridemenu" class="col-sm-1 col-form-label ml-5">Book Ride</label>
+            <div class="col-sm-4">
+                <select class="form-control" formControlName="bookride" id="bookridemenu" (change)="onOptionChange()">
+                    <option value="" disabled selected>Select Book Ride</option>
+                    <option value="now">Now</option>
+                    <option value="schedule">Schedule</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group row m-2">
+            <label for="datetimepicker" class="col-sm-1 col-form-label ml-5">Date and Time</label>
+            <div class="col-sm-4">
+                <input type="datetime-local" class="form-control" formControlName="datetime" id="datetimepicker">
+            </div>
+        </div>
+
+        <div class="form-group row m-2">
+            <div class="col-sm-10">
+                <button id="calcButton" class="btn btn-secondary mx-2">Book Ride</button>
+            </div>
+        </div>
+    </form>
+</div> -->
+
+
+
+
+
+
+<!-- <div class="container">
+    <form [formGroup]="directionForm" (ngSubmit)="ondirectionbtn()">
+      <div class="form-group row m-2">
+        <label for="from" class="col-sm-1 col-form-label" ml-5>From <i class="far fa-dot-circle"></i></label>
+        <div class="col-sm-4">
+          <input type="text" id="from" formControlName="from" placeholder="Origin" class="form-control">
+        </div>
+      </div>
+  
+      <div class="form-group row m-2">
+        <label for="to" class="col-sm-1 col-form-label" ml-5>To <i class="fas fa-map-marker-alt"></i></label>
+        <div class="col-sm-4">
+          <input type="text" id="to" formControlName="to" placeholder="Destination" class="form-control">
+        </div>
+      </div>
+  
+      <div class="form-group row m-2" *ngFor="let stop of stops; let i = index">
+        <label for="stop{{ i }}" class="col-sm-1 col-form-label" ml-5>Stop {{ i + 1 }}</label>
+        <div class="col-sm-4">
+          <input type="text" id="stop{{ i }}" formControlName="stops" placeholder="Stop {{ i + 1 }}"
+            class="form-control">
+        </div>
+      </div>
+  
+      <div class="form-group row m-2">
+        <div class="col-sm-10">
+          <button id="calcButton" class="btn btn-secondary mx-2">Direction</button>
+          <button class="btn btn-secondary mx-2" (click)="onAddStop()">Add Stop</button>
+        </div>
+      </div>
+    </form>
+  </div> -->

@@ -1,0 +1,16 @@
+/* .usershead{  
+    display: flex;
+    justify-content: space-around;
+    margin: 10px;
+    align-items: center;
+    }
+    .searchusers{
+        margin-right: 10px;
+        width:500px;
+        border-radius: 5px;
+    } */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px; /* Adjust the spacing between buttons as needed */
+      }

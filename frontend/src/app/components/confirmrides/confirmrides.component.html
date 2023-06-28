@@ -1,0 +1,190 @@
+<div class="container">
+    <div class="row my-4">
+        <div class="col-lg-12">
+            <div class="table-responsive">
+                <table class="table table-striped text-center my-3" id="tdata">
+                    <thead>
+                        <tr class="table-dark text-center">
+                            <th>Id</th>
+                            <th>RideId</th>
+                            <th>UserId</th>
+                            <th>User</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <!-- <th>Stops</th> -->
+                            <th>VehicleType</th>
+                            <th>TotalDistance</th>
+                            <th>TotalTime</th>
+                            <th>EstimatePrice</th>
+                            <th>Assign Driver</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody">
+                        <tr class="align-middle" id="tabletr" *ngFor="let createride of createridedata; let i = index">
+                            <td>{{i + 1}}</td>
+                            <td>{{createride._id}}
+                            </td>
+                            <td>{{createride.userId}}
+                            </td>
+                            <td>{{createride.userdata.name}}
+                            </td>
+                            <td>{{createride.from}}
+                            </td>
+                            <td>{{createride.to}}</td>
+                            <!-- <td>{{createride.stops}}</td> -->
+                            <td>{{createride.vehicletypedata.vehicletype}}</td>
+                            <td>{{createride.totalDistance}}</td>
+                            <td>{{createride.totalTime}}</td>
+                            <td>{{createride. estimatePrice}}</td>
+                            <td>
+                                <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#assignDriverModal" 
+                                [disabled]="createride.driverId !== null" (click)="onAssignBtnClick(createride)">
+                                  {{createride.driverId !== null? createride.driverdata?.name : 'Assign Driver' }}
+                                  <!-- {{assignedDriverName}} -->
+                                </button>
+                            </td>
+                            <td>
+                              <button [matMenuTriggerFor]="lvl2master" color="accent"  mat-button><mat-icon>edit</mat-icon></button>
+                              <mat-menu #lvl2master="matMenu">
+                                  <button mat-menu-item  id="" data-bs-toggle="modal" data-bs-target="#exampleModal" (click)="onInfoClick(createride)"><mat-icon>edit</mat-icon>More Details</button>
+                                  <button mat-menu-item  ><mat-icon>delete_forever</mat-icon>Delete</button>
+                                  <button mat-menu-item  ><mat-icon>drive_eta</mat-icon>Edit Type</button>
+                              </mat-menu>
+                            </td>
+                            <!-- <td>
+                                <a href="#" class="text-success edit" id="" data-bs-toggle="modal" data-bs-target="#exampleModal" (click)="onInfoClick(createride)"><i
+                                    class="fas fa-edit fa-lg mx-1"></i>Info</a>
+                                <a href="#" class="text-success edit" id="" ><i class="fas fa-edit fa-lg mx-1"></i></a>
+                                <a href="#" class="text-danger delete" id=""><i class="fas fa-trash fa-lg mx-1"></i></a>
+                            </td> -->
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- <div class="pagination">
+                <button class="btn btn-secondary" [disabled]="currentPage === 1" (click)="prevPage()">Previous</button>
+                <ng-container *ngFor="let page of generatePageArray()">
+                    <button class="btn btn-secondary" [class.active]="page === currentPage" (click)="goToPage(page)">{{
+                        page }}</button>
+                </ng-container>
+                <button class="btn btn-secondary" [disabled]="currentPage === totalPages"
+                    (click)="nextPage()">Next</button>
+            </div> -->
+        </div>
+    </div>
+</div>
+
+<!-- Button trigger modal -->
+<!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    Launch demo modal
+  </button>
+   -->
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+    <div class="modal-body">
+        <ng-container *ngIf="selectedcreateride">
+          <p>Name: {{selectedcreateride.userdata.name}}</p>
+          <p>Email: {{selectedcreateride.userdata.email}}</p>
+          <p>Phone: {{ selectedcreateride.userdata.phone }}</p>
+          <p>UserId: {{selectedcreateride.userdata._id }}</p>
+          <p>CityId: {{selectedcreateride.cityId }}</p>
+          <p>VehicleTypeId: {{selectedcreateride.vehicleTypeId }}</p>
+          <p>From: {{selectedcreateride.from }}</p>
+          <p>To: {{ selectedcreateride.to }}</p>
+          <p>Stops: {{ selectedcreateride.stops }}</p>
+          <p>TotalDistance: {{selectedcreateride.totalDistance }}</p>
+          <p>TotalTime: {{selectedcreateride.totalTime }}</p>
+          <p>EstimatePrice: {{selectedcreateride.estimatePrice }}</p>
+          <p>VehicleType: {{selectedcreateride.vehicleType }}</p>
+          <p>PaymentOption: {{selectedcreateride.paymentOption }}</p>
+          <p>DateTime: {{selectedcreateride.datetime }}</p>
+     </ng-container>
+      </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="modal fade" id="assignDriverModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+    <div class="modal-body">
+        <div class="container">
+            <div class="row my-4">
+                <div class="col-lg-12">
+                    <div class="table-responsive">
+                        <table class="table table-striped text-center my-3" id="tdata">
+                            <thead>
+                                <tr class="table-dark text-center">
+                                    <th>Id</th>
+                                    <th>Profile</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Country</th>
+                                    <th>City</th>
+                                    <th>Type</th>
+                                    <th>Assign</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody">
+                              <!-- <ng-container *ngIf="driverdatafiltered.length > 0; else noDrivers"> -->
+                                <tr class="align-middle" id="tabletr" *ngFor="let driver of driverdatafiltered; let i = index">
+                                    <td>{{i + 1}}
+                                    </td>
+                                    <td><img src="{{driver.profile}}" width="50" class="img-thumbnail"></td>
+                                    <td>{{driver.name}}
+                                    </td>
+                                    <td>{{driver.email}}
+                                    </td>
+                                    <td>{{driver.phone}}
+                                    </td>
+                                    <td>{{driver.countrydata.country}}</td>
+                                    <td>{{driver.citydata.city}}</td>
+                                    <td>{{driver.vehicletypedata.vehicletype}}</td>
+                                    <td><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" (click)="onAssignDriver(driver)">
+                                      Assign
+                                    </button></td>
+                                </tr>
+                              <!-- </ng-container> -->
+                            </tbody>
+                        </table>
+                        <!-- <ng-template #noDrivers>
+                          <p>No drivers are available for this ride.</p>
+                      </ng-template> -->
+                      <div *ngIf="driverdatafiltered.length === 0" class="text-center">
+                        <p class="text-muted">No drivers are available for this ride.</p>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-center">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="onAssignNearestDriver()">
+             Assign Nearest Driver
+            </button>
+          </div>
+        </div>
+
+      </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>

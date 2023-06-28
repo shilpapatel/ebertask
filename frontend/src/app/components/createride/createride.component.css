@@ -1,0 +1,16 @@
+/* #googleMap {
+    width: 50%;
+    height: 400px;
+    margin: 10px auto;
+  } */
+
+  #googleMap {
+    width: 100%;
+    height: 500px;
+  }
+  
+  .map-container {
+    width: 50%;
+    height: 400px;
+    margin: 10px auto;
+  }

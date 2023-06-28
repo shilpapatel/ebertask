@@ -1,0 +1,20 @@
+#map {
+    width: 80%;
+    height: 400px;
+    margin: 10px auto;
+  }
+  .formcontainer{
+    display: inline-flex;
+    text-align: center;
+    border: 2px solid #757373;
+}
+
+.container{
+    margin: 10px 10px;
+    padding: 10px 10px;
+    background-color:transparent;
+    /* border-radius: 5px; */
+    text-align:center;
+    /* justify-content: space-between; */   
+}
+  
