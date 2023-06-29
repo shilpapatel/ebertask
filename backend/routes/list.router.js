@@ -32,43 +32,44 @@ var upload = multer({
     ) {
       cb(null, true)
     } else {
-      // cb(null, false)
-      // return cb(new Error('Only .png, .jpg and .jpeg format allowed!'))
-      cb(new Error('Only .png, .jpg and .jpeg format allowed!'));
+      cb(null, false)
+      return cb(new Error('Only .png, .jpg and .jpeg format allowed!'))
+      // cb(new Error('Only .png, .jpg and .jpeg format allowed!'));
     }
   },
 })
 
-const fileSaver = (req, res, next) => {
-  upload.single('profile')(req, res, function (error) {
-    // if (error instanceof multer.MulterError) {
-    //   console.log('MulterError occurred');
-    //   return res.status(400).json({ error: error.message });
-    // } 
-    if (error && error.message === 'Only .png, .jpg and .jpeg format allowed!') {
-      console.log(error.message );
-      return res.status(400).json({ message: 'Only .png, .jpg and .jpeg format allowed!' });
-    }
-    // } else if (error) {
-    //   console.log('Unknown error occurred during file upload');
-    //   return res.status(500).json({ error: error.message });
-    // }
-    // console.log('File was uploaded successfully');
-    next();
-  });
-};
+// const fileSaver = (req, res, next) => {
+//   upload.single('profile')(req, res, function (error) {
+//     // if (error instanceof multer.MulterError) {
+//     //   console.log('MulterError occurred');
+//     //   return res.status(400).json({ error: error.message });
+//     // } 
+//     if (error && error.message === 'Only .png, .jpg and .jpeg format allowed!') {
+//       console.log(error.message );
+//       return res.status(400).json({ message: 'Only .png, .jpg and .jpeg format allowed!' });
+//     }
+//     // } else if (error) {
+//     //   console.log('Unknown error occurred during file upload');
+//     //   return res.status(500).json({ error: error.message });
+//     // }
+//     // console.log('File was uploaded successfully');
+//     next();
+//   });
+// };
 
 let DriverList = require('../model/list.model')
-router.post('/add-driver', fileSaver, async (req, res, next) => {
+router.post('/add-driver', upload.single('profile'), async (req, res, next) => {
   try {
     const url = req.protocol + '://' + req.get('host');
+    let profileUrl = req.file ? url + '/public/' + req.body.profile : url + '/public/'+  'profile1.png';
     console.log(req.body);
     const driver = new DriverList({
       // _id: new mongoose.Types.ObjectId(),
       name: req.body.name,
       email: req.body.email,
       phone: req.body.code + req.body.phone,
-      profile: url + '/public/' + req.body.profile,
+      profile:  profileUrl,
       country_id: req.body.country_id,
       city_id: req.body.city_id,
       vehicletype_id: this.vehicletype_id,
@@ -327,7 +328,7 @@ router.delete('/delete-driver/:id', async (req, res, next) => {
     res.status(500).json({ error: err });
   }
 });
-router.put('/update-driver', fileSaver, async (req, res, next) => {
+router.put('/update-driver', upload.single('profile'), async (req, res, next) => {
   try {
     const url = req.protocol + '://' + req.get('host');
     const driverId = req.body.id;
@@ -335,7 +336,7 @@ router.put('/update-driver', fileSaver, async (req, res, next) => {
       name: req.body.name,
       email: req.body.email,
       phone: req.body.code + req.body.phone,
-      profile: url + '/public/' + req.body.profile,
+      profile: url + '/public/' + req.file.filename,
       country_id: req.body.country_id,
       city_id: req.body.city_id,
       // type:req.body.type,

@@ -148,8 +148,8 @@ export class ListComponent {
      if (index !== -1) {
        this.driverdata[index].vehicletype_id= updatedDriverType.vehicletype_id;
        console.log(this.driverdata);
-        this.getDriver();
-       this.toastr.success('Driver Status Updated');
+         this.getDriver();
+       this.toastr.success('Driver VehicleType Updated');
      }
    });
   }
@@ -196,12 +196,12 @@ export class ListComponent {
     // this.isShow = !this.isShow;
     this.isShowAddBtn = true;
     this.isShowEditBtn = false;
-    if(this.isShow){
-      this.isShow = this.isShow;
-    }
-    else{
-      this.isShow = !this.isShow;
-    }
+    // if(this.isShow){
+    //   this.isShow = this.isShow;
+    // }
+    // else{
+    //   this.isShow = !this.isShow;
+    // }
   }
   // onFileSelected(event: any) {
   //   const file: File = (event.target as HTMLInputElement).files[0];
@@ -210,6 +210,26 @@ export class ListComponent {
   // }
   onFileSelected(event: any) {
     const file: File = (event.target as HTMLInputElement).files[0];
+
+     // Check file size
+     const maxSize = 5 * 1024 * 1024; // 5MB
+     if (file.size > maxSize) {
+       // Display an error message or handle the oversized file
+       // For example, you can set an error state in the form control
+       this.driversForm.get('profile').setErrors({ maxSize: true });
+       this.toastr.error("please select size less than 5 mb")
+       return;
+     }
+ 
+     // Check file type
+     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+     if (!allowedTypes.includes(file.type)) {
+       // Display an error message or handle the invalid file type
+       // For example, you can set an error state in the form control
+       this.driversForm.get('profile').setErrors({ invalidType: true });
+       this.toastr.error("please select jpg png jpeg format")
+       return;
+     }
     this.driversForm.patchValue({
       profile: file
     });
@@ -255,7 +275,7 @@ export class ListComponent {
       }
       )
     }
-    this.isShow = !this.isShow;
+    // this.isShow = !this.isShow;
   }
 
 
@@ -276,12 +296,12 @@ onEditDriver(driver: any, event: Event) {
   this.isShowEditBtn = true;
   this.isShowAddBtn = false;
   // this.isShow = !this.isShow;
-  if(this.isShow){
-    this.isShow = this.isShow;
-  }
-  else{
-    this.isShow = !this.isShow;
-  }
+  // if(this.isShow){
+  //   this.isShow = this.isShow;
+  // }
+  // else{
+  //   this.isShow = !this.isShow;
+  // }
 }
 
 onEditType(driver: any,event: Event){
@@ -335,6 +355,16 @@ onCancelBtn() {
   this.isShowEditType = !this.isShowEditType;
   this.vehicletypeForm.reset();
   // this.isShowEditBtn = false;
+}
+
+private apiRequest: any;
+onCancelBtnList() {
+  if (this.apiRequest) {
+    // Cancel the API request if it exists
+    this.apiRequest.cancel();
+  }
+  this.driversForm.reset(); // Reset the form fields
+  // this.isShow = false; // Hide the form container
 }
 getVehicleType() {
   this.vehicletypeService.getVehicleType().subscribe((res) => {

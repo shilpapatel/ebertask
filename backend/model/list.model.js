@@ -35,7 +35,7 @@ const driverlistSchema = new mongoose.Schema({
     },
     profile:{
         type:String,
-        default:'img3.jpg'   
+        default:'profile1.png'   
     },
     country_id:{type: Schema.Types.ObjectId,required:true},
     city_id:{type: Schema.Types.ObjectId,required:true},

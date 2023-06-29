@@ -256,7 +256,7 @@ const configureSocket = (io) => {
     });
 
     const job = new cron.CronJob('*/20 * * * * *', async () => {
-      console.log('Cron job start');
+      // console.log('Cron job start');
       const updatedDriverId = {
         driverId: null,
         assigned: 'timeout'

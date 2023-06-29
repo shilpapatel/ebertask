@@ -113,6 +113,7 @@ export class VehicletypeComponent {
              this.toastr.success(res.message);
         },
         (error) => {
+          this.toastr.error(error.error.message);
         // res => {
         // this.vehicles.push(res['VehicleTypCreated']);
         // this.toastr.success({res.message});
