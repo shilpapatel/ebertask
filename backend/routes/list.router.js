@@ -7,54 +7,73 @@ const mongoose = require('mongoose');
 const DIR = './public/'
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, DIR)
-    },
-    filename: (req, file, cb) => {
-      const fileName = file.originalname.toLowerCase().split(' ').join('-')
-      cb(null, fileName)
-      },
-  })
+  destination: (req, file, cb) => {
+    cb(null, DIR)
+  },
+  filename: (req, file, cb) => {
+    console.log(req.body);
+    const fileName = file.originalname.toLowerCase().split(' ').join('-')
+    req.body.profile= fileName;
+    cb(null, fileName)
+  },
+})
 
-  // Multer Mime Type Validation
-  var upload = multer({
-    storage: storage,
-}) 
+// Multer Mime Type Validation
+var upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 1024 * 1024 * 5,
+  },
+  fileFilter: (req, file, cb) => {
+    if (
+      file.mimetype == 'image/png' ||
+      file.mimetype == 'image/jpg' ||
+      file.mimetype == 'image/jpeg'
+    ) {
+      cb(null, true)
+    } else {
+      // cb(null, false)
+      // return cb(new Error('Only .png, .jpg and .jpeg format allowed!'))
+      cb(new Error('Only .png, .jpg and .jpeg format allowed!'));
+    }
+  },
+})
 
-// var upload = multer({
-//     storage: storage,
-//     limits: {
-//       fileSize: 1024 * 1024 * 5,
-//     },
-//     fileFilter: (req, file, cb) => {
-//       if (
-//         file.mimetype == 'image/png' ||
-//         file.mimetype == 'image/jpg' ||
-//         file.mimetype == 'image/jpeg'
-//       ) {
-//         cb(null, true)
-//       } else {
-//         cb(null, false)
-//         return cb(new Error('Only .png, .jpg and .jpeg format allowed!'))
-//       }
-//     },
-//   })
+const fileSaver = (req, res, next) => {
+  upload.single('profile')(req, res, function (error) {
+    // if (error instanceof multer.MulterError) {
+    //   console.log('MulterError occurred');
+    //   return res.status(400).json({ error: error.message });
+    // } 
+    if (error && error.message === 'Only .png, .jpg and .jpeg format allowed!') {
+      console.log(error.message );
+      return res.status(400).json({ message: 'Only .png, .jpg and .jpeg format allowed!' });
+    }
+    // } else if (error) {
+    //   console.log('Unknown error occurred during file upload');
+    //   return res.status(500).json({ error: error.message });
+    // }
+    // console.log('File was uploaded successfully');
+    next();
+  });
+};
+
 let DriverList = require('../model/list.model')
-router.post('/add-driver', upload.single('profile'), async (req, res, next) => {
+router.post('/add-driver', fileSaver, async (req, res, next) => {
   try {
-      const url = req.protocol + '://' + req.get('host');
-      // console.log(req.body.code);
-      const driver = new DriverList({
-        // _id: new mongoose.Types.ObjectId(),
-        name: req.body.name,
-        email: req.body.email,
-        phone: req.body.code + req.body.phone,
-        profile:url + '/public/' + req.file.filename,
-        country_id: req.body.country_id,
+    const url = req.protocol + '://' + req.get('host');
+    console.log(req.body);
+    const driver = new DriverList({
+      // _id: new mongoose.Types.ObjectId(),
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.code + req.body.phone,
+      profile: url + '/public/' + req.body.profile,
+      country_id: req.body.country_id,
       city_id: req.body.city_id,
-      vehicletype_id:this.vehicletype_id,
-       rideStatus:this.rideStatus,
-        status:this.status
+      vehicletype_id: this.vehicletype_id,
+      rideStatus: this.rideStatus,
+      status: this.status
     });
     const driverCreated = await driver.save();
     // const VehicleTypCreated = await vehicletype.save();
@@ -68,13 +87,13 @@ router.post('/add-driver', upload.single('profile'), async (req, res, next) => {
       //     phone: result.phone,
       //     profile: result.profile,
       // },
-  });
-   
-  } catch (err) {
-      console.log(err);
-      res.status(500).json({
-          error: err,
-      });
+    });
+
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
@@ -146,12 +165,12 @@ router.get('/get-drivers', async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 3;
     const searchQuery = req.query.searchQuery || '';
     const sortField = req.query.sortField || 'name'; // Default sort field is 'name'
-    const sortOrder = req.query.sortOrder || 'asc'; 
+    const sortOrder = req.query.sortOrder || 'asc';
     let sortOptions = {};
     sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
 
     const searchRegex = new RegExp(searchQuery, 'i');
-    const count = await DriverList.countDocuments({$or: [{ name: searchRegex },{ email: searchRegex },{ phone: searchRegex }]});
+    const count = await DriverList.countDocuments({ $or: [{ name: searchRegex }, { email: searchRegex }, { phone: searchRegex }] });
     const totalPages = Math.ceil(count / limit);
     const skip = (page - 1) * limit;
 
@@ -175,7 +194,7 @@ router.get('/get-drivers', async (req, res, next) => {
           as: 'citydata'
         }
       },
-       
+
       {
         $unwind: '$citydata'
       },
@@ -187,7 +206,7 @@ router.get('/get-drivers', async (req, res, next) => {
           as: 'vehicletypedata'
         }
       },
-     
+
       // {
       //   $addFields: {
       //     unwoundField: {
@@ -206,10 +225,10 @@ router.get('/get-drivers', async (req, res, next) => {
       //   }
       // },
       {
-        $unwind:{
-        path: '$vehicletypedata',
-        preserveNullAndEmptyArrays:true
-      }
+        $unwind: {
+          path: '$vehicletypedata',
+          preserveNullAndEmptyArrays: true
+        }
       },
       // {
       //   $addFields: {
@@ -243,12 +262,12 @@ router.get('/get-drivers', async (req, res, next) => {
     ];
     const data = await DriverList.aggregate(pipeline);
     // const data = await DriverList.find({$or: [{ name: searchRegex },{ email: searchRegex },{ phone: searchRegex }]})
-    
+
     // // .sort({ name: 1 })
     //   .sort(sortOptions)
     //   .skip(skip)
     //   .limit(limit);
-    console.log(data);
+    // console.log(data);
 
     res.status(200).json({
       message: 'Drivers retrieved successfully!',
@@ -277,7 +296,7 @@ router.get('/get-drivers', async (req, res, next) => {
 //     const skip = (page - 1) * limit;
 
 //     const data = await DriverList.find({$or: [{ name: searchRegex },{ email: searchRegex },{ phone: searchRegex }]})
-    
+
 //     // .sort({ name: 1 })
 //       .sort(sortOptions)
 //       .skip(skip)
@@ -308,7 +327,7 @@ router.delete('/delete-driver/:id', async (req, res, next) => {
     res.status(500).json({ error: err });
   }
 });
-router.put('/update-driver', upload.single('profile'), async (req, res, next) => {
+router.put('/update-driver', fileSaver, async (req, res, next) => {
   try {
     const url = req.protocol + '://' + req.get('host');
     const driverId = req.body.id;
@@ -316,7 +335,7 @@ router.put('/update-driver', upload.single('profile'), async (req, res, next) =>
       name: req.body.name,
       email: req.body.email,
       phone: req.body.code + req.body.phone,
-      profile: url + '/public/' + req.file.filename,
+      profile: url + '/public/' + req.body.profile,
       country_id: req.body.country_id,
       city_id: req.body.city_id,
       // type:req.body.type,
@@ -324,7 +343,7 @@ router.put('/update-driver', upload.single('profile'), async (req, res, next) =>
     };
     const result = await DriverList.findByIdAndUpdate(driverId, updatedDriver, { new: true });
     // io.emit('driverUpdate', result);
-   
+
     res.status(200).json({
       message: 'Driver updated successfully!',
       driverUpdated: result,
@@ -337,49 +356,49 @@ router.put('/update-driver', upload.single('profile'), async (req, res, next) =>
   }
 });
 
-router.put('/update-status/:id', async(req, res) => {
+router.put('/update-status/:id', async (req, res) => {
   try {
-  const driverId = req.params.id;
-  // console.log(req.body);
-  const updatedstatus= {
-    status:req.body.driverstatus
+    const driverId = req.params.id;
+    // console.log(req.body);
+    const updatedstatus = {
+      status: req.body.driverstatus
+    }
+    const result = await DriverList.findByIdAndUpdate(driverId, updatedstatus, { new: true });
+    // io.emit('driverUpdate', result);
+    res.status(200).json({
+      message: 'Driver status updated successfully!',
+      driverStatusUpdated: result,
+
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      error: err,
+    });
   }
-  const result = await DriverList.findByIdAndUpdate(driverId, updatedstatus, { new: true });
-  // io.emit('driverUpdate', result);
-  res.status(200).json({
-    message: 'Driver status updated successfully!',
-    driverStatusUpdated: result,
-
-  });
-
-} catch (err) {
-   console.log(err);
-  res.status(500).json({
-    error: err,
-  });
-}
 });
 
-router.put('/update-type/:id', async(req, res) => {
+router.put('/update-type/:id', async (req, res) => {
   try {
-  const driverId = req.params.id;
-  console.log(req.body);
-  const updatedvehicetype= {
-    vehicletype_id:req.body.vehicletype_id
+    const driverId = req.params.id;
+    console.log(req.body);
+    const updatedvehicetype = {
+      vehicletype_id: req.body.vehicletype_id
+    }
+    const result = await DriverList.findByIdAndUpdate(driverId, updatedvehicetype, { new: true });
+    res.status(200).json({
+      message: 'Driver type updated successfully!',
+      driverTypeUpdated: result,
+
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      error: err,
+    });
   }
-  const result = await DriverList.findByIdAndUpdate(driverId, updatedvehicetype, { new: true });
-  res.status(200).json({
-    message: 'Driver type updated successfully!',
-    driverTypeUpdated: result,
-
-  });
-
-} catch (err) {
-   console.log(err);
-  res.status(500).json({
-    error: err,
-  });
-}
 });
 
 // router.get('/drivers/:cityId/:vehicleTypeId', async (req, res) => {
@@ -402,3 +421,24 @@ router.put('/update-type/:id', async(req, res) => {
 // });
 
 module.exports = router;
+
+
+
+// var upload = multer({
+//     storage: storage,
+//     limits: {
+//       fileSize: 1024 * 1024 * 5,
+//     },
+//     fileFilter: (req, file, cb) => {
+//       if (
+//         file.mimetype == 'image/png' ||
+//         file.mimetype == 'image/jpg' ||
+//         file.mimetype == 'image/jpeg'
+//       ) {
+//         cb(null, true)
+//       } else {
+//         cb(null, false)
+//         return cb(new Error('Only .png, .jpg and .jpeg format allowed!'))
+//       }
+//     },
+//   })

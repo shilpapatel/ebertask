@@ -1,13 +1,5 @@
-<!-- <div class="drivershead">
-    <div class="driversearch">
-        <input type="text" class="searchdrivers" placeholder=" Search by name">
-    </div>
-    <div class="driveradd">
-        <button class="btn btn-secondary btnsearchdriver" (click)="onAddBtnDriver()">Add</button>
-    </div>
-</div> -->
-
-<div class="form-group row m-2">
+<div class="container">
+<div class="form-group row m-2 d-flex justify-content-center">
     <div class="col-sm-1 m-1">
         <select class="form-control bg-secondary text-white" [(ngModel)]="sortOrder" (ngModelChange)="onSort()">
             <option value="asc">Asc</option>
@@ -24,124 +16,122 @@
         <button class="btn btn-secondary" (click)="clearSearch()">Clear</button>
     </div>
     <div class="col-sm-2 m-1">
-        <button class="btn btn-secondary" (click)="onAddBtnDriver()">Add</button>
+        <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal" (click)="onAddBtnDriver()">Add</button>
     </div>
 </div>
-<div class="driverformcontainer" *ngIf="isShow">
-    <form [formGroup]="driversForm" (ngSubmit)="onSubmit()" novalidate>
-        <div class="form-group row m-2">
-            <label for="name" class="col-sm-2 col-form-label">Name</label>
-            <div class="col-sm-10">
-                <input type="Text" class="form-control" id="name" name="name" placeholder="Enter Name"
-                    formControlName="name">
-            </div>
-        </div>
-        <div
-            *ngIf="driversForm.get('name')?.invalid && (driversForm.get('name')?.dirty || driversForm.get('name')?.touched)">
-            <div [hidden]="!driversForm.get('name')?.errors['required']" class="text-danger"
-                [ngStyle]="{'margin-left': '100px'}">** Name is required **</div>
-            <div [hidden]="!driversForm.get('name')?.errors['minlength']" class="text-danger"
-                [ngStyle]="{'margin-left': '100px'}">** Min Length is 3 **</div>
-        </div>
-        <div class="form-group row m-3">
-            <label for="email" class="col-sm-2 col-form-label">Email</label>
-            <div class="col-sm-10">
-                <input type="email" class="form-control" id="email" name="email" placeholder="Enter Email"
-                    formControlName="email">
-            </div>
-        </div>
-        <div
-            *ngIf="driversForm.get('email')?.invalid && (driversForm.get('email')?.dirty || driversForm.get('email')?.touched)">
-            <div [hidden]="!driversForm.get('email')?.errors['required']" class="text-danger"
-                [ngStyle]="{'margin-left': '100px'}">** Email is required **</div>
-            <div [hidden]="!driversForm.get('email')?.errors['minlength']" class="text-danger"
-                [ngStyle]="{'margin-left': '100px'}">** Invalid Email id **</div>
-        </div>
-        <div class="form-group row m-3">
-            <label for="phone" class="col-sm-2 col-form-label">Phone</label>
-            <div class="col-sm-10">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <!-- <span class="input-group-text">Code</span> -->
-                        <select class="form-control input-group-text" formControlName="code" name="code">
-                            <option value="" disabled selected>Code</option>
-                            <option *ngFor="let code of callingCodes" [value]="code">{{ code }}</option>
-                        </select>
-                    </div>
-                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter Phone No"
-                        formControlName="phone" pattern="[0-9]+" minlength="10" maxlength="10"
-                        oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-                </div>
-            </div>
-        </div>
-
-        <!-- <div class="form-group row m-3">
-          <label for="phone" class="col-sm-2 col-form-label">Phone</label>
-          <div class="col-sm-10">
-            <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter Phone No"
-              formControlName="phone">
-          </div>
-        </div> -->
-        <div
-            *ngIf="driversForm.get('phone')?.invalid && (driversForm.get('phone')?.dirty || driversForm.get('phone')?.touched)">
-            <div [hidden]="!driversForm.get('phone')?.errors['required']" class="text-danger"
-                [ngStyle]="{'margin-left': '100px'}">** Phone No is required **</div>
-            <div [hidden]="!driversForm.get('phone')?.errors['minlength']" class="text-danger"
-                [ngStyle]="{'margin-left': '100px'}">** Min Length is 10 **</div>
-            <div [hidden]="!driversForm.get('phone')?.errors['maxlength']" class="text-danger"
-                [ngStyle]="{'margin-left': '100px'}">** MAX Length is 10 **</div>
-        </div>
-
-        <div class="form-group row m-3">
-            <label for="profile" class="col-sm-2 col-form-label">Profile</label>
-            <div class="col-sm-10">
-                <input type="file" class="form-control" id="profile" name="profile" placeholder="Profile"
-                    (change)="onFileSelected($event)">
-            </div>
-        </div>
-        <div
-            *ngIf="driversForm.get('profile')?.invalid && (driversForm.get('profile')?.dirty || driversForm.get('profile')?.touched)">
-            <div [hidden]="!driversForm.get('profile')?.errors['required']" class="text-danger"
-                [ngStyle]="{'margin-left': '100px'}">** Profile is required **</div>
-        </div>
-        <div class="form-group row m-2">
-            <label for="countrymenu" class="col-sm-2 col-form-label" ml-5>Country</label>
-            <div class="col-sm-10">
-                <select class="form-control" formControlName="country_id" id="countrymenu"
-                    (change)="onCountrySelected()">
-                    <option value="" disabled selected>Select Country</option>
-                    <option *ngFor="let countrydata of countriesrcvd" [value]="countrydata._id">
-                        {{countrydata.country}}
-                    </option>
-                </select>
-            </div>
-        </div>
-        <div class="form-group row m-2">
-            <label for="citymenu" class="col-sm-2 col-form-label" ml-5>City</label>
-            <div class="col-sm-10">
-                <select class="form-control" formControlName="city_id" id="citymenu">
-                    <option value="" disabled selected>Select City</option>
-                    <option *ngFor="let citydata of selectedcountry" [value]="citydata._id">
-                        {{citydata.city}}
-                    </option>
-                </select>
-            </div>
-        </div>
-
-        <div class="form-group row m-3">
-            <div class="col-sm-10">
-                <button class="btn btn-secondary mx-2" [disabled]="!driversForm.valid" *ngIf="isShowAddBtn">Add
-                    Driver</button>
-                <button class="btn btn-secondary mx-2" [disabled]="!driversForm.valid" *ngIf="isShowEditBtn">Update
-                    Driver</button>
-                <button class="btn btn-secondary mx-2">Cancel</button>
-            </div>
-        </div>
-    </form>
 </div>
 
-
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="exampleModalLabel">User</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="driversForm" (ngSubmit)="onSubmit()" novalidate>
+                    <div class="form-group row m-2">
+                        <label for="name" class="col-sm-2 col-form-label">Name</label>
+                        <div class="col-sm-10">
+                            <input type="Text" class="form-control" id="name" name="name" placeholder="Enter Name"
+                                formControlName="name">
+                        </div>
+                    </div>
+                    <div
+                        *ngIf="driversForm.get('name')?.invalid && (driversForm.get('name')?.dirty || driversForm.get('name')?.touched)">
+                        <div [hidden]="!driversForm.get('name')?.errors['required']" class="text-danger"
+                            [ngStyle]="{'margin-left': '100px'}">** Name is required **</div>
+                        <div [hidden]="!driversForm.get('name')?.errors['minlength']" class="text-danger"
+                            [ngStyle]="{'margin-left': '100px'}">** Min Length is 3 **</div>
+                    </div>
+                    <div class="form-group row m-3">
+                        <label for="email" class="col-sm-2 col-form-label">Email</label>
+                        <div class="col-sm-10">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter Email"
+                                formControlName="email">
+                        </div>
+                    </div>
+                    <div
+                        *ngIf="driversForm.get('email')?.invalid && (driversForm.get('email')?.dirty || driversForm.get('email')?.touched)">
+                        <div [hidden]="!driversForm.get('email')?.errors['required']" class="text-danger"
+                            [ngStyle]="{'margin-left': '100px'}">** Email is required **</div>
+                        <div [hidden]="!driversForm.get('email')?.errors['minlength']" class="text-danger"
+                            [ngStyle]="{'margin-left': '100px'}">** Invalid Email id **</div>
+                    </div>
+                    <div class="form-group row m-3">
+                        <label for="phone" class="col-sm-2 col-form-label">Phone</label>
+                        <div class="col-sm-10">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <select class="form-control input-group-text" formControlName="code" name="code">
+                                        <option value="" disabled selected>Code</option>
+                                        <option *ngFor="let code of callingCodes" [value]="code">{{ code }}</option>
+                                    </select>
+                                </div>
+                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter Phone No"
+                                    formControlName="phone" pattern="[0-9]+" minlength="10" maxlength="10"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        *ngIf="driversForm.get('phone')?.invalid && (driversForm.get('phone')?.dirty || driversForm.get('phone')?.touched)">
+                        <div [hidden]="!driversForm.get('phone')?.errors['required']" class="text-danger"
+                            [ngStyle]="{'margin-left': '100px'}">** Phone No is required **</div>
+                        <div [hidden]="!driversForm.get('phone')?.errors['minlength']" class="text-danger"
+                            [ngStyle]="{'margin-left': '100px'}">** Min Length is 10 **</div>
+                        <div [hidden]="!driversForm.get('phone')?.errors['maxlength']" class="text-danger"
+                            [ngStyle]="{'margin-left': '100px'}">** MAX Length is 10 **</div>
+                    </div>
+            
+                    <div class="form-group row m-3">
+                        <label for="profile" class="col-sm-2 col-form-label">Profile</label>
+                        <div class="col-sm-10">
+                            <input type="file" class="form-control" id="profile" name="profile" placeholder="Profile"
+                                (change)="onFileSelected($event)">
+                        </div>
+                    </div>
+                    <div class="form-group row m-2">
+                        <label for="countrymenu" class="col-sm-2 col-form-label" ml-5>Country</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" formControlName="country_id" id="countrymenu"
+                                (change)="onCountrySelected()">
+                                <option value="" disabled selected>Select Country</option>
+                                <option *ngFor="let countrydata of countriesrcvd" [value]="countrydata._id">
+                                    {{countrydata.country}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row m-2">
+                        <label for="citymenu" class="col-sm-2 col-form-label" ml-5>City</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" formControlName="city_id" id="citymenu">
+                                <option value="" disabled selected>Select City</option>
+                                <option *ngFor="let citydata of selectedcountry" [value]="citydata._id">
+                                    {{citydata.city}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+  
+                    <div class="modal-footer d-flex justify-content-center">
+                        <button class="btn btn-secondary mx-2" [disabled]="!driversForm.valid" data-bs-dismiss="modal" *ngIf="isShowAddBtn">Add
+                            Driver</button>
+                        <button class="btn btn-secondary mx-2" [disabled]="!driversForm.valid"  data-bs-dismiss="modal" *ngIf="isShowEditBtn">Update
+                            Driver</button>
+                        <button class="btn btn-secondary mx-2" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+  </div>
+  
+
+
+<div class="modal fade" id="exampleModal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -149,7 +139,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- <div *ngIf="isShowEditType"> -->
                     <form [formGroup]="vehicletypeForm" (ngSubmit)="onSubmitvehicletypeForm()">
                         <div class="form-group row m-2">
                             <label for="vehicletypemenu" class="col-sm-2 col-form-label" ml-5> Vehicle Type</label>
@@ -159,7 +148,6 @@
                                     <option *ngFor="let vehicle of vehicles" [value]="vehicle._id">
                                         {{vehicle.vehicletype}}
                                     </option>
-                                    <!-- <option *ngFor="let country of countries" [value]="country.name.common">{{ country.name.common }}</option> -->
                                 </select>
                             </div>
                         </div>
@@ -172,37 +160,11 @@
                             </div>
                         </div>
                     </form>
-                <!-- </div> -->
             </div>
-            <!-- <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div> -->
         </div>
     </div>
 </div>
 
-<!-- <div *ngIf="isShowEditType">
-    <form [formGroup]="vehicletypeForm" (ngSubmit)="onSubmitvehicletypeForm()">
-        <div class="form-group row m-2">
-            <label for="vehicletypemenu" class="col-sm-2 col-form-label" ml-5> Vehicle Type</label>
-            <div class="col-sm-10">
-                <select class="form-control" formControlName="vehicletype_id" id="vehicletypemenu">
-                    <option value="" disabled selected>Select Vehicle Type</option>
-                    <option *ngFor="let vehicle of vehicles" [value]="vehicle._id">
-                        {{vehicle.vehicletype}}
-                    </option>
-                </select>
-            </div>
-        </div>
-        <div class="form-group row m-2">
-            <div class="col-sm-10">
-                <button class="btn btn-secondary mx-2" [disabled]="!vehicletypeForm.valid">AddType</button>
-                <button class="btn btn-secondary mx-2" (click)="onCancelBtn()">Cancel</button>
-
-            </div>
-        </div>
-    </form>
-</div> -->
 
 <div class="container">
     <div class="row my-4">
@@ -255,26 +217,15 @@
                                     mat-button><mat-icon>edit</mat-icon></button>
                                 <mat-menu #lvl2master="matMenu">
                                     <button mat-menu-item
-                                        (click)="onEditDriver(driver,$event)"><mat-icon>edit</mat-icon>Edit
+                                    data-bs-toggle="modal" data-bs-target="#exampleModal" (click)="onEditDriver(driver,$event)"><mat-icon>edit</mat-icon>Edit
                                         Driver</button>
                                     <button mat-menu-item
                                         (click)="onDeleteDriver(driver._id,$event)"><mat-icon>delete_forever</mat-icon>Delete</button>
-                                    <button mat-menu-item data-bs-toggle="modal" data-bs-target="#exampleModal"
+                                    <button mat-menu-item data-bs-toggle="modal" data-bs-target="#exampleModal1"
                                         (click)="onEditType(driver,$event)"><mat-icon>drive_eta</mat-icon>Edit
                                         Type</button>
                                 </mat-menu>
                             </td>
-                            <!-- <td>
-                               
-                                  <a href="#" class="text-success edit" id="" (click)="onEditDriver(driver,$event)"><i
-                                    class="fas fa-edit fa-lg mx-1"></i></a>
-                            <a href="#" class="text-danger delete" id=""
-                                (click)="onDeleteDriver(driver._id,$event)"><i
-                                    class="fas fa-trash fa-lg mx-1"></i></a>
-                            <a href="#" class="text-success edit" id="" (click)="onEditType(driver,$event)"><i
-                                    class="fas fa-edit fa-lg mx-1"></i>Edit Type</a>
-                               </td>    -->
-
                         </tr>
                     </tbody>
                 </table>
@@ -282,7 +233,6 @@
 
             <div class="pagination">
                 <button class="btn btn-secondary" [disabled]="currentPage === 1" (click)="prevPage()">Previous</button>
-                <!-- <span>{{ currentPage }} / {{ totalPages }}</span> -->
                 <ng-container *ngFor="let page of generatePageArray()">
                     <button class="btn btn-secondary" [class.active]="page === currentPage" (click)="goToPage(page)">{{
                         page }}</button>
@@ -293,3 +243,141 @@
         </div>
     </div>
 </div>
+
+
+
+<!-- <div *ngIf="isShowEditType">
+    <form [formGroup]="vehicletypeForm" (ngSubmit)="onSubmitvehicletypeForm()">
+        <div class="form-group row m-2">
+            <label for="vehicletypemenu" class="col-sm-2 col-form-label" ml-5> Vehicle Type</label>
+            <div class="col-sm-10">
+                <select class="form-control" formControlName="vehicletype_id" id="vehicletypemenu">
+                    <option value="" disabled selected>Select Vehicle Type</option>
+                    <option *ngFor="let vehicle of vehicles" [value]="vehicle._id">
+                        {{vehicle.vehicletype}}
+                    </option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group row m-2">
+            <div class="col-sm-10">
+                <button class="btn btn-secondary mx-2" [disabled]="!vehicletypeForm.valid">AddType</button>
+                <button class="btn btn-secondary mx-2" (click)="onCancelBtn()">Cancel</button>
+
+            </div>
+        </div>
+    </form>
+</div> -->
+
+
+<!-- <div class="driverformcontainer" *ngIf="isShow">
+    <form [formGroup]="driversForm" (ngSubmit)="onSubmit()" novalidate>
+        <div class="form-group row m-2">
+            <label for="name" class="col-sm-2 col-form-label">Name</label>
+            <div class="col-sm-10">
+                <input type="Text" class="form-control" id="name" name="name" placeholder="Enter Name"
+                    formControlName="name">
+            </div>
+        </div>
+        <div
+            *ngIf="driversForm.get('name')?.invalid && (driversForm.get('name')?.dirty || driversForm.get('name')?.touched)">
+            <div [hidden]="!driversForm.get('name')?.errors['required']" class="text-danger"
+                [ngStyle]="{'margin-left': '100px'}">** Name is required **</div>
+            <div [hidden]="!driversForm.get('name')?.errors['minlength']" class="text-danger"
+                [ngStyle]="{'margin-left': '100px'}">** Min Length is 3 **</div>
+        </div>
+        <div class="form-group row m-3">
+            <label for="email" class="col-sm-2 col-form-label">Email</label>
+            <div class="col-sm-10">
+                <input type="email" class="form-control" id="email" name="email" placeholder="Enter Email"
+                    formControlName="email">
+            </div>
+        </div>
+        <div
+            *ngIf="driversForm.get('email')?.invalid && (driversForm.get('email')?.dirty || driversForm.get('email')?.touched)">
+            <div [hidden]="!driversForm.get('email')?.errors['required']" class="text-danger"
+                [ngStyle]="{'margin-left': '100px'}">** Email is required **</div>
+            <div [hidden]="!driversForm.get('email')?.errors['minlength']" class="text-danger"
+                [ngStyle]="{'margin-left': '100px'}">** Invalid Email id **</div>
+        </div>
+        <div class="form-group row m-3">
+            <label for="phone" class="col-sm-2 col-form-label">Phone</label>
+            <div class="col-sm-10">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <select class="form-control input-group-text" formControlName="code" name="code">
+                            <option value="" disabled selected>Code</option>
+                            <option *ngFor="let code of callingCodes" [value]="code">{{ code }}</option>
+                        </select>
+                    </div>
+                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter Phone No"
+                        formControlName="phone" pattern="[0-9]+" minlength="10" maxlength="10"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                </div>
+            </div>
+        </div>
+        <div
+            *ngIf="driversForm.get('phone')?.invalid && (driversForm.get('phone')?.dirty || driversForm.get('phone')?.touched)">
+            <div [hidden]="!driversForm.get('phone')?.errors['required']" class="text-danger"
+                [ngStyle]="{'margin-left': '100px'}">** Phone No is required **</div>
+            <div [hidden]="!driversForm.get('phone')?.errors['minlength']" class="text-danger"
+                [ngStyle]="{'margin-left': '100px'}">** Min Length is 10 **</div>
+            <div [hidden]="!driversForm.get('phone')?.errors['maxlength']" class="text-danger"
+                [ngStyle]="{'margin-left': '100px'}">** MAX Length is 10 **</div>
+        </div>
+
+        <div class="form-group row m-3">
+            <label for="profile" class="col-sm-2 col-form-label">Profile</label>
+            <div class="col-sm-10">
+                <input type="file" class="form-control" id="profile" name="profile" placeholder="Profile"
+                    (change)="onFileSelected($event)">
+            </div>
+        </div>
+        <div class="form-group row m-2">
+            <label for="countrymenu" class="col-sm-2 col-form-label" ml-5>Country</label>
+            <div class="col-sm-10">
+                <select class="form-control" formControlName="country_id" id="countrymenu"
+                    (change)="onCountrySelected()">
+                    <option value="" disabled selected>Select Country</option>
+                    <option *ngFor="let countrydata of countriesrcvd" [value]="countrydata._id">
+                        {{countrydata.country}}
+                    </option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group row m-2">
+            <label for="citymenu" class="col-sm-2 col-form-label" ml-5>City</label>
+            <div class="col-sm-10">
+                <select class="form-control" formControlName="city_id" id="citymenu">
+                    <option value="" disabled selected>Select City</option>
+                    <option *ngFor="let citydata of selectedcountry" [value]="citydata._id">
+                        {{citydata.city}}
+                    </option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group row m-3">
+            <div class="col-sm-10">
+                <button class="btn btn-secondary mx-2" [disabled]="!driversForm.valid" *ngIf="isShowAddBtn">Add
+                    Driver</button>
+                <button class="btn btn-secondary mx-2" [disabled]="!driversForm.valid" *ngIf="isShowEditBtn">Update
+                    Driver</button>
+                <button class="btn btn-secondary mx-2">Cancel</button>
+            </div>
+        </div>
+    </form>
+</div> -->
+
+
+
+                            <!-- <td>
+                               
+                                  <a href="#" class="text-success edit" id="" (click)="onEditDriver(driver,$event)"><i
+                                    class="fas fa-edit fa-lg mx-1"></i></a>
+                            <a href="#" class="text-danger delete" id=""
+                                (click)="onDeleteDriver(driver._id,$event)"><i
+                                    class="fas fa-trash fa-lg mx-1"></i></a>
+                            <a href="#" class="text-success edit" id="" (click)="onEditType(driver,$event)"><i
+                                    class="fas fa-edit fa-lg mx-1"></i>Edit Type</a>
+                               </td>    -->

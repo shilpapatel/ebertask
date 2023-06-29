@@ -1,4 +1,5 @@
-<div class="form-group row m-2">
+<div class="container">
+<div class="form-group row m-2 d-flex justify-content-center">
   <div class="col-sm-1 m-1">
     <select class="form-control bg-secondary text-white" [(ngModel)]="sortOrder" (ngModelChange)="onSort()">
       <option value="asc">Asc</option>
@@ -15,108 +16,95 @@
     <button class="btn btn-secondary" (click)="clearSearch()">Clear</button>
   </div>
   <div class="col-sm-2 m-1">
-    <button class="btn btn-secondary" (click)="onAddBtnUser()">Add</button>
+    <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal" (click)="onAddBtnUser()">Add</button>
   </div>
 </div>
+</div>
 
-
-<!-- <div class="form-group">
-  <div class="col-sm-1">
-    <select class="form-control bg-secondary text-white" [(ngModel)]="sortOrder" (ngModelChange)="onSort()">
-      <option value="asc">Asc</option>
-      <option value="desc">Desc</option>
-    </select>
-  </div>
-  <div class="col-sm-4">
-    <input type="text" class="form-control" placeholder="Search by name" [(ngModel)]="searchQuery">
-    <button class="btn btn-secondary m-2" (click)="onSearch()">Search</button>
-    <button class="btn btn-secondary m-2 " (click)="clearSearch()">Clear</button>
-  </div>
-  <div class="col-sm-2">
-    <button class="btn btn-secondary" (click)="onAddBtnUser()">Add</button>
-  </div>
-</div> -->
-<div class="userformcontainer" *ngIf="isShow">
-  <form [formGroup]="usersForm" (ngSubmit)="onSubmit()" novalidate>
-    <div class="form-group row m-2">
-      <label for="name" class="col-sm-2 col-form-label">Name</label>
-      <div class="col-sm-10">
-        <input type="Text" class="form-control" id="name" name="name" placeholder="Enter Name" formControlName="name">
-      </div>
-    </div>
-    <div *ngIf="usersForm.get('name')?.invalid && (usersForm.get('name')?.dirty || usersForm.get('name')?.touched)">
-      <div [hidden]="!usersForm.get('name')?.errors['required']" class="text-danger"
-        [ngStyle]="{'margin-left': '100px'}">** Name is required **</div>
-      <div [hidden]="!usersForm.get('name')?.errors['minlength']" class="text-danger"
-        [ngStyle]="{'margin-left': '100px'}">** Min Length is 3 **</div>
-    </div>
-    <div class="form-group row m-3">
-      <label for="email" class="col-sm-2 col-form-label">Email</label>
-      <div class="col-sm-10">
-        <input type="email" class="form-control" id="email" name="email" placeholder="Enter Email"
-          formControlName="email">
-      </div>
-    </div>
-    <div *ngIf="usersForm.get('email')?.invalid && (usersForm.get('email')?.dirty || usersForm.get('email')?.touched)">
-      <div [hidden]="!usersForm.get('email')?.errors['required']" class="text-danger"
-        [ngStyle]="{'margin-left': '100px'}">** Email is required **</div>
-      <div [hidden]="!usersForm.get('email')?.errors['minlength']" class="text-danger"
-        [ngStyle]="{'margin-left': '100px'}">** Invalid Email id **</div>
-    </div>
-    <div class="form-group row m-3">
-      <label for="phone" class="col-sm-2 col-form-label">Phone</label>
-      <div class="col-sm-10">
-        <div class="input-group">
-          <div class="input-group-prepend">
-            <!-- <span class="input-group-text">Code</span> -->
-            <select class="form-control input-group-text" formControlName="code" name="code">
-              <option value="" disabled selected>Code</option>
-              <option *ngFor="let code of callingCodes" [value]="code">{{ code }}</option>
-            </select>
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h3 class="modal-title" id="exampleModalLabel">User</h3>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter Phone No"
-            formControlName="phone" pattern="[0-9]+" minlength="10" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-        </div>
-      </div>
-    </div>
+          <div class="modal-body">
+              <form [formGroup]="usersForm" (ngSubmit)="onSubmit()" novalidate>
+                <div class="form-group row m-2">
+                  <label for="name" class="col-sm-2 col-form-label">Name</label>
+                  <div class="col-sm-10">
+                    <input type="Text" class="form-control" id="name" name="name" placeholder="Enter Name" formControlName="name">
+                  </div>
+                </div>
+                <div *ngIf="usersForm.get('name')?.invalid && (usersForm.get('name')?.dirty || usersForm.get('name')?.touched)">
+                  <div [hidden]="!usersForm.get('name')?.errors['required']" class="text-danger"
+                    [ngStyle]="{'margin-left': '100px'}">** Name is required **</div>
+                  <div [hidden]="!usersForm.get('name')?.errors['minlength']" class="text-danger"
+                    [ngStyle]="{'margin-left': '100px'}">** Min Length is 3 **</div>
+                </div>
+                <div class="form-group row m-3">
+                  <label for="email" class="col-sm-2 col-form-label">Email</label>
+                  <div class="col-sm-10">
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter Email"
+                      formControlName="email">
+                  </div>
+                </div>
+                <div *ngIf="usersForm.get('email')?.invalid && (usersForm.get('email')?.dirty || usersForm.get('email')?.touched)">
+                  <div [hidden]="!usersForm.get('email')?.errors['required']" class="text-danger"
+                    [ngStyle]="{'margin-left': '100px'}">** Email is required **</div>
+                  <div [hidden]="!usersForm.get('email')?.errors['minlength']" class="text-danger"
+                    [ngStyle]="{'margin-left': '100px'}">** Invalid Email id **</div>
+                </div>
+                <div class="form-group row m-3">
+                  <label for="phone" class="col-sm-2 col-form-label">Phone</label>
+                  <div class="col-sm-10">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <select class="form-control input-group-text" formControlName="code" name="code">
+                          <option value="" disabled selected>Code</option>
+                          <option *ngFor="let code of callingCodes" [value]="code">{{ code }}</option>
+                        </select>
+                      </div>
+                      <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter Phone No"
+                        formControlName="phone" pattern="[0-9]+" minlength="10" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="usersForm.get('phone')?.invalid && (usersForm.get('phone')?.dirty || usersForm.get('phone')?.touched)">
+                  <div [hidden]="!usersForm.get('phone')?.errors['required']" class="text-danger"
+                    [ngStyle]="{'margin-left': '100px'}">** Phone No is required **</div>
+                  <div [hidden]="!usersForm.get('phone')?.errors['minlength']" class="text-danger"
+                    [ngStyle]="{'margin-left': '100px'}">** Min Length is 10 **</div>
+                  <div [hidden]="!usersForm.get('phone')?.errors['maxlength']" class="text-danger"
+                    [ngStyle]="{'margin-left': '100px'}">** MAX Length is 10 **</div>
+                </div>
+                <div class="form-group row m-3">
+                  <label for="profile" class="col-sm-2 col-form-label">Profile</label>
+                  <div class="col-sm-10">
+                    <input type="file" class="form-control" id="profile" name="profile" placeholder="Profile"
+                      (change)="onFileSelected($event)">
+                  </div>
+                </div>
+                <div
+                  *ngIf="usersForm.get('profile')?.invalid && (usersForm.get('profile')?.dirty || usersForm.get('profile')?.touched)">
+                  <div [hidden]="!usersForm.get('profile')?.errors['required']" class="text-danger"
+                    [ngStyle]="{'margin-left': '100px'}">** Profile is required **</div>
+                </div>
 
-    <!-- <div class="form-group row m-3">
-        <label for="phone" class="col-sm-2 col-form-label">Phone</label>
-        <div class="col-sm-10">
-          <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter Phone No"
-            formControlName="phone">
-        </div>
-      </div> -->
-    <div *ngIf="usersForm.get('phone')?.invalid && (usersForm.get('phone')?.dirty || usersForm.get('phone')?.touched)">
-      <div [hidden]="!usersForm.get('phone')?.errors['required']" class="text-danger"
-        [ngStyle]="{'margin-left': '100px'}">** Phone No is required **</div>
-      <div [hidden]="!usersForm.get('phone')?.errors['minlength']" class="text-danger"
-        [ngStyle]="{'margin-left': '100px'}">** Min Length is 10 **</div>
-      <div [hidden]="!usersForm.get('phone')?.errors['maxlength']" class="text-danger"
-        [ngStyle]="{'margin-left': '100px'}">** MAX Length is 10 **</div>
-    </div>
-    <div class="form-group row m-3">
-      <label for="profile" class="col-sm-2 col-form-label">Profile</label>
-      <div class="col-sm-10">
-        <input type="file" class="form-control" id="profile" name="profile" placeholder="Profile"
-          (change)="onFileSelected($event)">
+                  <div class="modal-footer d-flex justify-content-center">
+                    <button class="btn btn-secondary mx-2" [disabled]="!usersForm.valid" data-bs-dismiss="modal" *ngIf="isShowAddBtn">Add User</button>
+                    <button class="btn btn-secondary mx-2" [disabled]="!usersForm.valid" data-bs-dismiss="modal" *ngIf="isShowEditBtn">Update
+                      User</button>
+                    <button class="btn btn-secondary mx-2" data-bs-dismiss="modal" >Cancel</button>
+                  </div>
+              </form>
+          </div>
       </div>
-    </div>
-    <div
-      *ngIf="usersForm.get('profile')?.invalid && (usersForm.get('profile')?.dirty || usersForm.get('profile')?.touched)">
-      <div [hidden]="!usersForm.get('profile')?.errors['required']" class="text-danger"
-        [ngStyle]="{'margin-left': '100px'}">** Profile is required **</div>
-    </div>
-    <div class="form-group row m-3">
-      <div class="col-sm-10">
-        <button class="btn btn-secondary mx-2" [disabled]="!usersForm.valid" *ngIf="isShowAddBtn">Add User</button>
-        <button class="btn btn-secondary mx-2" [disabled]="!usersForm.valid" *ngIf="isShowEditBtn">Update
-          User</button>
-        <button class="btn btn-secondary mx-2">Cancel</button>
-      </div>
-    </div>
-  </form>
+  </div>
 </div>
+
+
+
 <div class="container">
   <div class="row my-4">
     <div class="col-lg-12">
@@ -146,17 +134,11 @@
               <td>
               <button [matMenuTriggerFor]="lvl2master" color="accent"  mat-button><mat-icon>edit</mat-icon></button>
               <mat-menu #lvl2master="matMenu">
-                  <button mat-menu-item  (click)="onEditUser(user,$event)"><mat-icon>edit</mat-icon>Edit User</button>
+                  <button mat-menu-item data-bs-toggle="modal" data-bs-target="#exampleModal" (click)="onEditUser(user,$event)"><mat-icon>edit</mat-icon>Edit User</button>
                   <button mat-menu-item  (click)="onDeleteUser(user._id,$event)"><mat-icon>delete_forever</mat-icon>Delete</button>
                   <button mat-menu-item  (click)="onCardClick()"><mat-icon>credit_card</mat-icon>Cards</button>
               </mat-menu>
             </td>
-              <!-- <td><a href="#" class="text-success edit" id="" (click)="onEditUser(user,$event)"><i
-                    class="fas fa-edit fa-lg mx-1"></i></a>
-                <a href="#" class="text-danger delete" id="" (click)="onDeleteUser(user._id,$event)"><i
-                    class="fas fa-trash fa-lg mx-1"></i></a>
-                <a href="#" class="text-danger" id="" (click)="onCardClick()"></a>
-              </td> -->
             </tr>
           </tbody>
         </table>
@@ -164,18 +146,110 @@
 
       <div class="pagination">
         <button class="btn btn-secondary" [disabled]="currentPage === 1" (click)="prevPage()">Previous</button>
-        <!-- <span>{{ currentPage }} / {{ totalPages }}</span> -->
         <ng-container *ngFor="let page of generatePageArray()">
           <button class="btn btn-secondary" [class.active]="page === currentPage" (click)="goToPage(page)">{{ page }}</button>
         </ng-container>
         <button class="btn btn-secondary" [disabled]="currentPage === totalPages" (click)="nextPage()">Next</button>
       </div>
-      <!-- <div class="pagination">
-        <button class="btn btn-secondary" [disabled]="currentPage === 1" (click)="prevPage()">Previous</button>
-        <span>{{ currentPage }} / {{ totalPages }}</span>
-        <button class="btn btn-secondary" [disabled]="currentPage === totalPages" (click)="nextPage()">Next</button>
-      </div> -->
 
     </div>
   </div>
 </div>
+
+
+<!-- <div class="form-group">
+  <div class="col-sm-1">
+    <select class="form-control bg-secondary text-white" [(ngModel)]="sortOrder" (ngModelChange)="onSort()">
+      <option value="asc">Asc</option>
+      <option value="desc">Desc</option>
+    </select>
+  </div>
+  <div class="col-sm-4">
+    <input type="text" class="form-control" placeholder="Search by name" [(ngModel)]="searchQuery">
+    <button class="btn btn-secondary m-2" (click)="onSearch()">Search</button>
+    <button class="btn btn-secondary m-2 " (click)="clearSearch()">Clear</button>
+  </div>
+  <div class="col-sm-2">
+    <button class="btn btn-secondary" (click)="onAddBtnUser()">Add</button>
+  </div>
+</div> -->
+
+              <!-- <td><a href="#" class="text-success edit" id="" (click)="onEditUser(user,$event)"><i
+                    class="fas fa-edit fa-lg mx-1"></i></a>
+                <a href="#" class="text-danger delete" id="" (click)="onDeleteUser(user._id,$event)"><i
+                    class="fas fa-trash fa-lg mx-1"></i></a>
+                <a href="#" class="text-danger" id="" (click)="onCardClick()"></a>
+              </td> -->
+
+              <!-- <div class="userformcontainer" *ngIf="isShow">
+                <form [formGroup]="usersForm" (ngSubmit)="onSubmit()" novalidate>
+                  <div class="form-group row m-2">
+                    <label for="name" class="col-sm-2 col-form-label">Name</label>
+                    <div class="col-sm-10">
+                      <input type="Text" class="form-control" id="name" name="name" placeholder="Enter Name" formControlName="name">
+                    </div>
+                  </div>
+                  <div *ngIf="usersForm.get('name')?.invalid && (usersForm.get('name')?.dirty || usersForm.get('name')?.touched)">
+                    <div [hidden]="!usersForm.get('name')?.errors['required']" class="text-danger"
+                      [ngStyle]="{'margin-left': '100px'}">** Name is required **</div>
+                    <div [hidden]="!usersForm.get('name')?.errors['minlength']" class="text-danger"
+                      [ngStyle]="{'margin-left': '100px'}">** Min Length is 3 **</div>
+                  </div>
+                  <div class="form-group row m-3">
+                    <label for="email" class="col-sm-2 col-form-label">Email</label>
+                    <div class="col-sm-10">
+                      <input type="email" class="form-control" id="email" name="email" placeholder="Enter Email"
+                        formControlName="email">
+                    </div>
+                  </div>
+                  <div *ngIf="usersForm.get('email')?.invalid && (usersForm.get('email')?.dirty || usersForm.get('email')?.touched)">
+                    <div [hidden]="!usersForm.get('email')?.errors['required']" class="text-danger"
+                      [ngStyle]="{'margin-left': '100px'}">** Email is required **</div>
+                    <div [hidden]="!usersForm.get('email')?.errors['minlength']" class="text-danger"
+                      [ngStyle]="{'margin-left': '100px'}">** Invalid Email id **</div>
+                  </div>
+                  <div class="form-group row m-3">
+                    <label for="phone" class="col-sm-2 col-form-label">Phone</label>
+                    <div class="col-sm-10">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <select class="form-control input-group-text" formControlName="code" name="code">
+                            <option value="" disabled selected>Code</option>
+                            <option *ngFor="let code of callingCodes" [value]="code">{{ code }}</option>
+                          </select>
+                        </div>
+                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter Phone No"
+                          formControlName="phone" pattern="[0-9]+" minlength="10" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                      </div>
+                    </div>
+                  </div>
+                  <div *ngIf="usersForm.get('phone')?.invalid && (usersForm.get('phone')?.dirty || usersForm.get('phone')?.touched)">
+                    <div [hidden]="!usersForm.get('phone')?.errors['required']" class="text-danger"
+                      [ngStyle]="{'margin-left': '100px'}">** Phone No is required **</div>
+                    <div [hidden]="!usersForm.get('phone')?.errors['minlength']" class="text-danger"
+                      [ngStyle]="{'margin-left': '100px'}">** Min Length is 10 **</div>
+                    <div [hidden]="!usersForm.get('phone')?.errors['maxlength']" class="text-danger"
+                      [ngStyle]="{'margin-left': '100px'}">** MAX Length is 10 **</div>
+                  </div>
+                  <div class="form-group row m-3">
+                    <label for="profile" class="col-sm-2 col-form-label">Profile</label>
+                    <div class="col-sm-10">
+                      <input type="file" class="form-control" id="profile" name="profile" placeholder="Profile"
+                        (change)="onFileSelected($event)">
+                    </div>
+                  </div>
+                  <div
+                    *ngIf="usersForm.get('profile')?.invalid && (usersForm.get('profile')?.dirty || usersForm.get('profile')?.touched)">
+                    <div [hidden]="!usersForm.get('profile')?.errors['required']" class="text-danger"
+                      [ngStyle]="{'margin-left': '100px'}">** Profile is required **</div>
+                  </div>
+                  <div class="form-group row m-3">
+                    <div class="col-sm-10">
+                      <button class="btn btn-secondary mx-2" [disabled]="!usersForm.valid" *ngIf="isShowAddBtn">Add User</button>
+                      <button class="btn btn-secondary mx-2" [disabled]="!usersForm.valid" *ngIf="isShowEditBtn">Update
+                        User</button>
+                      <button class="btn btn-secondary mx-2">Cancel</button>
+                    </div>
+                  </div>
+                </form>
+              </div> -->

@@ -30,19 +30,21 @@
     </ul>
   </div>
 
-  <section class="home-section">
-    <div class="home-header">
-      <div class="hamburger-menu">
-        <input type="checkbox" id="checkbox-hamburger-menu" [(ngModel)]="openSidebar"/>
-        <label class="label-hamburger-menu" for="checkbox-hamburger-menu">
-              <div class="bar"></div>
-              <div class="bar"></div>
-              <div class="bar"></div>
-          </label>
-      </div>
-      <!-- <div class="title">Dashboard</div> -->
-      <div><input type="button" class="logbtn" (click)="onLogout()" value="Logout"/></div>
+  <div class="home-header">
+    <div class="hamburger-menu">
+      <input type="checkbox" id="checkbox-hamburger-menu" [(ngModel)]="openSidebar"/>
+      <label class="label-hamburger-menu" for="checkbox-hamburger-menu">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </label>
     </div>
+    <!-- <div class="title">Dashboard</div> -->
+    <div><input type="button" class="logbtn" (click)="onLogout()" value="Logout"/></div>
+  </div>
+
+  <section class="home-section">
+    
     <div class="home-view">
       <router-outlet></router-outlet>
     </div>

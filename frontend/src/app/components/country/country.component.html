@@ -1,8 +1,5 @@
-<!-- <div class="countryhead"> -->
-  <div class="form-group row m-2">
-  <!-- <div class="countrysearch">
-    <input type="text" class="searchcountry" placeholder="Search by name">
-  </div> -->
+<div class="container">
+  <div class="form-group row m-2 d-flex justify-content-center">
   <div class="col-sm-5 m-1">
     <input type="text" class="form-control" placeholder="Search by name" [(ngModel)]="searchQuery">
   </div>
@@ -13,11 +10,82 @@
     <button class="btn btn-secondary" (click)="clearSearch()">Clear</button>
   </div>
   <div class="col-sm-2 m-1">
-  <!-- <div class="countryadd"> -->
-    <button class="btn btn-secondary btnsearchcountry" (click)="onAddBtnCountry()" *ngIf="!isShow">add</button>
+    <button class="btn btn-secondary btnsearchcountry" data-bs-toggle="modal" data-bs-target="#exampleModal" (click)="onAddBtnCountry()" *ngIf="!isShow">add</button>
   </div>
 </div>
-<div class="formcontainer" *ngIf="isShow">
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h3 class="modal-title" id="exampleModalLabel">Country</h3>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form [formGroup]="countryForm" (ngSubmit)="onSubmitCountryForm()">
+              <div class="form-group row m-2">
+                <label for="countrymenu" class="col-sm-2 col-form-label" ml-5>Country</label>
+                <div class="col-sm-10">
+                  <select class="form-control" formControlName="country" id="countrymenu" (change)="onCountrySelected()">
+                    <option value="" disabled selected>Select Country</option>
+                    <option *ngFor="let country of countries" [value]="country.name.common">{{ country.name.common }}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row m-2">
+                <label for="timezone" class="col-sm-2 col-form-label">Timezone</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" formControlName="timezone" id="timezone" placeholder="Timezone">
+                </div>
+              </div>
+              <div class="form-group row m-2">
+                <label for="currency" class="col-sm-2 col-form-label">Currency</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" formControlName="currency" id="currency" placeholder="Currency">
+                </div>
+              </div>
+              <div class="form-group row m-2">
+                <label for="code" class="col-sm-2 col-form-label">Code</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" formControlName="code" id="code" placeholder="Code">
+                </div>
+              </div>
+              <div class="form-group row m-2">
+                <label for="flag" class="col-sm-2 col-form-label">Flag</label>
+                <div class="col-sm-10">
+                  <img [src]="countryForm.get('flag').value" id="flag" alt="flag" width="100" height="100">
+                </div>
+              </div>
+              <div class="modal-footer d-flex justify-content-center">
+                <button type="submit" class="btn btn-secondary mx-2" data-bs-dismiss="modal">Add Country</button>
+                <button class="btn btn-secondary mx-2" data-bs-dismiss="modal" (click)="onCancelBtn()">Cancel</button>
+              </div>
+            </form>
+          </div>
+      </div>
+  </div>
+</div>
+
+<div class="container mt-4 d-flex align-items-center justify-content-center">
+  <div class="row">
+    <div class="col-md-4" *ngFor="let countrydt of countriesrcvd">
+      <div class="card m-3" style="height: 370px; width: 300px;">
+        <div class="d-flex" style="height: 200px;">
+          <img  class="card-img-top object-fit-none" [src]="countrydt.flag" [alt]="countrydt.country" style="max-height: 100%; max-width: 100%;">
+        </div>
+        <div class="card-body d-flex flex-column align-items-center font-weight-bold text-center">
+          <p>{{ countrydt.country }}</p>
+          <p>{{ countrydt.timezone }}</p>
+          <p>{{ countrydt.currency }}</p>
+          <p>{{ countrydt.code }}</p>
+        </div>
+      </div>
+    </div>
+</div>
+</div>
+
+<!-- <div class="formcontainer" *ngIf="isShow">
   <form [formGroup]="countryForm" (ngSubmit)="onSubmitCountryForm()">
     <div class="form-group row m-2">
       <label for="countrymenu" class="col-sm-2 col-form-label" ml-5>Country</label>
@@ -59,26 +127,7 @@
       </div>
     </div>
   </form>
-</div>
-<div class="container mt-4 d-flex align-items-center justify-content-center">
-  <div class="row">
-    <div class="col-md-4" *ngFor="let countrydt of countriesrcvd">
-    <!-- <div class="d-inline-flex"> -->
-      <div class="card m-3" style="height: 370px; width: 300px;">
-        <div class="d-flex" style="height: 200px;">
-          <img  class="card-img-top object-fit-none" [src]="countrydt.flag" [alt]="countrydt.country" style="max-height: 100%; max-width: 100%;">
-        </div>
-        <div class="card-body d-flex flex-column align-items-center font-weight-bold text-center">
-          <p>{{ countrydt.country }}</p>
-          <p>{{ countrydt.timezone }}</p>
-          <p>{{ countrydt.currency }}</p>
-          <p>{{ countrydt.code }}</p>
-        </div>
-      </div>
-    </div>
-    <!-- </div> -->
-</div>
-</div>
+</div> -->
 
 <!-- <div class="container">
   <ng-container *ngFor="let countrydt of countriesrcvd">

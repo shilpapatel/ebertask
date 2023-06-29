@@ -17,14 +17,17 @@ const configureSocket = (io) => {
           status: data.driverStatus
         }
         const result = await DriverList.findByIdAndUpdate(driverId, updatedStatus, { new: true });
-        // console.log(result);
         if (result.status === 'Approved') {
           result.rideStatus = 'Online';
         } else if (result.status === 'Declined') {
           result.rideStatus = 'Offline';
         }
+        const updatedDriver = await result.save(); // Save the updated driver object
 
-        io.emit('driverUpdate', result);
+      console.log(updatedDriver);
+        // console.log(result);
+
+        io.emit('driverUpdate', updatedDriver);
 
       } catch (err) {
         console.log(err);
@@ -256,7 +259,7 @@ const configureSocket = (io) => {
       console.log('Cron job start');
       const updatedDriverId = {
         driverId: null,
-        assigned: 'pending'
+        assigned: 'timeout'
       };
   
       const result = await CreateRide.findOneAndUpdate({assigned: 'assigning'},updatedDriverId, { new: true });

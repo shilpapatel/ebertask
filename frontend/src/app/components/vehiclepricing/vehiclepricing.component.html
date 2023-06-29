@@ -1,119 +1,119 @@
-<div class="vehiclepricehead">
-  <div class="vehiclepricesearch">
+<div class="container">>
+  <!-- <div class="vehiclepricesearch">
     <input type="text" class="searchvehicleprice" placeholder=" Search by name">
-  </div>
-  <div class="vehiclepriceadd">
-    <button class="btn btn-secondary btnsearchvehicleprice" (click)="onAddBtnVehiclePricing()">Add</button>
+  </div> -->
+  <div class="text-center">
+    <button class="btn btn-secondary btnsearchvehicleprice" data-bs-toggle="modal" data-bs-target="#exampleModal" (click)="onAddBtnVehiclePricing()">Add</button>
   </div>
 </div>
-<div class="formcontainer" *ngIf="isShow">
-  <form [formGroup]="vehiclePricingForm" (ngSubmit)="onSubmitvehiclePricingForm()">
-    <div class="form-group row m-2">
-      <label for="countrymenu" class="col-sm-2 col-form-label" ml-5>Country</label>
-      <div class="col-sm-10">
-        <select class="form-control" formControlName="country_id" id="countrymenu" (change)="onCountrySelected()">
-          <option value="" disabled selected>Select Country</option>
-          <option *ngFor="let countrydata of countriesrcvd" [value]="countrydata._id">
-            {{countrydata.country}}
-          </option>
-          <!-- <option *ngFor="let country of countries" [value]="country.name.common">{{ country.name.common }}</option> -->
-        </select>
-      </div>
-    </div>
-    <div class="form-group row m-2">
-      <label for="citymenu" class="col-sm-2 col-form-label" ml-5>City</label>
-      <div class="col-sm-10">
-        <select class="form-control" formControlName="city_id" id="citymenu" >
-          <option value="" disabled selected>Select City</option>
-          <option *ngFor="let citydata of selectedcountry" [value]="citydata._id">
-            {{citydata.city}}
-          </option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group row m-2">
-      <label for="vehicletypemenu" class="col-sm-2 col-form-label" ml-5> Vehicle Type</label>
-      <div class="col-sm-10">
-        <select class="form-control" formControlName="vehicletype_id" id="vehicletypemenu" >
-          <option value="" disabled selected>Select Vehicle Type</option>
-          <option *ngFor="let vehicle of vehicles" [value]="vehicle._id">
-            {{vehicle.vehicletype}}
-          </option>
-          <!-- <option *ngFor="let country of countries" [value]="country.name.common">{{ country.name.common }}</option> -->
-        </select>
-      </div>
-    </div>
-    <div class="form-group row m-2">
-      <label for="driverprofit" class="col-sm-2 col-form-label">Driver Profit</label>
-      <div class="col-sm-10">
-        <input type="text" class="form-control" formControlName="driverprofit" id="driverprofit"
-          placeholder="driverprofit" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-      </div>
-    </div>
-    <div class="form-group row m-2">
-      <label for="minfare" class="col-sm-2 col-form-label">Min. Fare</label>
-      <div class="col-sm-10">
-        <input type="text" class="form-control" formControlName="minfare" id="minfare" placeholder="minfare" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-      </div>
-    </div>
-    <div class="form-group row m-2">
-      <label for="distanceforbaseprice" class="col-sm-2 col-form-label" ml-5>Distance for Base Price</label>
-      <div class="col-sm-10">
-        <select class="form-control" formControlName="distanceforbaseprice" id="distanceforbasepricemenu">
-          <option value="" disabled selected>Select Distance for Base Price</option>
-          <option *ngFor="let distbaseprice of availabledistanceforbaseprice" [value]="distbaseprice">
-            {{distbaseprice}}
-          </option>
-        </select>
-      </div>
-    </div>
-    <!-- <div class="form-group row m-2">
-        <label for="distanceforbaseprice" class="col-sm-2 col-form-label">Distance for Base Price</label>
-        <div class="col-sm-10">
-          <input type="text" class="form-control" formControlName="distanceforbaseprice" id="distanceforbaseprice" placeholder="distanceforbaseprice">
-        </div>
-      </div> -->
-    <div class="form-group row m-2">
-      <label for="baseprice" class="col-sm-2 col-form-label">Base Price</label>
-      <div class="col-sm-10">
-        <input type="text" class="form-control" formControlName="baseprice" id="baseprice" placeholder="baseprice" pattern="[0-9]+" minlength="1" maxlength="5" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-      </div>
-    </div>
-    <div class="form-group row m-2">
-      <label for="priceperunitdistance" class="col-sm-2 col-form-label">Price Per Unit Distance</label>
-      <div class="col-sm-10">
-        <input type="text" class="form-control" formControlName="priceperunitdistance" id="priceperunitdistance"
-          placeholder="priceperunitdistance" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-      </div>
-    </div>
-    <div class="form-group row m-2">
-      <label for="priceperunittime" class="col-sm-2 col-form-label">Price Per Unit Time</label>
-      <div class="col-sm-10">
-        <input type="text" class="form-control" formControlName="priceperunittime" id="priceperunittime"
-          placeholder="priceperunittime" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-      </div>
-    </div>
-    <div class="form-group row m-2">
-      <label for="maxspace" class="col-sm-2 col-form-label">Max Space</label>
-      <div class="col-sm-10">
-        <input type="text" class="form-control" formControlName="maxspace" id="maxspace" placeholder="maxspace" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-      </div>
-    </div>
 
-    <div class="form-group row m-2">
-      <div class="col-sm-10">
-        <button class="btn btn-secondary mx-2" [disabled]="!vehiclePricingForm.valid" *ngIf="isShowAddBtn">Add Vehicle
-          Price</button>
-        <button class="btn btn-secondary mx-2"  *ngIf="isShowEditBtn">Update
-          Vehicle Price</button>
-          <!-- [disabled]="!vehiclePricingForm.valid" -->
-        <button class="btn btn-secondary mx-2" (click)="onCancelBtn()">Cancel</button>
-        <!-- <button type="submit" class="btn btn-secondary mx-2">Add Vehicle Price</button>
-          <button class="btn btn-secondary mx-2">Cancel</button> -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h3 class="modal-title" id="exampleModalLabel">VehiclePricing</h3>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form [formGroup]="vehiclePricingForm" (ngSubmit)="onSubmitvehiclePricingForm()">
+              <div class="form-group row m-2">
+                <label for="countrymenu" class="col-sm-2 col-form-label" ml-5>Country</label>
+                <div class="col-sm-10">
+                  <select class="form-control" formControlName="country_id" id="countrymenu" (change)="onCountrySelected()">
+                    <option value="" disabled selected>Select Country</option>
+                    <option *ngFor="let countrydata of countriesrcvd" [value]="countrydata._id">
+                      {{countrydata.country}}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row m-2">
+                <label for="citymenu" class="col-sm-2 col-form-label" ml-5>City</label>
+                <div class="col-sm-10">
+                  <select class="form-control" formControlName="city_id" id="citymenu" >
+                    <option value="" disabled selected>Select City</option>
+                    <option *ngFor="let citydata of selectedcountry" [value]="citydata._id">
+                      {{citydata.city}}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row m-2">
+                <label for="vehicletypemenu" class="col-sm-2 col-form-label" ml-5> Vehicle Type</label>
+                <div class="col-sm-10">
+                  <select class="form-control" formControlName="vehicletype_id" id="vehicletypemenu" >
+                    <option value="" disabled selected>Select Vehicle Type</option>
+                    <option *ngFor="let vehicle of vehicles" [value]="vehicle._id">
+                      {{vehicle.vehicletype}}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row m-2">
+                <label for="driverprofit" class="col-sm-2 col-form-label">Driver Profit</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" formControlName="driverprofit" id="driverprofit"
+                    placeholder="driverprofit" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                </div>
+              </div>
+              <div class="form-group row m-2">
+                <label for="minfare" class="col-sm-2 col-form-label">Min. Fare</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" formControlName="minfare" id="minfare" placeholder="minfare" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                </div>
+              </div>
+              <div class="form-group row m-2">
+                <label for="distanceforbaseprice" class="col-sm-2 col-form-label" ml-5>Distance for Base Price</label>
+                <div class="col-sm-10">
+                  <select class="form-control" formControlName="distanceforbaseprice" id="distanceforbasepricemenu">
+                    <option value="" disabled selected>Select Distance for Base Price</option>
+                    <option *ngFor="let distbaseprice of availabledistanceforbaseprice" [value]="distbaseprice">
+                      {{distbaseprice}}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row m-2">
+                <label for="baseprice" class="col-sm-2 col-form-label">Base Price</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" formControlName="baseprice" id="baseprice" placeholder="baseprice" pattern="[0-9]+" minlength="1" maxlength="5" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                </div>
+              </div>
+              <div class="form-group row m-2">
+                <label for="priceperunitdistance" class="col-sm-2 col-form-label">Price Per Unit Distance</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" formControlName="priceperunitdistance" id="priceperunitdistance"
+                    placeholder="priceperunitdistance" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                </div>
+              </div>
+              <div class="form-group row m-2">
+                <label for="priceperunittime" class="col-sm-2 col-form-label">Price Per Unit Time</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" formControlName="priceperunittime" id="priceperunittime"
+                    placeholder="priceperunittime" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                </div>
+              </div>
+              <div class="form-group row m-2">
+                <label for="maxspace" class="col-sm-2 col-form-label">Max Space</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" formControlName="maxspace" id="maxspace" placeholder="maxspace" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                </div>
+              </div>
+          
+              <div class="modal-footer d-flex justify-content-center">
+                  <button class="btn btn-secondary mx-2" [disabled]="!vehiclePricingForm.valid"  data-bs-dismiss="modal" *ngIf="isShowAddBtn">Add Vehicle
+                    Price</button>
+                  <button class="btn btn-secondary mx-2" data-bs-dismiss="modal" *ngIf="isShowEditBtn">Update
+                    Vehicle Price</button>
+                  <button class="btn btn-secondary mx-2" data-bs-dismiss="modal" (click)="onCancelBtn()">Cancel</button>
+                </div>
+            </form>
+          </div>
       </div>
-    </div>
-  </form>
+  </div>
 </div>
+
+
 
 <div class="container">
   <div class="row my-4">
@@ -149,7 +149,7 @@
               <td>{{vehiclepricing.priceperunitdistance}}</td>
               <td>{{vehiclepricing.priceperunittime}}</td>
               <td>{{vehiclepricing.maxspace}}</td>
-              <td><a href="#" class="text-success edit" id="" (click)="onEditVehiclePricing(vehiclepricing,$event)"><i
+              <td><a href="#" class="text-success edit" id=""  data-bs-toggle="modal" data-bs-target="#exampleModal" (click)="onEditVehiclePricing(vehiclepricing,$event)"><i
                     class="fas fa-edit fa-lg mx-1"></i></a>
                 <a href="#" class="text-danger delete" id=""
                   (click)="onDeleteVehiclePricing(vehiclepricing._id,$event)"><i
@@ -162,3 +162,104 @@
     </div>
   </div>
 </div>
+
+
+<!-- <div class="formcontainer" *ngIf="isShow">
+  <form [formGroup]="vehiclePricingForm" (ngSubmit)="onSubmitvehiclePricingForm()">
+    <div class="form-group row m-2">
+      <label for="countrymenu" class="col-sm-2 col-form-label" ml-5>Country</label>
+      <div class="col-sm-10">
+        <select class="form-control" formControlName="country_id" id="countrymenu" (change)="onCountrySelected()">
+          <option value="" disabled selected>Select Country</option>
+          <option *ngFor="let countrydata of countriesrcvd" [value]="countrydata._id">
+            {{countrydata.country}}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group row m-2">
+      <label for="citymenu" class="col-sm-2 col-form-label" ml-5>City</label>
+      <div class="col-sm-10">
+        <select class="form-control" formControlName="city_id" id="citymenu" >
+          <option value="" disabled selected>Select City</option>
+          <option *ngFor="let citydata of selectedcountry" [value]="citydata._id">
+            {{citydata.city}}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group row m-2">
+      <label for="vehicletypemenu" class="col-sm-2 col-form-label" ml-5> Vehicle Type</label>
+      <div class="col-sm-10">
+        <select class="form-control" formControlName="vehicletype_id" id="vehicletypemenu" >
+          <option value="" disabled selected>Select Vehicle Type</option>
+          <option *ngFor="let vehicle of vehicles" [value]="vehicle._id">
+            {{vehicle.vehicletype}}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group row m-2">
+      <label for="driverprofit" class="col-sm-2 col-form-label">Driver Profit</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" formControlName="driverprofit" id="driverprofit"
+          placeholder="driverprofit" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+      </div>
+    </div>
+    <div class="form-group row m-2">
+      <label for="minfare" class="col-sm-2 col-form-label">Min. Fare</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" formControlName="minfare" id="minfare" placeholder="minfare" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+      </div>
+    </div>
+    <div class="form-group row m-2">
+      <label for="distanceforbaseprice" class="col-sm-2 col-form-label" ml-5>Distance for Base Price</label>
+      <div class="col-sm-10">
+        <select class="form-control" formControlName="distanceforbaseprice" id="distanceforbasepricemenu">
+          <option value="" disabled selected>Select Distance for Base Price</option>
+          <option *ngFor="let distbaseprice of availabledistanceforbaseprice" [value]="distbaseprice">
+            {{distbaseprice}}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group row m-2">
+      <label for="baseprice" class="col-sm-2 col-form-label">Base Price</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" formControlName="baseprice" id="baseprice" placeholder="baseprice" pattern="[0-9]+" minlength="1" maxlength="5" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+      </div>
+    </div>
+    <div class="form-group row m-2">
+      <label for="priceperunitdistance" class="col-sm-2 col-form-label">Price Per Unit Distance</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" formControlName="priceperunitdistance" id="priceperunitdistance"
+          placeholder="priceperunitdistance" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+      </div>
+    </div>
+    <div class="form-group row m-2">
+      <label for="priceperunittime" class="col-sm-2 col-form-label">Price Per Unit Time</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" formControlName="priceperunittime" id="priceperunittime"
+          placeholder="priceperunittime" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+      </div>
+    </div>
+    <div class="form-group row m-2">
+      <label for="maxspace" class="col-sm-2 col-form-label">Max Space</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" formControlName="maxspace" id="maxspace" placeholder="maxspace" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+      </div>
+    </div>
+
+    <div class="form-group row m-2">
+      <div class="col-sm-10">
+        <button class="btn btn-secondary mx-2" [disabled]="!vehiclePricingForm.valid" *ngIf="isShowAddBtn">Add Vehicle
+          Price</button>
+        <button class="btn btn-secondary mx-2"  *ngIf="isShowEditBtn">Update
+          Vehicle Price</button>
+
+        <button class="btn btn-secondary mx-2" (click)="onCancelBtn()">Cancel</button>
+ 
+      </div>
+    </div>
+  </form>
+</div> -->

@@ -42,7 +42,6 @@ getDriverRideData(): void {
     });
   }
 
-
    onDeleteDriver(driverrideId: string) {
     if (confirm('Are you sure you want to delete this user?')) {
       this.socketService.deleteDriverRide(driverrideId).subscribe(

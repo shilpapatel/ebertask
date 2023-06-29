@@ -39,9 +39,10 @@
                             <td>{{createride. estimatePrice}}</td>
                             <td>
                                 <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#assignDriverModal" 
-                                [disabled]="createride.driverId !== null" (click)="onAssignBtnClick(createride)">
-                                  {{createride.driverId !== null? createride.driverdata?.name : 'Assign Driver' }}
+                                [disabled]="createride.assigned == 'assigning'" (click)="onAssignBtnClick(createride)">
+                                  {{createride.assigned == 'assigning'? createride.driverdata?.name : (createride.assigned == 'timeout' ? 'ReAssign Driver':'Assign Driver') }}
                                   <!-- {{assignedDriverName}} -->
+                                  <!-- createride.driverdata?.name  -->
                                 </button>
                             </td>
                             <td>
@@ -86,7 +87,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <h5 class="modal-title" id="exampleModalLabel">Create ride Details</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
     <div class="modal-body">
@@ -118,10 +119,10 @@
 
   
   <div class="modal fade" id="assignDriverModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <h5 class="modal-title" id="exampleModalLabel">Available Driver</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
     <div class="modal-body">
@@ -175,7 +176,7 @@
                 </div>
             </div>
             <div class="d-flex justify-content-center">
-              <button type="button" class="btn btn-secondary btn-sm" (click)="onAssignNearestDriver()">
+              <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" (click)="onAssignNearestDriver()">
              Assign Nearest Driver
             </button>
           </div>

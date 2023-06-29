@@ -50,7 +50,8 @@ export class ListComponent {
       email: ['', [Validators.required, Validators.email]],
       code:['',[Validators.required]],
       phone: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(10)]],
-      profile: [null, [Validators.required]],
+       profile: [null],
+      // profile: [null, [Validators.required]],
       country_id: ['', Validators.required],
       city_id: ['', Validators.required],  
     }),
@@ -214,7 +215,6 @@ export class ListComponent {
     });
     // this.userForm.get('profile').updateValueAndValidity();
   }
-
   onSubmit() {
     var formData: any = new FormData();
 
@@ -242,12 +242,18 @@ export class ListComponent {
       });
     } else {
       // Adding a new vehicle
-      this.listService.addDrivers(formData).subscribe(res=> {
+      this.listService.addDrivers(formData).subscribe(
+        (res)=> {
         this.driverdata.push(res['driverCreated']);
          this.getDriver();
         this.toastr.success('Driver Added ')
         // this.router.navigate(['users']);
-      })
+      },
+      (error) =>{
+        
+        this.toastr.error(error.error.message)
+      }
+      )
     }
     this.isShow = !this.isShow;
   }
