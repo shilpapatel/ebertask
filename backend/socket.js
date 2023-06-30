@@ -313,32 +313,7 @@ const configureSocket = (io) => {
       } 
       ])
       io.emit('driverRideData', driverridedata);
-      // console.log(result, "updated result");
-      // console.log(result._id, "updated id");
-    //   try {
-    //     console.log('Cron job start');
-    //     const pendingRides = await CreateRide.find({ assigned: 'pending' }).exec();
-    // console.log(pendingRides,"pendingrides");
-    //     const currentTime = Date.now();
-    //     const timeoutDuration = 20000; // 20 seconds
-    
-    //     pendingRides.forEach(async (ride) => {
-    //       const rideTime = ride.created
-    //       const elapsedTime = currentTime - rideTime;
-    
-    //       if (elapsedTime >= timeoutDuration) {
-    //         const timeoutResult = await CreateRide.findByIdAndUpdate(
-    //           ride._id,
-    //           { driverId: null, assigned: 'timeout' },
-    //           { new: true }
-    //         );
-    //         console.log(timeoutResult);
-    //         io.emit('driverridetimeout', timeoutResult);
-    //       }
-    //     });
-    //   } catch (err) {
-    //     console.log(err);
-    //   }
+     
     });
     job.start();
 
@@ -499,9 +474,32 @@ const configureSocket = (io) => {
 module.exports = configureSocket;
 
 
-
-
-
+ // console.log(result, "updated result");
+      // console.log(result._id, "updated id");
+    //   try {
+    //     console.log('Cron job start');
+    //     const pendingRides = await CreateRide.find({ assigned: 'pending' }).exec();
+    // console.log(pendingRides,"pendingrides");
+    //     const currentTime = Date.now();
+    //     const timeoutDuration = 20000; // 20 seconds
+    
+    //     pendingRides.forEach(async (ride) => {
+    //       const rideTime = ride.created
+    //       const elapsedTime = currentTime - rideTime;
+    
+    //       if (elapsedTime >= timeoutDuration) {
+    //         const timeoutResult = await CreateRide.findByIdAndUpdate(
+    //           ride._id,
+    //           { driverId: null, assigned: 'timeout' },
+    //           { new: true }
+    //         );
+    //         console.log(timeoutResult);
+    //         io.emit('driverridetimeout', timeoutResult);
+    //       }
+    //     });
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
 
 
     // socket.on('addDriverRide', async (data) => {

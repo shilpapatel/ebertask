@@ -211,21 +211,15 @@ export class ListComponent {
   onFileSelected(event: any) {
     const file: File = (event.target as HTMLInputElement).files[0];
 
-     // Check file size
      const maxSize = 5 * 1024 * 1024; // 5MB
      if (file.size > maxSize) {
-       // Display an error message or handle the oversized file
-       // For example, you can set an error state in the form control
        this.driversForm.get('profile').setErrors({ maxSize: true });
        this.toastr.error("please select size less than 5 mb")
        return;
      }
- 
-     // Check file type
+
      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
      if (!allowedTypes.includes(file.type)) {
-       // Display an error message or handle the invalid file type
-       // For example, you can set an error state in the form control
        this.driversForm.get('profile').setErrors({ invalidType: true });
        this.toastr.error("please select jpg png jpeg format")
        return;

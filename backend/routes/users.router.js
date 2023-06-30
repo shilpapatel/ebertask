@@ -2,7 +2,29 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer')
 const mongoose = require('mongoose');
+const stripe = require('stripe')('sk_test_51NObn2BQlJgbeIPVzCyHaca669BS3YrGmlGoSQNFIahLk6xyFc1pH5utU9GO9a78duDiyPxiCD95SneKT1Utj5oD006hxweLrL');
+// const paymentMethods = await stripe.paymentMethods.list({
+//   customer: '{{CUSTOMER_ID}}',
+//   type: 'card',
+// });
 
+
+// try {
+//   const paymentIntent = await stripe.paymentIntents.create({
+//     amount: 1099,
+//     currency: 'usd',
+//     automatic_payment_methods: {enabled: true},
+//     customer: '{{CUSTOMER_ID}}',
+//     payment_method: '{{PAYMENT_METHOD_ID}}',
+//     off_session: true,
+//     confirm: true,
+//   });
+// } catch (err) {
+//   // Error code will be authentication_required if authentication is needed
+//   console.log('Error code is: ', err.code);
+//   const paymentIntentRetrieved = await stripe.paymentIntents.retrieve(err.raw.payment_intent.id);
+//   console.log('PI retrieved: ', paymentIntentRetrieved.id);
+// }
 // const ctrlUser = require('../controllers/user.controller');
 // const passport = require('passport');
 // const jwtHelper = require('../config/jwtHelper');
@@ -43,6 +65,9 @@ const storage = multer.diskStorage({
 //     },
 //   })
 let User = require('../model/users.model')
+
+
+
 router.post('/add-user', upload.single('profile'), async (req, res, next) => {
   try {
       const url = req.protocol + '://' + req.get('host');
@@ -55,6 +80,17 @@ router.post('/add-user', upload.single('profile'), async (req, res, next) => {
         profile:url + '/public/' + req.file.filename,
     });
     const userCreated = await user.save();
+
+    // Create a customer in Stripe
+    const customer = await stripe.customers.create({
+      email: userCreated.email,
+      name: userCreated.name,
+      // Add any additional customer information here
+    });
+
+    // Associate the Stripe customer ID with the user in your database
+    userCreated.stripeCustomerId = customer.id;
+    await userCreated.save();
     // const VehicleTypCreated = await vehicletype.save();
     res.status(201).json({
       message: 'User registered successfully!',
@@ -74,6 +110,14 @@ router.post('/add-user', upload.single('profile'), async (req, res, next) => {
           error: err,
       });
   }
+});
+
+router.post('/create-intent', async (req, res) => {
+  const intent = await stripe.setupIntents.create({
+    customer: customer.id,
+    automatic_payment_methods: {enabled: true},
+  });
+  res.json({client_secret: intent.client_secret});
 });
 
 // router.get('/get-users', async (req, res, next) => {

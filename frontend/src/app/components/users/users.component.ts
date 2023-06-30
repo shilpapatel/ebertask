@@ -1,6 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { HttpClient, HttpEvent } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+// import { Stripe } from '@stripe/stripe-js';
+// import { loadStripe } from '@stripe/stripe-js';
+
 // import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { UsersService } from 'src/app/shared/users.service';
@@ -31,6 +34,8 @@ export class UsersComponent {
   searchQuery: string = '';
   sortOrder: string = 'asc'; 
   sortField: string = 'name';
+
+  @ViewChild('cardModal') cardModal!: ElementRef;
 
   // userdata: Users = {
   //   name: '',
@@ -136,6 +141,19 @@ export class UsersComponent {
   // }
   onFileSelected(event: any) {
     const file: File = (event.target as HTMLInputElement).files[0];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+     if (file.size > maxSize) {
+       this.usersForm.get('profile').setErrors({ maxSize: true });
+       this.toastr.error("please select size less than 5 mb")
+       return;
+     }
+
+     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+     if (!allowedTypes.includes(file.type)) {
+       this.usersForm.get('profile').setErrors({ invalidType: true });
+       this.toastr.error("please select jpg png jpeg format")
+       return;
+     }
     this.usersForm.patchValue({
       profile: file
     });
@@ -225,9 +243,76 @@ onDeleteUser(userId: string, event: Event) {
     );
   }
 }
+// async onCardClick(){
+//     var stripeCardContainer = document.getElementById('stripeCardContainer');
+//     const stripe = await loadStripe('pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou');
+//     const elements = stripe.elements();
+  
+//     // Create a new Stripe card element
+//     const card = elements.create('card');
+//     card.mount(stripeCardContainer); // Replace with the appropriate ID or selector for the card container element
+
+//     this.cardModal.nativeElement.classList.add('show');
+//     this.cardModal.nativeElement.style.display = 'block';
+ 
+// }
+cards: any[] = []; // Array to store the card details
 onCardClick(){
+// this.onAddCard()
+// this.onDeleteCard()
 }
 
+
+
+  async onAddCard() {
+  const stripe = (window as any).Stripe('pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou');
+  // const elements = stripe.elements();
+  const options = {
+    mode: 'setup',
+    currency: 'usd',
+    appearance: {/*...*/},
+  };
+  const elements = stripe.elements(options);
+  
+  // Create and mount the Payment Element
+  const paymentElement = elements.create('payment');
+  paymentElement.mount('#payment-element');
+    
+    // const stripeCardContainer = document.getElementById('stripeCardContainer');
+    // stripeCardContainer.innerHTML = '';
+    // const stripe = await loadStripe('pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou');
+    // const elements = stripe.elements();
+    // const card = elements.create('card');
+    // card.mount(stripeCardContainer); 
+    // card.on('change', (event) => {
+    //   console.log(event);
+    //   console.log(card);   
+    //   if (event.complete) {
+    //     const cardSymbol = event.brand;
+    //     // const cardNumber = card._frame.element.querySelector('[data-placeholder]').getAttribute('data-placeholder');
+    //     this.cards.push({
+    //       symbol: cardSymbol,
+    //       number: "",
+    //       default: false
+    //     });
+    //   }
+    // });
+
+
+  }
+
+  onDeleteCard(card: any) {
+    // Delete the card from the array
+    const index = this.cards.indexOf(card);
+    if (index !== -1) {
+      this.cards.splice(index, 1);
+    }
+  }
+
+
+  
+
+}
 // prevPage() {
 //   if (this.currentPage > 1) {
 //     this.currentPage--;
@@ -256,6 +341,310 @@ onCardClick(){
 //   const endIndex = startIndex + this.pageSize;
 //   this.paginatedUsers = filteredUsers.slice(startIndex, endIndex);
 // }
-}
 
 
+
+//stripe integration
+
+// import { data } from "jquery";
+// import { HttpClient } from "@angular/common/http";
+// import { Component, EventEmitter, Inject, OnInit, Output } from "@angular/core";
+// import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
+// import { loadStripe } from "@stripe/stripe-js";
+// import { ToastrService } from "ngx-toastr";
+
+// @Component({
+//   selector: "app-cards",
+//   template: `
+//     <div class="card m-3">
+//       <div *ngIf="cardlist">
+//         <!-- <div ngIf="cardlist"> -->
+//         <div class="row m-2 p-2" *ngFor="let card of cardList">
+//           <div class="card p-1 globebox">
+//             <span
+//               class="badge badge-pill badge-success position-absolute px-2"
+//               *ngIf="card.id == defaultcardid"
+//               >Default</span
+//             >
+//             <!-- <button
+//               mat-button
+//               (click)="DeleteCard(card.id)"
+//               style="position: absolute;right:0 "
+//             >
+//               <mat-icon class="mat-18">delete</mat-icon>
+//             </button> -->
+//             <div class="example-button-container">
+//               <button
+//                 mat-fab
+//                 color="warn"
+//                 aria-label="Example icon button with a delete icon"
+//                 (click)="DeleteCard(card.id)"
+//                 style="position:absolute;right:0px;height:30px;width:30px;font-size: 10px;margin:5px;top:8px;"
+//               >
+//                 <mat-icon>delete</mat-icon>
+//               </button>
+//             </div>
+//             <div class="d-flex justify-content-center align-center">
+//               <div
+//                 class="align-center w-50 d-flex justify-content-center align-center"
+//               >
+//                 <img
+//                   src="../assets/logo/visa.svg"
+//                   alt=""
+//                   class="img-thumbnail card border border-success p-1"
+//                   style="height: 60px;width:120px;margin:auto 0;"
+//                 />
+//               </div>
+//               <div class="text-center w-50">
+//                 <p>xxxx xxxx xxxx {{ card.card.last4 }}</p>
+//                 <p>Expiration Month: {{ card.card.exp_month }}</p>
+//                 <p>Expiration Year: {{ card.card.exp_year }}</p>
+//                 <!-- Add more card details as needed -->
+//               </div>
+//             </div>
+//             <div class="text-center" *ngIf="card.id != defaultcardid">
+//               <!-- <button
+//                 class="btn btn-success btn-rounded m-2"
+//                 (click)="SetDefault(card.customer, card.id)"
+//               >
+//                 Set Default
+//               </button> -->
+//               <div class="example-button-container">
+//                 <button
+//                   mat-fab
+//                   color="basic"
+//                   aria-label="Example icon button with a bookmark icon"
+//                   style="position:absolute;right:0px;height:30px;width:30px;font-size: 10px;margin:5px;top:55px;background-color:lightgreen"
+//                   (click)="SetDefault(card.customer, card.id)"
+//                 >
+//                   <mat-icon>account_balance</mat-icon>
+//                 </button>
+//               </div>
+//             </div>
+
+//             <!-- <button
+//               class="btn btn-danger btn-rounded m-2"
+//               (click)="DeleteCard(card.id)"
+//             >
+//               Delete
+//             </button> -->
+//           </div>
+//         </div>
+//         <!-- </div> -->
+//         <input type="text" value="{{ data.id }}" #id hidden />
+//       </div>
+//       <form id="payment-form">
+//         <div id="card-element">
+//           <!-- Elements will create form elements here -->
+//         </div>
+
+//         <div class="text-center">
+//           <button
+//             id="submit"
+//             class="btn btn-success btn-rounded m-2"
+//             (click)="AddCardDetails(id)
+// "
+//             *ngIf="addcard"
+//           >
+//             Add
+//           </button>
+//         </div>
+//         <div class="text-center">
+//           <button
+//             id="submit"
+//             class="btn btn-info btn-rounded m-2"
+//             (click)="AddCard(id.value)"
+//           >
+//             Add Card
+//           </button>
+//           <button
+//             mat-button
+//             mat-dialog-close
+//             class="btn btn-info btn-rounded m-2"
+//           >
+//             Close
+//           </button>
+//         </div>
+//         <div id="error-message">
+//           <!-- Display error message to your customers here -->
+//         </div>
+//       </form>
+//       <div></div>
+//     </div>
+//   `,
+//   styleUrls: ["./cards.component.scss"],
+// })
+// export class CardsComponent implements OnInit {
+//   stripe: any;
+//   @Output() dialogClosed = new EventEmitter<string>();
+//   form: any;
+//   messageContainer: any;
+//   elements: any;
+//   paymentElement: any;
+//   handleError: any;
+//   AddCardUser: any = false;
+//   addcard: any = false;
+//   cardList: any;
+//   Userdata!: DialogData;
+//   id: any;
+//   cardlist: any = true;
+//   result: any;
+//   defaultcardid: any;
+//   customersdata: any;
+//   async ngOnInit() {
+//     console.log(this.data);
+//     this.id = this.data.id;
+//     this.getcard();
+//   }
+//   constructor(
+//     public dialogRef: MatDialogRef<CardsComponent>,
+//     private toaster: ToastrService,
+//     private http: HttpClient,
+//     @Inject(MAT_DIALOG_DATA) public data: DialogData
+//   ) {}
+//   async AddCard(val: any) {
+//     this.cardlist = false;
+//     this.stripe = await loadStripe(
+//       "pk_test_51NBaQISBFTafl90RGOHxPwdTrMqYMydbzDsDcJG7BXYYNOhAnnKFQUd0ZnIeSRO7ZpeGeh1TOXgxi4UEIWAKQuxz00Q9fgpwt1"
+//     );
+//     setTimeout(() => {
+//       // this.vehiclelist()-
+//       const options = {
+//         mode: "setup",
+//         currency: "usd",
+//         appearance: {},
+//       };
+//       // Set up Stripe.js and Elements to use in checkout form, passing the client secret obtained in step 3
+//       this.elements = this.stripe.elements(options);
+//       this.paymentElement = this.elements.create("payment", {
+//         layout: {
+//           type: "accordion",
+//           defaultCollapsed: false,
+//           radios: true,
+//           spacedAccordionItems: false,
+//         },
+//       });
+//       // Create and mount the Payment Element
+//       this.paymentElement.mount("#card-element");
+//     }, 1000);
+//     this.AddCardUser = true;
+//     this.addcard = true;
+//   }
+//   async getcard() {
+//     if (this.data.customerid.customerid != null) {
+//       if (this.cardlist) {
+//         this.http
+//           .get(`http://localhost:5000/userslist/get-customer/${this.data.id}`)
+//           .subscribe(
+//             (data) => {
+//               console.log(data);
+//               this.customersdata = data;
+//               this.defaultcardid = this.customersdata.invoice_settings.default_payment_method;
+//             },
+//             (error) => {
+//               console.error("Error:", error);
+//               // Handle the error
+//             }
+//           );
+//         this.http
+//           .get(`http://localhost:5000/userslist/get-card/${this.id}`)
+//           .subscribe(
+//             (data) => {
+//               console.log(data);
+//               // Handle the retrieved data
+//               this.result = data;
+//               this.cardList = this.result.data;
+//               console.log(this.cardList);
+//             },
+//             (error) => {
+//               console.error("Error:", error);
+//               // Handle the error
+//             }
+//           );
+//       }
+//     }
+//   }
+//   async AddCardDetails(val: any) {
+//     const { error: submitError } = await this.elements.submit();
+//     if (submitError) {
+//       console.log(submitError);
+//       this.handleError(submitError);
+//       return;
+//     }
+
+//     // Create the SetupIntent and obtain clientSecret
+//     const res = await fetch(
+//       `http://localhost:5000/userslist/create-intent/${val}`,
+//       {
+//         method: "POST",
+//       }
+//     );
+
+//     const { client_secret: clientSecret } = await res.json();
+
+//     // Confirm the SetupIntent using the details collected by the Payment Element
+//     const { error } = await this.stripe.confirmSetup({
+//       elements: this.elements,
+//       clientSecret,
+//       confirmParams: {
+//         return_url: "http://localhost:4200/dashboard/users",
+//       },
+//     });
+
+//     if (error) {
+//       this.handleError(error);
+//     } else {
+//       console.log("elsee from comfornmmm setup");
+
+//       // this.isAddCard = false
+//       this.toaster.success("Card added successfully!");
+//       this.AddCardUser = false;
+//       this.cardlist = true;
+//       // this.router.navigate(['/users'])
+//       // Your customer is redirected to your `return_url`. For some payment
+//       // methods like iDEAL, your customer is redirected to an intermediate
+//       // site first to authorize the payment, then redirected to the `return_url`.
+//     }
+//   }
+//   async DeleteCard(val: any) {
+//     const deletecard = confirm("Are You Want To Delete Card????");
+//     if (deletecard) {
+//       this.http
+//         .get(`http://localhost:5000/userslist/delete-card/${val}`)
+//         .subscribe(
+//           (data) => {
+//             // Handle the retrieved data
+//             this.getcard();
+//             this.toaster.error("Deleted Succesfully!!", "");
+//           },
+//           (error) => {
+//             console.error("Error:", error);
+//             // Handle the error
+//           }
+//         );
+//     }
+//   }
+//   async SetDefault(val: any, cardid: any) {
+//     console.log(val);
+//     console.log(cardid);
+//     this.http
+//       .patch(`http://localhost:5000/userslist/default-card/${val}`, { cardid })
+//       .subscribe(
+//         (data) => {
+//           console.log(data);
+//           // Handle the retrieved data
+//           this.getcard();
+//         },
+//         (error) => {
+//           console.error("Error:", error);
+//           // Handle the error
+//         }
+//       );
+//   }
+// }
+
+// export interface DialogData {
+//   title: string;
+//   id: String;
+//   customerid: any;
+// }

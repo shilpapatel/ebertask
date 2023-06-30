@@ -1,9 +1,13 @@
 <div class="container">
     <div class="text-center">
-        <button class="btn btn-secondary mt-2" data-bs-toggle="modal" data-bs-target="#exampleModal" (click)="onAddBtnCity()">Add City</button>
+        <button class="btn btn-secondary mt-2" (click)="onAddBtnCity()">Add City</button>
     </div>
 
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+<!-- <div class="text-center">
+        <button class="btn btn-secondary mt-2" data-bs-toggle="modal" data-bs-target="#exampleModal" (click)="onAddBtnCity()">Add City</button>
+    </div> -->
+    <!-- <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -46,9 +50,10 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
-    <!-- <div class="formcontainer" *ngIf="isShow">
+    <div class="d-flex justify-content-center align-items-center" *ngIf="isShow">
+        <div class="border border-secondary p-3 rounded">
         <form #cityForm="ngForm" (ngSubmit)="onsubmitCityForm(cityForm)">
             <div class="form-group row m-2">
                 <label for="countrymenu" class="col-sm-2 col-form-label" ml-5>Country</label>
@@ -82,7 +87,8 @@
                 </div>
             </div>
         </form>
-    </div> -->
+    </div>
+    </div>
     <div #mapContainer id="map"></div>
     <!-- <div id="output"></div> -->
 

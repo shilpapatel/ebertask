@@ -126,16 +126,16 @@ export class ConfirmridesComponent {
 
   onAssignDriver(driver: any) {
     this.selectedDriver = driver;
+    this.socketService.updateDriverRide(this.selectedcreateride._id, this.selectedDriver._id,this.selectedcreateride.assigned,this.selectedcreateride.created);
     
     // this.assignedDriverName = this.selectedDriver.name;
-    console.log(this.assignedDriverName);
-    console.log(this.selectedDriver,"selecteddriver");
-    console.log(this.selectedDriver._id,"selecteddriverid");
-    console.log(this.selectedcreateride,"selectedride");
-    console.log(this.selectedcreateride._id,"selectedrideid");
+    // console.log(this.assignedDriverName);
+    // console.log(this.selectedDriver,"selecteddriver");
+    // console.log(this.selectedDriver._id,"selecteddriverid");
+    // console.log(this.selectedcreateride,"selectedride");
+    // console.log(this.selectedcreateride._id,"selectedrideid");
     // this.selectedcreateride.assigned = "assigning";
     // (this.selectedcreateride.assigned === "assigning")
-    this.socketService.updateDriverRide(this.selectedcreateride._id, this.selectedDriver._id,this.selectedcreateride.assigned,this.selectedcreateride.created);
     // }
 }
 
@@ -149,11 +149,6 @@ export class ConfirmridesComponent {
         const driver = this.driverdatafiltered[index];
         this.selectedDriver = driver;
 
-        console.log(this.assignedDriverName);
-        console.log(this.selectedDriver, "selecteddriver");
-        console.log(this.selectedDriver._id, "selecteddriverid");
-        console.log(this.selectedcreateride, "selectedride");
-        console.log(this.selectedcreateride._id, "selectedrideid");
         this.socketService.updateDriverRide(
           this.selectedcreateride._id,
           this.selectedDriver._id,

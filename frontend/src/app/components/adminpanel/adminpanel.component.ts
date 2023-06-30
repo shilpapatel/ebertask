@@ -10,6 +10,7 @@ import { AdminService } from 'src/app/shared/admin.service';
 export class AdminpanelComponent implements OnInit {
   userDetails;
   openSidebar: boolean = true;
+  
 
  menuSidebar = [
    // {
@@ -91,5 +92,4 @@ export class AdminpanelComponent implements OnInit {
  showSubmenu(itemEl: HTMLElement) {
    itemEl.classList.toggle("showMenu");
  }
-
 }

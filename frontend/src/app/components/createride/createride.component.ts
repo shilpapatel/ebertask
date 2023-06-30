@@ -492,9 +492,7 @@ export class CreaterideComponent {
         estimatePrice = minFare;
       }
       return estimatePrice;
-
     }
-
     return 0; // Or any default value if vehicle type is not found
   }
 
