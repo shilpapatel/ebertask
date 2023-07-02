@@ -18,7 +18,7 @@ export class VehicletypeComponent {
   preview: string;
   vehicleForm: FormGroup;
   selectedVehicle: any = null;
-  availableVehicleTypes: string[] = ['Suv', 'Hatchback', 'Sedan','Sports','Xuv'];
+  availableVehicleTypes: string[] = ['Suv', 'Hatchback', 'Sedan','Sports','Xuv','Crossover','Minivan','Convertible'];
   selectedVehicleTypes: string[] = [];
   // percentDone?: any = 0;
   // users: any[] = [];
@@ -26,7 +26,7 @@ export class VehicletypeComponent {
   constructor(public fb: FormBuilder, public router: Router,private vehicletypeService: VehicletypeService,private toastr: ToastrService) {
 
     this.vehicleForm = this.fb.group({
-      vehicleimg: [null,[Validators.required]],
+      vehicleimg: [null],
       vehicletype: ['',[Validators.required]]
     });
   }
@@ -58,6 +58,19 @@ export class VehicletypeComponent {
   }
   uploadFile(event) {
     const file = (event.target as HTMLInputElement).files[0];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      this.vehicleForm.get('vehicleimg').setErrors({ maxSize: true });
+      this.toastr.error("please select size less than 5 mb")
+      return;
+    }
+
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      this.vehicleForm.get('vehicleimg').setErrors({ invalidType: true });
+      this.toastr.error("please select jpg png jpeg format")
+      return;
+    }
     this.vehicleForm.patchValue({
       vehicleimg: file,
     });

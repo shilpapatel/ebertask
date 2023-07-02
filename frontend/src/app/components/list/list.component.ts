@@ -121,19 +121,18 @@ export class ListComponent {
     this.onSearch();
   }
   ngOnInit(): void {
-    this.countryService.getCountries().subscribe((countries) => {
-      this.countries = countries;
-      // console.log(this.countries);
-      this.countries.forEach((country:any) => { 
-        if (country.idd.suffixes) {
-          const countrycode = country.idd.root + country.idd.suffixes[0]
-          // console.log( country.idd.suffixes[0]);
-          this.callingCodes.push(countrycode);
+    // this.countryService.getCountries().subscribe((countries) => {
+    //   this.countries = countries;
+    //   // console.log(this.countries);
+    //   this.countries.forEach((country:any) => { 
+    //     if (country.idd.suffixes) {
+    //       const countrycode = country.idd.root + country.idd.suffixes[0]
+    //       // console.log( country.idd.suffixes[0]);
+    //       this.callingCodes.push(countrycode);
           
-        }
-      });
-  
-    });
+    //     }
+    //   });
+    // });
     this.subscribeToListenDriverTypeUpdate()
     this.subscribeToListenDriverUpdate()
     this.getDriver();
@@ -189,7 +188,18 @@ export class ListComponent {
   }
   onCountrySelected() {
     const selectedCountry = this.driversForm.value.country_id;
+    console.log(selectedCountry);
+    // const selectedCountryName = this.countries.filter(country => country._id === selectedCountry);
+    const selectedCountryName = this.countriesrcvd.find(country => country._id === selectedCountry);
+    console.log(selectedCountryName.code);
+    if (selectedCountryName) {
+      this.driversForm.patchValue({
+        code: selectedCountryName.code
+      });
+    }
      this.selectedcountry = this.citiesrcvd.filter(city => city.country_id === selectedCountry);
+     console.log(this.selectedcountry);
+     
     // this.selectedcountry = this.citiesrcvd.map(country => country.city === selectedCountry);
   }
   onAddBtnDriver() {

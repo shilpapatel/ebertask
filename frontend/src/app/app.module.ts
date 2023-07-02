@@ -17,6 +17,7 @@ import {UsersService} from './shared/users.service';
 import {VehiclepricingService} from './shared/vehiclepricing.service';
 import { AdminpanelComponent } from './components/adminpanel/adminpanel.component';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { NgxSpinnerModule } from 'ngx-spinner';
 import { DatePipe } from '@angular/common';
 
 import { AuthGuard } from './auth/auth.guard';
@@ -65,7 +66,8 @@ import { MatMenuModule } from '@angular/material/menu';
     ToastrModule.forRoot(),
     NgxPaginationModule,AdminpanelModule,
     MatIconModule,
-    MatMenuModule
+    MatMenuModule,
+    NgxSpinnerModule
     
     
   ],

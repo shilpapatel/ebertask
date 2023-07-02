@@ -11,6 +11,7 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const fileName = file.originalname.toLowerCase().split(' ').join('-')
+    req.body.vehicleimg = fileName
     cb(null, fileName)
   },
 })
@@ -59,27 +60,18 @@ let VehicleType = require('../model/vehicletype.model')
 router.post('/create-vehicletype', upload.single('vehicleimg'), async (req, res, next) => {
   try {
     const url = req.protocol + '://' + req.get('host');
+    let vehicleUrl = req.file ? url + '/public/' + req.body.vehicleimg : url + '/public/'+  'car3.jpg';
     const vehicletype = new VehicleType({
       _id: new mongoose.Types.ObjectId(),
       vehicletype: req.body.vehicletype,
-      vehicleimg: url + '/public/' + req.file.filename,
+      vehicleimg: vehicleUrl,
     });
     const VehicleTypCreated = await vehicletype.save();
     res.status(201).json({
       message: 'Vehicle Type successfully!',
       VehicleTypCreated,
-      // : {
-      //     _id: result._id,
-      //     vehicletype: result.vehicletype,
-      //     vehicleimg: result.vehicleimg,
-      // },
     });
   } catch (error) {
-    // if (error.keyPattern.vehicleimg) {
-    //   return res.status(500).send({
-    //     success: false,
-    //     message: "allowed jpg"
-    //   })
       console.log(error);
       res.status(500).json({
           error: error,

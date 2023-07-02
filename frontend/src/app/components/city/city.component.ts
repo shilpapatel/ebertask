@@ -4,6 +4,8 @@ import { CityService } from 'src/app/shared/city.service';
 import { CountryService } from 'src/app/shared/country.service';
 declare var google: any;
 import { ToastrService } from 'ngx-toastr';
+import { NgxSpinnerService } from 'ngx-spinner';
+
 
 @Component({
   selector: 'app-city',
@@ -16,7 +18,7 @@ export class CityComponent implements OnInit, AfterViewInit {
   isShowEditBtn = false
   editingCityId: string;
   countries;
-  countryName:any;
+  countryName: any;
   selectedCountry: string;
   selectedCountryNm: string;
   selectedCity: string;
@@ -34,7 +36,7 @@ export class CityComponent implements OnInit, AfterViewInit {
   countriesNm: any;
   countrycode: any;
   marker: any;
-  markerselectedlocation:any;
+  markerselectedlocation: any;
   mapPolygon: any;
   isDrawingMode: boolean = false;
   citydatabasedata: any;
@@ -44,7 +46,7 @@ export class CityComponent implements OnInit, AfterViewInit {
   tableSizes: any = [3, 6, 9, 12];
   p: number = 1;
   pageSize: any;
-  isbuttonshow : boolean = true; 
+  isbuttonshow: boolean = true;
 
 
   // @ViewChild('mapContainer', { static: true }) mapContainer: ElementRef;
@@ -60,19 +62,22 @@ export class CityComponent implements OnInit, AfterViewInit {
   isPolygonDrawn: boolean = false;
   cityForm: any;
   searchQuery: string = '';
-  constructor(private fb: FormBuilder, private cityService: CityService, private countryService: CountryService, private toastr: ToastrService) {
+  constructor(private spinner: NgxSpinnerService, private fb: FormBuilder, private cityService: CityService, private countryService: CountryService, private toastr: ToastrService) {
 
   }
   getCountry() {
     this.countryService.getCountry(this.searchQuery).subscribe((res) => {
       this.countriesrcvd = res['countrydata'];
       console.log(this.countriesrcvd);
-      
+
     });
   }
 
   ngOnInit() {
-
+    this.spinner.show();
+    setTimeout(() => {
+      this.spinner.hide();
+    }, 2000);
     this.getCountry();
     this.getCity();
     this.initMap();
@@ -84,7 +89,7 @@ export class CityComponent implements OnInit, AfterViewInit {
     });
   }
   ngAfterViewInit() {
-      // this.initAutocomplete();
+    // this.initAutocomplete();
   }
   onsubmitCityForm(form: NgForm) {
     if (this.isupdated) {
@@ -101,13 +106,13 @@ export class CityComponent implements OnInit, AfterViewInit {
           city: this.enteredLocation,
           coordinates: coordinates
         };
-        console.log(updatedCity,"updated city");
-        
+        console.log(updatedCity, "updated city");
+
 
         this.cityService.updateCity(this.editingCityId, updatedCity).subscribe(
-          (res) => {  
+          (res) => {
             console.log(res);
-            
+
             const index = this.citiesrcvd.findIndex(city => city._id === this.editingCityId);
             if (index !== -1) {
               this.citiesrcvd[index] = res.citydata;
@@ -135,7 +140,7 @@ export class CityComponent implements OnInit, AfterViewInit {
         }));
 
 
-        this.citydata.country_id =  this.selectedCountry;
+        this.citydata.country_id = this.selectedCountry;
         this.citydata.city = this.enteredLocation;
         this.citydata.coordinates = coordinates
         console.log(this.citydata.country_id);
@@ -164,42 +169,74 @@ export class CityComponent implements OnInit, AfterViewInit {
   }
 
   onCountrySelected() {
-    console.log(this.selectedCountry,"idddd");
-    this.isbuttonshow = false; 
+    console.log(this.selectedCountry, "idddd");
+    this.isbuttonshow = false;
 
     const citiesInCountry = this.citiesrcvd.filter(city => city.country_id === this.selectedCountry);
     console.log(citiesInCountry);
-    
+
     this.countriesrcvd.map((country: any) => {
       if (country._id === this.selectedCountry) {
         this.countryName = country.country
-        console.log(this.countryName);
-        
+        // console.log(this.countryName);
+
       }
     })
+
+    const selectedCountryData = this.countriesrcvd.find(country => country.country === this.countryName);
+      console.log(selectedCountryData);
+
+      this.countryname = selectedCountryData ? selectedCountryData.country : '';
+      this.enteredLocation = '';
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ address: this.countryName }, (results, status) => {
+        if (status === google.maps.GeocoderStatus.OK && results.length > 0) {
+          const latitude = results[0].geometry.this.countryName.lat();
+          const longitude = results[0].geometry.this.countryName.lng();
+      
+          // Do something with the coordinates
+          console.log('Latitude:', latitude);
+          console.log('Longitude:', longitude);
+        } else {
+          console.error('Geocode was not successful for the following reason:', status);
+        }
+      });
+    // if (this.countryName) {
+    //   const countryCoordinates = this.countryName.coordinates;
+    //   console.log(countryCoordinates);
+      
+    //   const countryCenter = countryCoordinates[Math.floor(countryCoordinates.length / 2)]; // Assuming the center coordinate is at index Math.floor(countryCoordinates.length / 2)
+    //   console.log(countryCenter);
+    //   // Set the map center to the selected country's location
+    //   if (countryCenter) {
+    //     const centerLocation = {
+    //       lat: countryCenter.lat,
+    //       lng: countryCenter.lng
+    //     };
+    //     this.map.setCenter(centerLocation);
+    //   }
+    // }
+
     
-    const selectedCountryData = this.countriesrcvd.find(country => country.country ===  this.countryName);
-    this.countryname = selectedCountryData ? selectedCountryData.country : '';
-    this.enteredLocation = ''; 
-    this.displayCitiesOnMap(citiesInCountry);
-    
+
     if (this.marker) {
       this.marker.setMap(null);
       this.marker = null;
     }
-  
+
     if (this.markerselectedlocation) {
       this.markerselectedlocation.setMap(null);
       this.markerselectedlocation = null;
     }
-  
+
     if (this.polygon) {
       this.polygon.setMap(null);
       this.polygon = null;
     }
-    
-    
-     this.initAutocomplete();
+    // this.initMap();
+    this.displayCitiesOnMap(citiesInCountry);
+    this.initAutocomplete();
+
   }
 
   displayCitiesOnMap(cities: any[]) {
@@ -212,7 +249,7 @@ export class CityComponent implements OnInit, AfterViewInit {
       this.marker.setMap(null);
       this.marker = null;
     }
-  
+
     // Iterate over the cities and display their polygons
     for (const city of cities) {
       if (city.coordinates && city.coordinates.length > 0) {
@@ -223,9 +260,9 @@ export class CityComponent implements OnInit, AfterViewInit {
           draggable: false,
           map: this.map,
         });
-  
+
         // Add event listeners or customizations for the polygon if needed
-  
+
         // Add the polygon to the map
         cityPolygon.setMap(this.map);
       }
@@ -343,10 +380,10 @@ export class CityComponent implements OnInit, AfterViewInit {
           map: this.map,
           title: 'Selected Location'
         });
-        
+
         // if (this.marker) {
         //   this.marker.setPosition(place.geometry.location);
-           this.map.setCenter(place.geometry.location);
+        this.map.setCenter(place.geometry.location);
         // }
       }
     });
@@ -354,7 +391,7 @@ export class CityComponent implements OnInit, AfterViewInit {
     this.cityService.getCountriesName(this.countryname).subscribe((res) => {
       this.countriesNm = res;
       console.log(this.countriesNm);
-      
+
       const selectedCountryName = this.countriesNm.find(country => country.country === this.selectedCountryNm);
       console.log(selectedCountryName);
       const countrycode = selectedCountryName ? selectedCountryName.cca2 : '';
@@ -421,7 +458,7 @@ export class CityComponent implements OnInit, AfterViewInit {
 
     this.selectedCountry = cities.country_id;
     this.enteredLocation = cities.city;
-    console.log( this.selectedCountry,"sdfgjhknbfv");
+    console.log(this.selectedCountry, "sdfgjhknbfv");
     console.log(this.enteredLocation);
 
     this.editingCityId = cities._id;
@@ -470,60 +507,60 @@ export class CityComponent implements OnInit, AfterViewInit {
           title: 'City Location'
         });
 
-      //  this.markerselectedlocation.setMap(null);
+        //  this.markerselectedlocation.setMap(null);
         this.map.setCenter(location);
       }
     });
-      }
+  }
 
-      // updateMap(coordinates: any[]): void {
-      //   const polygonPath = coordinates.map((coordinate: any) => ({
-      //     lat: coordinate.lat,
-      //     lng: coordinate.lng
-      //   }));
+  // updateMap(coordinates: any[]): void {
+  //   const polygonPath = coordinates.map((coordinate: any) => ({
+  //     lat: coordinate.lat,
+  //     lng: coordinate.lng
+  //   }));
 
-      //   // Assuming you have a Google Maps instance available as 'map'
-      //   const polygon = new google.maps.Polygon({
-      //     paths: polygonPath,
-      //     strokeColor: '#000000',
-      //     strokeOpacity: 0.8,
-      //     strokeWeight: 2,
-      //     fillColor: '#000000',
-      //     fillOpacity: 0.35,
-      //     editable: true,
-      //     draggable: true
+  //   // Assuming you have a Google Maps instance available as 'map'
+  //   const polygon = new google.maps.Polygon({
+  //     paths: polygonPath,
+  //     strokeColor: '#000000',
+  //     strokeOpacity: 0.8,
+  //     strokeWeight: 2,
+  //     fillColor: '#000000',
+  //     fillOpacity: 0.35,
+  //     editable: true,
+  //     draggable: true
 
-      //   });
-      //   polygon.setMap(this.map);
+  //   });
+  //   polygon.setMap(this.map);
 
-      //   const marker = new google.maps.Marker({
-      //     position: polygonPath[0],
-      //     map: this.map,
-      //     title: 'City Location'
-      //   });
+  //   const marker = new google.maps.Marker({
+  //     position: polygonPath[0],
+  //     map: this.map,
+  //     title: 'City Location'
+  //   });
 
-      //   this.map.setCenter(polygonPath[0]);
-      //   this.drawingManager.setMap(this.map);
-      // }
+  //   this.map.setCenter(polygonPath[0]);
+  //   this.drawingManager.setMap(this.map);
+  // }
 
 
-      onPageChange(event: any): void {
-        this.page = event;
-        this.getCity();
-      }
+  onPageChange(event: any): void {
+    this.page = event;
+    this.getCity();
+  }
 
-      onPageSizeChange(event: any): void {
-        this.tableSize = event.target.value;
-        this.page = 1;
-        this.getCity();
-      }
-      onCancelBtn(form: NgForm) {
-        this.isShow = !this.isShow;
-        form.reset();
-        this.polygon.setMap(null);
-        // this.editingVehiclePricing = null;
-        this.isShowAddBtn = false;
-        this.isShowEditBtn = false;
-      }
+  onPageSizeChange(event: any): void {
+    this.tableSize = event.target.value;
+    this.page = 1;
+    this.getCity();
+  }
+  onCancelBtn(form: NgForm) {
+    this.isShow = !this.isShow;
+    form.reset();
+    this.polygon.setMap(null);
+    // this.editingVehiclePricing = null;
+    this.isShowAddBtn = false;
+    this.isShowEditBtn = false;
+  }
 
-    }
+}

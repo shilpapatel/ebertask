@@ -59,15 +59,40 @@
                         <div [hidden]="!driversForm.get('email')?.errors['minlength']" class="text-danger"
                             [ngStyle]="{'margin-left': '100px'}">** Invalid Email id **</div>
                     </div>
+                    <div class="form-group row m-2">
+                        <label for="countrymenu" class="col-sm-2 col-form-label" ml-5>Country</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" formControlName="country_id" id="countrymenu"
+                                (change)="onCountrySelected()">
+                                <option value="" disabled selected>Select Country</option>
+                                <option *ngFor="let countrydata of countriesrcvd" [value]="countrydata._id">
+                                    {{countrydata.country}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row m-2">
+                        <label for="citymenu" class="col-sm-2 col-form-label" ml-5>City</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" formControlName="city_id" id="citymenu">
+                                <option value="" disabled selected>Select City</option>
+                                <option *ngFor="let citydata of selectedcountry" [value]="citydata._id">
+                                    {{citydata.city}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="form-group row m-3">
                         <label for="phone" class="col-sm-2 col-form-label">Phone</label>
                         <div class="col-sm-10">
                             <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <select class="form-control input-group-text" formControlName="code" name="code">
+                                <div class="input-group-prepend col-3">
+                                    <input type="text" class="form-control input-group-text" formControlName="code" id="code" placeholder="Code" readonly>
+                                    <!-- <select class="form-control input-group-text" formControlName="code" name="code">
                                         <option value="" disabled selected>Code</option>
                                         <option *ngFor="let code of callingCodes" [value]="code">{{ code }}</option>
-                                    </select>
+                                    </select> -->
                                 </div>
                                 <input type="tel" class="form-control" id="phone" name="phone"
                                     placeholder="Enter Phone No" formControlName="phone" pattern="[0-9]+" minlength="10"
@@ -107,29 +132,7 @@
                         </div>
                     </div> -->
                     
-                    <div class="form-group row m-2">
-                        <label for="countrymenu" class="col-sm-2 col-form-label" ml-5>Country</label>
-                        <div class="col-sm-10">
-                            <select class="form-control" formControlName="country_id" id="countrymenu"
-                                (change)="onCountrySelected()">
-                                <option value="" disabled selected>Select Country</option>
-                                <option *ngFor="let countrydata of countriesrcvd" [value]="countrydata._id">
-                                    {{countrydata.country}}
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group row m-2">
-                        <label for="citymenu" class="col-sm-2 col-form-label" ml-5>City</label>
-                        <div class="col-sm-10">
-                            <select class="form-control" formControlName="city_id" id="citymenu">
-                                <option value="" disabled selected>Select City</option>
-                                <option *ngFor="let citydata of selectedcountry" [value]="citydata._id">
-                                    {{citydata.city}}
-                                </option>
-                            </select>
-                        </div>
-                    </div>
+                    
 
                     <!-- <div class="form-group row m-3"> -->
                         <div class="d-flex justify-content-center">

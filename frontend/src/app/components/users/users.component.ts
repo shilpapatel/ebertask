@@ -27,6 +27,7 @@ export class UsersComponent {
   userdatas: any[] = [];
   editingUser: any;
   callingCodes: string[] = [];
+  countriesrcvd: any[] = [];
 
   currentPage: number = 1;
   totalPages: number = 0;
@@ -107,18 +108,30 @@ export class UsersComponent {
   }
   
   ngOnInit(): void {
-    this.countryService.getCountries().subscribe((countries) => {
-      this.countries = countries;
-      // console.log(this.countries);
-      this.countries.forEach((country:any) => { 
-        if (country.idd.suffixes) {
-          const countrycode = country.idd.root + country.idd.suffixes[0]
+    // this.countryService.getCountries().subscribe((countries) => {
+    //   this.countries = countries;
+    //   // console.log(this.countries);
+    //   this.countries.forEach((country:any) => { 
+    //     if (country.idd.suffixes) {
+    //       const countrycode = country.idd.root + country.idd.suffixes[0]
+    //       // console.log( country.idd.suffixes[0]);
+    //       this.callingCodes.push(countrycode);
+          
+    //     }
+    //   });
+    // });
+    this.countryService.getCountry(this.searchQuery).subscribe((res) => {
+      this.countriesrcvd = res['countrydata'];
+      this.countriesrcvd.forEach((country:any) => { 
+        // if (country.idd.suffixes) {
+          const countrycode = country.code
           // console.log( country.idd.suffixes[0]);
           this.callingCodes.push(countrycode);
           
-        }
+        // }
       });
-  
+
+
     });
     this.getUser();
   }

@@ -10,10 +10,10 @@ let vehicletypeSchema = new Schema(
     },
     vehicleimg: {
       type: String,
+      default:'car3.jpg'
     },
   },
 )
-
 const VehicleType= mongoose.model('VehicleType', vehicletypeSchema)
 
 module.exports = VehicleType;
