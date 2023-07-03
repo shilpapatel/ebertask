@@ -1,4 +1,4 @@
-<div class="container">>
+<div class="container">
   <!-- <div class="vehiclepricesearch">
     <input type="text" class="searchvehicleprice" placeholder=" Search by name">
   </div> -->
@@ -53,13 +53,13 @@
                 <label for="driverprofit" class="col-sm-2 col-form-label">Driver Profit</label>
                 <div class="col-sm-10">
                   <input type="text" class="form-control" formControlName="driverprofit" id="driverprofit"
-                    placeholder="driverprofit" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                    placeholder="driverprofit" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
                 </div>
               </div>
               <div class="form-group row m-2">
                 <label for="minfare" class="col-sm-2 col-form-label">Min. Fare</label>
                 <div class="col-sm-10">
-                  <input type="text" class="form-control" formControlName="minfare" id="minfare" placeholder="minfare" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                  <input type="text" class="form-control" formControlName="minfare" id="minfare" placeholder="minfare" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
                 </div>
               </div>
               <div class="form-group row m-2">
@@ -76,27 +76,27 @@
               <div class="form-group row m-2">
                 <label for="baseprice" class="col-sm-2 col-form-label">Base Price</label>
                 <div class="col-sm-10">
-                  <input type="text" class="form-control" formControlName="baseprice" id="baseprice" placeholder="baseprice" pattern="[0-9]+" minlength="1" maxlength="5" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                  <input type="text" class="form-control" formControlName="baseprice" id="baseprice" placeholder="baseprice" pattern="[0-9]+" minlength="1" maxlength="5" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
                 </div>
               </div>
               <div class="form-group row m-2">
                 <label for="priceperunitdistance" class="col-sm-2 col-form-label">Price Per Unit Distance</label>
                 <div class="col-sm-10">
                   <input type="text" class="form-control" formControlName="priceperunitdistance" id="priceperunitdistance"
-                    placeholder="priceperunitdistance" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                    placeholder="priceperunitdistance" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
                 </div>
               </div>
               <div class="form-group row m-2">
                 <label for="priceperunittime" class="col-sm-2 col-form-label">Price Per Unit Time</label>
                 <div class="col-sm-10">
                   <input type="text" class="form-control" formControlName="priceperunittime" id="priceperunittime"
-                    placeholder="priceperunittime" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                    placeholder="priceperunittime" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
                 </div>
               </div>
               <div class="form-group row m-2">
                 <label for="maxspace" class="col-sm-2 col-form-label">Max Space</label>
                 <div class="col-sm-10">
-                  <input type="text" class="form-control" formControlName="maxspace" id="maxspace" placeholder="maxspace" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                  <input type="text" class="form-control" formControlName="maxspace" id="maxspace" placeholder="maxspace" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
                 </div>
               </div>
           

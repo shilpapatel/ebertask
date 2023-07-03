@@ -56,6 +56,7 @@ export class CreaterideComponent {
   stops: any[] = [];
   totalDistanceInKm: any;
   totalTimeInHr: any;
+  totalTimeInMin: any;
   vehicleTypesService: any[] = [];
   showEstimatedPrices: boolean = false;
   estimatePrice:any;
@@ -319,11 +320,14 @@ export class CreaterideComponent {
             });
 
             this.totalDistanceInKm = (totalDistance / 1000).toFixed(2); // Convert meters to kilometers
-            this.totalTimeInHr = (totalTime / 3600).toFixed(2); // Convert seconds to hours
-
+            // this.totalTimeInHr = (totalTime / 3600).toFixed(2); // Convert seconds to hours
+            this.totalTimeInHr = Math.floor(totalTime / 3600); // Convert seconds to hours
+            this.totalTimeInMin = (Math.round(totalTime % 3600)/60).toFixed(0); 
 
             this.totalDistanceInput.value = `${this.totalDistanceInKm} km`;
-            this.totalTimeInput.value = `${this.totalTimeInHr} hr`;
+            this.totalTimeInput.value = `${this.totalTimeInHr} hr  ${this.totalTimeInMin} minutes`;
+            console.log(this.totalTimeInput.value);
+            
 
             directionsDisplay.setDirections(result);
             const numStops = legs.length - 1;

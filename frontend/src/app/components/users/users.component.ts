@@ -1,8 +1,8 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { HttpClient, HttpEvent } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 // import { Stripe } from '@stripe/stripe-js';
-// import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 
 // import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -35,6 +35,24 @@ export class UsersComponent {
   searchQuery: string = '';
   sortOrder: string = 'asc'; 
   sortField: string = 'name';
+
+
+  stripe: any;
+  data:any
+  @Output() dialogClosed = new EventEmitter<string>();
+  form: any;
+  messageContainer: any;
+  elements: any;
+  paymentElement: any;
+  handleError: any;
+  AddCardUser: any = false;
+  addcard: any = false;
+  cardList: any;
+  id: any;
+  cardlist: any = true;
+  result: any;
+  defaultcardid: any;
+  customersdata: any;
 
   @ViewChild('cardModal') cardModal!: ElementRef;
 
@@ -200,6 +218,8 @@ export class UsersComponent {
         this.userdatas.push(res['userCreated']);
         this.toastr.success('User Added ')
          this.getUser();
+
+         
         // this.router.navigate(['users']);
       })
     }
@@ -230,17 +250,6 @@ onEditUser(user: any, event: Event) {
   }
 }
 
-// async onDeleteUser(userId: string) {
-//   if (confirm('Are you sure you want to delete this user?')) {
-//     try {
-//       const res = await this.usersservice.deleteUser(userId).toPromise();
-//       console.log(res);
-//       this.getUser();
-//     } catch (err) {
-//       console.log(err);
-//     }
-//   }
-// }
 
 onDeleteUser(userId: string, event: Event) {
   event.preventDefault();
@@ -256,6 +265,274 @@ onDeleteUser(userId: string, event: Event) {
     );
   }
 }
+
+
+// handleError(error: any) {
+//   // Handle the error according to your application's needs
+//   console.error('An error occurred:', error);
+//   // Perform any additional error handling actions
+// }
+
+  onCardClick(userId: string){
+    this.id = userId
+    // this.AddCardDetails(this.id) 
+    // this.AddCard(this.id)
+   }
+
+  async AddCard( id:any) {
+    console.log(id);
+    
+    this.cardlist = false;
+    this.stripe = await loadStripe("pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou");
+    setTimeout(() => {  
+    this.elements = this.stripe.elements();
+      console.log(this.elements);
+      
+      this.paymentElement = this.elements.create("card")
+      this.paymentElement.mount("#card-element");
+    },1000)
+    this.AddCardUser = true;
+    this.addcard = true;
+  }
+
+   async AddCardDetails(userId: any) {
+
+    console.log(userId);
+
+    try {
+      setTimeout(() => { 
+      if (!this.elements || !this.paymentElement) {
+        throw new Error("Elements object is not initialized.");
+      }
+  
+      const submitResult = this.elements.submit();
+      const { error: submitError } = submitResult;
+  
+      if (submitError) {
+        console.log(submitError);
+        // this.handleError(submitError);
+        return;
+      }
+    },1000)
+    // Create the SetupIntent and obtain clientSecret
+    const response = await fetch(`http://localhost:5000/api/create-intent/${this.id}`, {
+        method: 'POST',
+      });
+      const { client_secret: clientSecret } = await response.json();
+
+      
+    const { error } = await this.stripe.confirmSetup({
+      elements: this.elements,
+      clientSecret,
+      confirmParams: {
+        return_url: "http://localhost:4200/api/users",
+      },
+    });
+
+    if (error) {
+      console.log(error);
+      
+      //  this.handleError(error);
+    } else {
+      console.log("elsee from comfornmmm setup");
+
+      // this.isAddCard = false
+      this.toastr.success("Card added successfully!");
+      this.AddCardUser = false;
+      this.cardlist = true;
+    }
+  } catch (error) {
+    console.log(error);
+    // this.handleError(error);
+  }
+  }
+  // async getcard() {
+  //   if (this.data.customerid.customerid != null) {
+  //     if (this.cardlist) {
+  //       this.http
+  //         .get(`http://localhost:5000/userslist/get-customer/${this.data.id}`)
+  //         .subscribe(
+  //           (data) => {
+  //             console.log(data);
+  //             this.customersdata = data;
+  //             this.defaultcardid = this.customersdata.invoice_settings.default_payment_method;
+  //           },
+  //           (error) => {
+  //             console.error("Error:", error);
+  //             // Handle the error
+  //           }
+  //         );
+  //       this.http
+  //         .get(`http://localhost:5000/userslist/get-card/${this.id}`)
+  //         .subscribe(
+  //           (data) => {
+  //             console.log(data);
+  //             // Handle the retrieved data
+  //             this.result = data;
+  //             this.cardList = this.result.data;
+  //             console.log(this.cardList);
+  //           },
+  //           (error) => {
+  //             console.error("Error:", error);
+  //             // Handle the error
+  //           }
+  //         );
+  //     }
+  //   }
+  // }
+ 
+  // async DeleteCard(val: any) {
+  //   const deletecard = confirm("Are You Want To Delete Card????");
+  //   if (deletecard) {
+  //     this.http
+  //       .get(`http://localhost:5000/userslist/delete-card/${val}`)
+  //       .subscribe(
+  //         (data) => {
+  //           // Handle the retrieved data
+  //           this.getcard();
+  //           this.toastr.error("Deleted Succesfully!!", "");
+  //         },
+  //         (error) => {
+  //           console.error("Error:", error);
+  //           // Handle the error
+  //         }
+  //       );
+  //   }
+  // }
+  // async SetDefault(val: any, cardid: any) {
+  //   console.log(val);
+  //   console.log(cardid);
+  //   this.http
+  //     .patch(`http://localhost:5000/userslist/default-card/${val}`, { cardid })
+  //     .subscribe(
+  //       (data) => {
+  //         console.log(data);
+  //         // Handle the retrieved data
+  //         this.getcard();
+  //       },
+  //       (error) => {
+  //         console.error("Error:", error);
+  //         // Handle the error
+  //       }
+  //     );
+  // }
+}
+
+
+
+// const { error, setupIntent } = await this.stripe.confirmCardSetup(clientSecret, {
+//   payment_method: {
+//     card: this.paymentElement,
+//   },
+// });
+
+// if (error) {
+//   console.log(error);
+//   return;
+// }
+
+// if (setupIntent.status === "succeeded") {
+//   console.log("Card added successfully!");
+//   this.AddCardUser = false;
+//   this.cardlist = true;
+// } else {
+//   console.log("Card setup failed.");
+// }
+// } catch (error) {
+// console.log(error);
+// }
+
+
+    //  // Create a token for the card
+    //  const result = await this.stripe.createToken(this.paymentElement);
+    //  if (result.error) {
+    //    console.log(result.error.message);
+    //    // Handle error
+    //  } else {
+    //    const token = result.token.id;
+    //    // Pass the token to your backend API along with the user ID
+    //    // await this.usersservice.createCardToken(id, token).subscribe(
+    //    //   (response) => {
+    //    //     console.log(response);
+    //    //     // Handle success
+    //    //   },
+    //    //   (error) => {
+    //    //     console.log(error);
+    //    //     // Handle error
+    //    //   }
+    //    // );
+    //  }
+
+
+// async onAddCard() {
+//   try {
+//     const response = await fetch('http://localhost:5000/api/payment-intent', {
+//       method: 'POST',
+//     });
+//     const { clientSecret } = await response.json();
+
+//     // Load Stripe
+//     const stripe = await loadStripe('pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou');
+//     const elements = stripe.elements({
+//       clientSecret: clientSecret, // Use the actual client secret
+//     });
+//     const paymentElement = elements.create('card');
+
+//     // Mount the payment element to the DOM
+//     await paymentElement.mount('#payment-element');
+
+//     const result = await this.saveCard(stripe, elements); // Pass 'stripe' and 'elements' as arguments
+
+//     if (result.success) {
+//       console.log('Card added:', result.card);
+//     } else {
+//       // Failed to add the card
+//       console.error(result.error);
+//     }
+
+//     // Rest of your code...
+//   } catch (error) {
+//     console.error(error);
+//   }
+// }
+
+// async saveCard(stripe, elements) { // Accept 'stripe' and 'elements' as arguments
+//   try {
+//     const cardElement = elements.getElement('card');
+//     if (!cardElement) {
+//       throw new Error('Card element not found');
+//     }
+//     // Create a payment method using the card element
+//     const { paymentMethod } = await stripe.createPaymentMethod({
+//       type: 'card',
+//       card: cardElement,
+//     });
+
+//     // Send the payment method to your backend for saving
+//     const response: any = await this.http.post('http://localhost:5000/api/cards', { paymentMethod: paymentMethod }).toPromise();
+//     return {
+//       success: true,
+//       card: response.data,
+//     };
+//   } catch (error) {
+//     return {
+//       success: false,
+//       error: error.message,
+//     };
+//   }
+// }
+
+
+//   async fetchCards() {
+//     try {
+//       // Fetch the list of saved cards from your backend
+//       const response:any = await this.http.get('http://localhost:5000/api/cards').toPromise();
+//       this.cards = response.data;
+//     } catch (error) {
+//       console.error(error);
+//     }
+//   }
+
 // async onCardClick(){
 //     var stripeCardContainer = document.getElementById('stripeCardContainer');
 //     const stripe = await loadStripe('pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou');
@@ -269,27 +546,71 @@ onDeleteUser(userId: string, event: Event) {
 //     this.cardModal.nativeElement.style.display = 'block';
  
 // }
-cards: any[] = []; // Array to store the card details
-onCardClick(){
-// this.onAddCard()
-// this.onDeleteCard()
-}
 
 
+  // async onAddCard() {
 
-  async onAddCard() {
-  const stripe = (window as any).Stripe('pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou');
-  // const elements = stripe.elements();
-  const options = {
-    mode: 'setup',
-    currency: 'usd',
-    appearance: {/*...*/},
-  };
-  const elements = stripe.elements(options);
+  //   try {
+  //     const response = await fetch('/api/payment-intent', {
+  //       method: 'POST',
+  //     });
+  //     const { clientSecret } = await response.json();
   
-  // Create and mount the Payment Element
-  const paymentElement = elements.create('payment');
-  paymentElement.mount('#payment-element');
+  //     // Load Stripe
+  //     const stripe = await loadStripe('pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou');
+  //     const elements = stripe.elements({
+  //       clientSecret: clientSecret, // Use the actual client secret
+  //     });
+  //     const paymentElement = elements.create('payment');
+  //     paymentElement.mount('#payment-element');
+
+  //     const result = await this.saveCard(paymentElement);
+  
+  //     if (result.success) {
+
+  //       console.log('Card added:', result.card);
+  //     } else {
+  //       // Failed to add the card
+  //       console.error(result.error);
+  //     }
+  
+  //     // Rest of your code...
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  
+  //   // }
+  // }
+  
+  // async saveCard(paymentMethod) {
+  //   try {
+  //     // Send the payment method to your backend for saving
+  //     const response: any = await this.http.post('/api/cards', { paymentMethod: paymentMethod }).toPromise();
+  //     return {
+  //       success: true,
+  //       card: response.data,
+  //     };
+  //   } catch (error) {
+  //     return {
+  //       success: false,
+  //       error: error.message,
+  //     };
+  //   }
+  // }
+
+  // async onAddCard() {
+  // const stripe = (window as any).Stripe('pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou');
+  // // const elements = stripe.elements();
+  // const options = {
+  //   mode: 'setup',
+  //   currency: 'usd',
+  //   appearance: {/*...*/},
+  // };
+  // const elements = stripe.elements(options);
+  
+  // // Create and mount the Payment Element
+  // const paymentElement = elements.create('payment');
+  // paymentElement.mount('#payment-element');
     
     // const stripeCardContainer = document.getElementById('stripeCardContainer');
     // stripeCardContainer.innerHTML = '';
@@ -312,20 +633,21 @@ onCardClick(){
     // });
 
 
-  }
+  // }
 
-  onDeleteCard(card: any) {
-    // Delete the card from the array
-    const index = this.cards.indexOf(card);
-    if (index !== -1) {
-      this.cards.splice(index, 1);
-    }
-  }
+  // onDeleteCard(card: any) {
+  //   // Delete the card from the array
+  //   const index = this.cards.indexOf(card);
+  //   if (index !== -1) {
+  //     this.cards.splice(index, 1);
+  //   }
+  // }
 
 
-  
 
-}
+
+
+
 // prevPage() {
 //   if (this.currentPage > 1) {
 //     this.currentPage--;
