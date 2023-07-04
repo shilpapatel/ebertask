@@ -9,8 +9,8 @@ const configureSocket = (io) => {
   io.on('connection', (socket) => {
     console.log('New client connected');
 
-    socket.on('driverStatusUpdate', async (data) => {
-      console.log(data);
+    socket.on('updateDriverStatus', async (data) => {
+      // console.log(data);
       try {
         const driverId = data.driverId;
         const updatedStatus = {
@@ -24,21 +24,21 @@ const configureSocket = (io) => {
         }
         const updatedDriver = await result.save(); // Save the updated driver object
 
-      console.log(updatedDriver);
+      // console.log(updatedDriver);
         // console.log(result);
 
-        io.emit('driverUpdate', updatedDriver);
+        io.emit('driverStatusUpdated', updatedDriver);
 
       } catch (err) {
         console.log(err);
-        io.emit('driverStatusUpdateError', { error: err });
+        io.emit('updateDriverStatusError', { error: err });
       }
     });
 
 
     socket.on('updateDriverType', async (data) => {
 
-      console.log(data, "adsfdgfhjkjyhrtgfdasdfghmnbv");
+      // console.log(data, "adsfdgfhjkjyhrtgfdasdfghmnbv");
       try {
         const driverId = data.driverId;
         const updatedVehicleType = {
@@ -55,6 +55,38 @@ const configureSocket = (io) => {
         io.emit('updateDriverTypeError', { error: err });
       }
     });
+
+    // socket.on('updateDriver', async (data) => {
+    //   console.log(data,"dfghjkjhggfggf");
+    //   try {
+    //     const url = socket.request.headers.origin;
+    //     let profileUrl = data.profile ? url + '/public/' + data.profile : url + '/public/'+  'profile1.png';
+    //     const driverId = data.id;
+    //     const updatedDriver = {
+    //       name: data.name,
+    //       email: data.email,
+    //       phone: data.code + data.phone,
+    //       profile: profileUrl,
+    //       country_id: data.country_id,
+    //       city_id: data.city_id,
+    //     };
+    //     const result = await DriverList.findByIdAndUpdate(driverId, updatedDriver, { new: true });
+    //     socket.emit('driverUpdated', result);
+
+    //     // socket.emit(200).json({
+    //     //   message: 'Driver updated successfully!',
+    //     //   driverUpdated: result,
+    //     // });
+    //   } catch (err) {
+    //     console.log(err);
+    //     socket.emit(500).json({
+    //       error: err,
+    //     });
+    //   }
+    // });
+
+
+
 
     socket.on('getDriversWithoutPage', async () => {
       try {
@@ -134,7 +166,7 @@ const configureSocket = (io) => {
         newDriverRide.driverId = null
         newDriverRide.assigned = "pending"
         const driverrideCreated = await newDriverRide.save();
-        console.log(driverrideCreated, "sadfghjklljhgfdszcxvbnm");
+        // console.log(driverrideCreated, "sadfghjklljhgfdszcxvbnm");
         io.emit('driverRideCreated', {
           message: 'DriverRide created successfully!',
           driverrideCreated,
@@ -318,7 +350,7 @@ const configureSocket = (io) => {
     job.start();
 
     socket.on('updatedriverride', async (data) => {
-      console.log(data);
+      // console.log(data);
       try {
         const driverrideId = data.driverrideId;
         const updatedDriverId = {
@@ -328,7 +360,7 @@ const configureSocket = (io) => {
         }
         const result = await CreateRide.findByIdAndUpdate(driverrideId, updatedDriverId, { new: true });
 
-        console.log(result);
+        // console.log(result);
         io.emit('driverrideupdated', result);
 
         // if(data.driverId != null){
@@ -397,8 +429,8 @@ const configureSocket = (io) => {
         };
     
         const result = await CreateRide.findByIdAndUpdate(driverrideId, updatedDriverId, { new: true });
-        console.log(result, "updated result");
-        console.log(result._id, "updated id");
+        // console.log(result, "updated result");
+        // console.log(result._id, "updated id");
     
         if (!result) {
           io.emit('deleteDriverRideError', { message: 'Driver not found' });

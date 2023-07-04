@@ -231,8 +231,8 @@
                             </td>
                             <td>{{driver.phone}}
                             </td>
-                            <td>{{driver.countrydata.country}}</td>
-                            <td>{{driver.citydata.city}}</td>
+                            <td>{{driver.countrydata?.country}}</td>
+                            <td>{{driver.citydata?.city}}</td>
                             <td>{{driver.vehicletypedata?.vehicletype ?
                                 driver.vehicletypedata.vehicletype:driver.type}}
                             </td>
@@ -403,7 +403,6 @@
         </div>
     </form>
 </div> -->
-
 
 
 <!-- <td>

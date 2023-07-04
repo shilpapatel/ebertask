@@ -100,6 +100,42 @@ router.post('/create-intent/:userId', async (req, res) => {
   }
   });
 
+  router.get('/get-card/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await User.findById(userId);
+    if (!user.stripeCustomerId) {
+      return res.status(400).json({ error: 'User does not have a Stripe customer ID' });
+    }
+
+    const customer = await stripe.customers.retrieve(user.stripeCustomerId);
+    console.log(customer,"custtttttttttt");
+    const paymentMethods = await stripe.paymentMethods.list({
+      customer: customer.id,
+      type: 'card',
+    });
+    console.log(paymentMethods,"paymentMethods");
+    res.json(paymentMethods.data );
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to retrieve card details' });
+  }
+});
+
+router.delete('/delete-card/:cardId', async (req, res) => {
+  try {
+    const cardId = req.params.cardId;
+
+    // Delete the card using the Stripe API
+    const deletedCard = await stripe.paymentMethods.detach(cardId);
+
+    res.status(200).json({ message: 'Card deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to delete card' });
+  }
+});
+
 
 
 router.post('/add-user', upload.single('profile'), async (req, res, next) => {
@@ -213,47 +249,6 @@ router.put('/update-user', upload.single('profile'), async (req, res, next) => {
 });
 
 
-
-router.get('/cards/:userId', async (req, res) => {
-  try {
-    const userId = req.params.userId;
-    // Retrieve the user from the database
-    const user = await User.findById(userId);
-
-    // Retrieve the Stripe customer ID associated with the user
-    const customerId = user.stripeCustomerId;
-
-    // Retrieve the list of cards for the customer from Stripe
-    const cards = await stripe.customers.listSources(customerId, { object: 'card' });
-
-    res.status(200).json({ cards: cards.data });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to retrieve user cards' });
-  }
-});
-
-// API endpoint to add a card to a user's account
-router.post('/cards/:userId', async (req, res) => {
-  try {
-    const userId = req.params.userId;
-    const { cardToken } = req.body;
-
-    // Retrieve the user from the database
-    const user = await User.findById(userId);
-
-    // Retrieve the Stripe customer ID associated with the user
-    const customerId = user.stripeCustomerId;
-
-    // Add the card to the customer in Stripe
-    await stripe.customers.createSource(customerId, { source: cardToken });
-
-    res.status(200).json({ message: 'Card added successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to add card' });
-  }
-});
 
 // API endpoint to delete a card from a user's account
 router.delete('/cards/:userId/:cardId', async (req, res) => {

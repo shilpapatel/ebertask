@@ -45,9 +45,11 @@ export class ConfirmridesComponent {
     public listService: ListService, private socketService: SocketService) { }
 
   ngOnInit(): void {
-    this.subscribeToListenDriverUpdate()
     this.getDriversAllData()
     this.getDriverRideData()
+    this.subscribeToListenDriverStatusUpdate()
+    this.subscribeToListenDriverTypeUpdate()
+    // this.onAssignBtnClick(this.selectedRide)
     // this.subscribeToListenDriverRideUpdate()
 
     // this.socketService.getTimeoutDriverRideData().subscribe((timeoutResult: any) => {
@@ -73,19 +75,33 @@ export class ConfirmridesComponent {
     );
 
   }
-  subscribeToListenDriverUpdate() {
-    this.socketService.subscribeToListenDriverUpdate().subscribe(updatedDriver => {
+  subscribeToListenDriverStatusUpdate() {
+    this.socketService.subscribeToListenDriverStatusUpdate().subscribe(updatedDriver => {
       // console.log(updatedDriver);
 
       const index = this.driverdata.findIndex(d => d._id === updatedDriver._id);
       if (index !== -1) {
         this.driverdata[index].status = updatedDriver.status;
-        // console.log(this.driverdata);
-        this.onAssignBtnClick(this.selectedRide)
+        console.log(this.driverdata);
+        this.onAssignBtnClick(this.selectedcreateride)
+        // this.getDriversAllData();
       }
       this.toastr.success('Driver Status Updated');
     });
   }
+
+  subscribeToListenDriverTypeUpdate(){
+    this.socketService.subscribeToListenDriverTypeUpdate().subscribe(updatedDriverType => {
+      console.log(updatedDriverType);
+       const index = this.driverdata.findIndex(d => d._id === updatedDriverType._id);
+       if (index !== -1) {
+         this.driverdata[index].vehicletype_id= updatedDriverType.vehicletype_id;
+         console.log(this.driverdata);
+         this.onAssignBtnClick(this.selectedcreateride)
+         this.toastr.success('Driver VehicleType Updated');
+       }
+     });
+    }
 
   getDriversAllData(): void {
     this.socketService.getDriversWithoutPage().subscribe(
@@ -100,7 +116,6 @@ export class ConfirmridesComponent {
   }
 
   onInfoClick(createride: any) {
- 
     this.selectedcreateride = createride
     // console.log(this.selectedcreateride);
   }
@@ -108,8 +123,8 @@ export class ConfirmridesComponent {
     this.selectedcreateride = createride;
     console.log(this.selectedcreateride);
     this.assignedDriverName = 'Assign Driver';
-    this.selectedcreateride.assigned = "assigning";
-    this.selectedcreateride.created = Date.now()
+    // this.selectedcreateride.assigned = "assigning";
+    // this.selectedcreateride.created = Date.now()
     // console.log(this.selectedcreateride.created);
     
 
@@ -126,6 +141,7 @@ export class ConfirmridesComponent {
 
   onAssignDriver(driver: any) {
     this.selectedDriver = driver;
+    this.selectedcreateride.assigned = "assigning";
     this.socketService.updateDriverRide(this.selectedcreateride._id, this.selectedDriver._id,this.selectedcreateride.assigned,this.selectedcreateride.created);
     
     // this.assignedDriverName = this.selectedDriver.name;
@@ -140,6 +156,7 @@ export class ConfirmridesComponent {
 }
 
  onAssignNearestDriver() {
+  this.selectedcreateride.assigned = "assigning";
   if (this.driverdatafiltered.length > 0) {
     let index = 0;
     const driverCount = this.driverdatafiltered.length;

@@ -98,18 +98,6 @@ router.post('/add-driver', upload.single('profile'), async (req, res, next) => {
   }
 });
 
-// router.get('/get-driverswithoutpage', async (req, res, next) => {
-//   try {
-//     const data = await DriverList.find();
-//     res.status(200).json({
-//       message: 'Drivers retrieved successfully!',
-//       driverlistalldata: data,
-//     });
-//     console.log(data);
-//   } catch (error) {
-//     next(error);
-//   }
-// });
 
 router.get('/get-driverswithoutpage', async (req, res, next) => {
   try {
@@ -207,41 +195,12 @@ router.get('/get-drivers', async (req, res, next) => {
           as: 'vehicletypedata'
         }
       },
-
-      // {
-      //   $addFields: {
-      //     unwoundField: {
-      //       $cond: [
-      //         { $ifNull: ['$vehicletype_id', false] },
-      //         '$vehicletypedata',
-      //         '$type'
-      //       ]
-      //     }
-      //   }
-      // },
-      // {
-      //   $unwind: {
-      //     path: '$unwoundField',
-      //     preserveNullAndEmptyArrays: true
-      //   }
-      // },
       {
         $unwind: {
           path: '$vehicletypedata',
           preserveNullAndEmptyArrays: true
         }
       },
-      // {
-      //   $addFields: {
-      //     type: {
-      //       $cond: [
-      //         { $eq: ['$vehicletype_id', null] },
-      //         '$$REMOVE',
-      //         '$type'
-      //       ]
-      //     }
-      //   }
-      // },
       {
         $match: {
           $or: [
@@ -281,40 +240,6 @@ router.get('/get-drivers', async (req, res, next) => {
   }
 });
 
-// router.get('/get-drivers', async (req, res, next) => {
-//   try {
-//     const page = parseInt(req.query.page) || 1;
-//     const limit = parseInt(req.query.limit) || 3;
-//     const searchQuery = req.query.searchQuery || '';
-//     const sortField = req.query.sortField || 'name'; // Default sort field is 'name'
-//     const sortOrder = req.query.sortOrder || 'asc'; 
-//     let sortOptions = {};
-//     sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
-
-//     const searchRegex = new RegExp(searchQuery, 'i');
-//     const count = await DriverList.countDocuments({$or: [{ name: searchRegex },{ email: searchRegex },{ phone: searchRegex }]});
-//     const totalPages = Math.ceil(count / limit);
-//     const skip = (page - 1) * limit;
-
-//     const data = await DriverList.find({$or: [{ name: searchRegex },{ email: searchRegex },{ phone: searchRegex }]})
-
-//     // .sort({ name: 1 })
-//       .sort(sortOptions)
-//       .skip(skip)
-//       .limit(limit);
-
-//     res.status(200).json({
-//       message: 'Drivers retrieved successfully!',
-//       driverlistdata: data,
-//       totalPages: totalPages,
-//       currentPage: page,
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// });
-
-
 router.delete('/delete-driver/:id', async (req, res, next) => {
   try {
     const driverId = req.params.id;
@@ -331,12 +256,13 @@ router.delete('/delete-driver/:id', async (req, res, next) => {
 router.put('/update-driver', upload.single('profile'), async (req, res, next) => {
   try {
     const url = req.protocol + '://' + req.get('host');
+    let profileUrl = req.file ? url + '/public/' + req.body.profile : url + '/public/'+  'profile1.png';
     const driverId = req.body.id;
     const updatedDriver = {
       name: req.body.name,
       email: req.body.email,
       phone: req.body.code + req.body.phone,
-      profile: url + '/public/' + req.file.filename,
+      profile: profileUrl,
       country_id: req.body.country_id,
       city_id: req.body.city_id,
       // type:req.body.type,
@@ -350,7 +276,7 @@ router.put('/update-driver', upload.single('profile'), async (req, res, next) =>
       driverUpdated: result,
     });
   } catch (err) {
-    // console.log(err);
+     console.log(err);
     res.status(500).json({
       error: err,
     });
@@ -402,24 +328,7 @@ router.put('/update-type/:id', async (req, res) => {
   }
 });
 
-// router.get('/drivers/:cityId/:vehicleTypeId', async (req, res) => {
-//   try {
-//     const cityId = req.params.cityId;
-//     const vehicleTypeId = req.params.vehicleTypeId;
 
-//     const drivers = await DriverList.find({ cityId: cityId, vehicleTypeId: vehicleTypeId });
-//     // console.log(drivers);
-
-//     res.status(200).json({
-//       driverlistdata: drivers,
-//     });
-//   } catch (err) {
-//     console.log(err);
-//     res.status(500).json({
-//       error: err,
-//     });
-//   }
-// });
 
 module.exports = router;
 
@@ -443,3 +352,69 @@ module.exports = router;
 //       }
 //     },
 //   })
+
+
+// router.get('/get-driverswithoutpage', async (req, res, next) => {
+//   try {
+//     const data = await DriverList.find();
+//     res.status(200).json({
+//       message: 'Drivers retrieved successfully!',
+//       driverlistalldata: data,
+//     });
+//     console.log(data);
+//   } catch (error) {
+//     next(error);
+//   }
+// });
+
+// router.get('/drivers/:cityId/:vehicleTypeId', async (req, res) => {
+//   try {
+//     const cityId = req.params.cityId;
+//     const vehicleTypeId = req.params.vehicleTypeId;
+
+//     const drivers = await DriverList.find({ cityId: cityId, vehicleTypeId: vehicleTypeId });
+//     // console.log(drivers);
+
+//     res.status(200).json({
+//       driverlistdata: drivers,
+//     });
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({
+//       error: err,
+//     });
+//   }
+// });
+
+// router.get('/get-drivers', async (req, res, next) => {
+//   try {
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = parseInt(req.query.limit) || 3;
+//     const searchQuery = req.query.searchQuery || '';
+//     const sortField = req.query.sortField || 'name'; // Default sort field is 'name'
+//     const sortOrder = req.query.sortOrder || 'asc'; 
+//     let sortOptions = {};
+//     sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
+
+//     const searchRegex = new RegExp(searchQuery, 'i');
+//     const count = await DriverList.countDocuments({$or: [{ name: searchRegex },{ email: searchRegex },{ phone: searchRegex }]});
+//     const totalPages = Math.ceil(count / limit);
+//     const skip = (page - 1) * limit;
+
+//     const data = await DriverList.find({$or: [{ name: searchRegex },{ email: searchRegex },{ phone: searchRegex }]})
+
+//     // .sort({ name: 1 })
+//       .sort(sortOptions)
+//       .skip(skip)
+//       .limit(limit);
+
+//     res.status(200).json({
+//       message: 'Drivers retrieved successfully!',
+//       driverlistdata: data,
+//       totalPages: totalPages,
+//       currentPage: page,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// });

@@ -17,6 +17,22 @@ export class SocketService {
     this.socket = io('http://localhost:5000/');
   }
 
+  // updateDriver(driverdata:any): void {
+  //   this.socket.emit('updateDriver', driverdata);
+  // }
+  
+  // subscribeToListenDriverUpdate(): Observable<any> {
+  //   return new Observable<any>(observer => {
+  //     this.socket.on('driverUpdated', updatedDriverType => {
+  //       observer.next(updatedDriverType);
+  //     });
+  
+  //     return () => {
+  //       this.socket.off('driverUpdated');
+  //     };
+  //   });
+  // }
+
 updateType(driverId: string, driverType: string): void {
   this.socket.emit('updateDriverType', { driverId, driverType });
 }
@@ -34,17 +50,17 @@ subscribeToListenDriverTypeUpdate(): Observable<any> {
 }
 
   updateStatus(driverId: string, driverStatus: string): void {
-    this.socket.emit('driverStatusUpdate', { driverId, driverStatus });
+    this.socket.emit('updateDriverStatus', { driverId, driverStatus });
   }
 
-  subscribeToListenDriverUpdate(): Observable<any> {
+  subscribeToListenDriverStatusUpdate(): Observable<any> {
     return new Observable<any>(observer => {
-      this.socket.on('driverUpdate', updatedDriver => {
+      this.socket.on('driverStatusUpdated', updatedDriver => {
         observer.next(updatedDriver);
       });
 
       return () => {
-        this.socket.off('driverUpdate');
+        this.socket.off('driverStatusUpdated');
       };
     });
   }
@@ -98,7 +114,6 @@ subscribeToListenDriverTypeUpdate(): Observable<any> {
       };
     });
   }
-
   // updateDriverRide(driverrideId: string, driverId: string,assignedvalue:string): void {
   //   this.socket.emit('updatedriverride', {driverrideId, driverId ,assignedvalue});
   // }

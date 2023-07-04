@@ -134,12 +134,25 @@ export class ListComponent {
     //   });
     // });
     this.subscribeToListenDriverTypeUpdate()
-    this.subscribeToListenDriverUpdate()
+    this.subscribeToListenDriverStatusUpdate()
+    // this.subscribeToListenDriverUpdate()
     this.getDriver();
     this.getCountry();
     this.getCity();
 
   }
+  // subscribeToListenDriverUpdate(){
+  //   this.socketService.subscribeToListenDriverUpdate().subscribe(updatedDriverType => {
+  //     console.log(updatedDriverType);
+  //      const index = this.driverdata.findIndex(d => d._id === updatedDriverType._id);
+  //      if (index !== -1) {
+  //        this.driverdata= updatedDriverType;
+  //        console.log(this.driverdata);
+  //          this.getDriver();
+  //        this.toastr.success('Driver Updated');
+  //      }
+  //    });
+  //   }
   subscribeToListenDriverTypeUpdate(){
   this.socketService.subscribeToListenDriverTypeUpdate().subscribe(updatedDriverType => {
     console.log(updatedDriverType);
@@ -152,8 +165,8 @@ export class ListComponent {
      }
    });
   }
-  subscribeToListenDriverUpdate(){
-    this.socketService.subscribeToListenDriverUpdate().subscribe(updatedDriver => {
+  subscribeToListenDriverStatusUpdate(){
+    this.socketService.subscribeToListenDriverStatusUpdate().subscribe(updatedDriver => {
       const index = this.driverdata.findIndex(d => d._id === updatedDriver._id);
       if (index !== -1) {
         this.driverdata[index].status = updatedDriver.status;
@@ -250,19 +263,15 @@ export class ListComponent {
     formData.append('country_id', this.driversForm.value.country_id);
     formData.append('city_id', this.driversForm.value.city_id);
     if (this.editingDriver) {
-      // Updating an existing vehicle
       formData.append('id', this.editingDriver._id);
-
+      // this.socketService.updateDriver(formData);
       this.listService.updateDriver(formData).subscribe(res => {
-        // Update the edited vehicle in the vehicles array
         const index = this.driverdata.findIndex(v => v._id === this.editingDriver._id);
         this.driverdata[index] = res['driverUpdated'];
         this.getDriver();
         this.toastr.success('Driver Updated ')
-        // this.router.navigate([], { skipLocationChange: true });
         this.editingDriver = null;
         this.driversForm.reset();
-        //  this.getUser();
       });
     } else {
       // Adding a new vehicle
@@ -336,9 +345,6 @@ onSubmitvehicletypeForm(){
     console.log(driverTypeData.vehicletype_id);
 
     this.socketService.updateType(driverTypeData._id, driverTypeData.vehicletype_id);
-
-      
-  
     }
     this.isShowEditType = !this.isShowEditType;
   }

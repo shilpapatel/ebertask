@@ -178,18 +178,27 @@
       </div>
       <div class="modal-body">
         <div class="card m-3">
-         
           <form id="payment-form">
             <div id="card-element"></div>
             <div class="text-center">
-              <button id="submit" class="btn btn-secondary m-2" (click)="AddCardDetails(id)" *ngIf="addcard">Add</button>
+              <button id="submit" class="btn btn-secondary m-2" (click)="AddCardDetails(id)"
+                *ngIf="addcard">Add</button>
             </div>
             <div class="text-center">
               <button id="submit" class="btn btn-secondary m-2" (click)="AddCard(id)">Add Card</button>
             </div>
             <div id="error-message"></div>
           </form>
-          <div></div>
+        </div>
+        <div class="card m-3">
+          <div *ngIf="cardList" class="d-flex flex-wrap">
+            <div *ngFor="let card of cardList" class="d-flex align-items-center text-center">
+              <img src="../../../assets/img/visacard.png" alt="{{card.card.brand}}" class="ms-3">
+              <div class="ms-5">**** **** **** {{card.card.last4}}</div>
+              <div class="ms-5">{{card.card.exp_month}} / {{card.card.exp_year}}</div>
+              <div class=" ms-5"><a class="text-danger" (click)="deleteCard(card.id)"><i class="fas fa-trash fa-lg mx-1"></i></a></div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="modal-footer d-flex justify-content-center">
@@ -199,8 +208,7 @@
     </div>
   </div>
 </div>
-
- <!-- <div *ngIf="cardlist">
+<!-- <div *ngIf="cardlist">
             <div class="row m-2 p-2" *ngFor="let card of cardList">
               <div class="card p-1 globebox">
                 <span class="badge badge-pill badge-success position-absolute px-2"

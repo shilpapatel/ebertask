@@ -277,6 +277,7 @@ onDeleteUser(userId: string, event: Event) {
     this.id = userId
     // this.AddCardDetails(this.id) 
     // this.AddCard(this.id)
+     this.getCard(this.id)
    }
 
   async AddCard( id:any) {
@@ -284,13 +285,13 @@ onDeleteUser(userId: string, event: Event) {
     
     this.cardlist = false;
     this.stripe = await loadStripe("pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou");
-    setTimeout(() => {  
+    // setTimeout(() => {  
     this.elements = this.stripe.elements();
       console.log(this.elements);
       
       this.paymentElement = this.elements.create("card")
-      this.paymentElement.mount("#card-element");
-    },1000)
+      await this.paymentElement.mount("#card-element");
+    // },1000)
     this.AddCardUser = true;
     this.addcard = true;
   }
@@ -320,76 +321,78 @@ onDeleteUser(userId: string, event: Event) {
       });
       const { client_secret: clientSecret } = await response.json();
 
-      
-    const { error } = await this.stripe.confirmSetup({
-      elements: this.elements,
-      clientSecret,
-      confirmParams: {
-        return_url: "http://localhost:4200/api/users",
-      },
-    });
-
-    if (error) {
+      const { paymentMethod, error } = await this.stripe.createPaymentMethod({
+        type: 'card',
+        card: this.paymentElement,
+      });
+  
+      if (error) {
+        console.log(error);
+        return;
+      }
+  
+      const { error: confirmError } = await this.stripe.confirmCardSetup(clientSecret, {
+        payment_method: paymentMethod.id,
+      });
+  
+      if (confirmError) {
+        console.log(confirmError);
+      } else {
+         this.getCard(this.id);
+        console.log("Successfully confirmed setup.");
+        this.toastr.success("Card added successfully!");
+        this.AddCardUser = false;
+        this.cardlist = true;
+      }
+    } catch (error) {
       console.log(error);
-      
-      //  this.handleError(error);
-    } else {
-      console.log("elsee from comfornmmm setup");
-
-      // this.isAddCard = false
-      this.toastr.success("Card added successfully!");
-      this.AddCardUser = false;
-      this.cardlist = true;
     }
-  } catch (error) {
-    console.log(error);
-    // this.handleError(error);
+
   }
+
+  getCard(userId: string) {
+    this.http.get(`http://localhost:5000/api/get-card/${this.id}`)
+      .subscribe(
+        (response) => {
+          console.log(response);
+          // Handle the retrieved data
+           this.cardList = response;
+          // Process the paymentMethods array as needed
+        },
+        (error) => {
+          console.error('Error:', error);
+          // Handle the error
+        }
+      );
   }
-  // async getcard() {
-  //   if (this.data.customerid.customerid != null) {
-  //     if (this.cardlist) {
-  //       this.http
-  //         .get(`http://localhost:5000/userslist/get-customer/${this.data.id}`)
-  //         .subscribe(
-  //           (data) => {
-  //             console.log(data);
-  //             this.customersdata = data;
-  //             this.defaultcardid = this.customersdata.invoice_settings.default_payment_method;
-  //           },
-  //           (error) => {
-  //             console.error("Error:", error);
-  //             // Handle the error
-  //           }
-  //         );
-  //       this.http
-  //         .get(`http://localhost:5000/userslist/get-card/${this.id}`)
-  //         .subscribe(
-  //           (data) => {
-  //             console.log(data);
-  //             // Handle the retrieved data
-  //             this.result = data;
-  //             this.cardList = this.result.data;
-  //             console.log(this.cardList);
-  //           },
-  //           (error) => {
-  //             console.error("Error:", error);
-  //             // Handle the error
-  //           }
-  //         );
-  //     }
-  //   }
-  // }
- 
-  // async DeleteCard(val: any) {
+
+  async deleteCard(cardId: any) {
+    const confirmDelete = confirm("Are you sure you want to delete this card?");
+    if (confirmDelete) {
+      try {
+        const response = await this.http.delete(`http://localhost:5000/api/delete-card/${cardId}`).toPromise();
+  
+        if (response && response['message'] === 'Card deleted successfully') {
+          this.getCard(this.id);
+          this.toastr.success("Card deleted successfully!");
+        } else {
+          throw new Error("Failed to delete card");
+        }
+      } catch (error) {
+        console.error(error);
+        this.toastr.error("Failed to delete card", "");
+      }
+    }
+  }
+  // async deleteCard(cardId: any) {
   //   const deletecard = confirm("Are You Want To Delete Card????");
   //   if (deletecard) {
   //     this.http
-  //       .get(`http://localhost:5000/userslist/delete-card/${val}`)
+  //       .get(`http://localhost:5000/userslist/delete-card/${cardId}`)
   //       .subscribe(
   //         (data) => {
   //           // Handle the retrieved data
-  //           this.getcard();
+  //           this.getCard(this.id)
   //           this.toastr.error("Deleted Succesfully!!", "");
   //         },
   //         (error) => {
@@ -417,235 +420,6 @@ onDeleteUser(userId: string, event: Event) {
   //     );
   // }
 }
-
-
-
-// const { error, setupIntent } = await this.stripe.confirmCardSetup(clientSecret, {
-//   payment_method: {
-//     card: this.paymentElement,
-//   },
-// });
-
-// if (error) {
-//   console.log(error);
-//   return;
-// }
-
-// if (setupIntent.status === "succeeded") {
-//   console.log("Card added successfully!");
-//   this.AddCardUser = false;
-//   this.cardlist = true;
-// } else {
-//   console.log("Card setup failed.");
-// }
-// } catch (error) {
-// console.log(error);
-// }
-
-
-    //  // Create a token for the card
-    //  const result = await this.stripe.createToken(this.paymentElement);
-    //  if (result.error) {
-    //    console.log(result.error.message);
-    //    // Handle error
-    //  } else {
-    //    const token = result.token.id;
-    //    // Pass the token to your backend API along with the user ID
-    //    // await this.usersservice.createCardToken(id, token).subscribe(
-    //    //   (response) => {
-    //    //     console.log(response);
-    //    //     // Handle success
-    //    //   },
-    //    //   (error) => {
-    //    //     console.log(error);
-    //    //     // Handle error
-    //    //   }
-    //    // );
-    //  }
-
-
-// async onAddCard() {
-//   try {
-//     const response = await fetch('http://localhost:5000/api/payment-intent', {
-//       method: 'POST',
-//     });
-//     const { clientSecret } = await response.json();
-
-//     // Load Stripe
-//     const stripe = await loadStripe('pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou');
-//     const elements = stripe.elements({
-//       clientSecret: clientSecret, // Use the actual client secret
-//     });
-//     const paymentElement = elements.create('card');
-
-//     // Mount the payment element to the DOM
-//     await paymentElement.mount('#payment-element');
-
-//     const result = await this.saveCard(stripe, elements); // Pass 'stripe' and 'elements' as arguments
-
-//     if (result.success) {
-//       console.log('Card added:', result.card);
-//     } else {
-//       // Failed to add the card
-//       console.error(result.error);
-//     }
-
-//     // Rest of your code...
-//   } catch (error) {
-//     console.error(error);
-//   }
-// }
-
-// async saveCard(stripe, elements) { // Accept 'stripe' and 'elements' as arguments
-//   try {
-//     const cardElement = elements.getElement('card');
-//     if (!cardElement) {
-//       throw new Error('Card element not found');
-//     }
-//     // Create a payment method using the card element
-//     const { paymentMethod } = await stripe.createPaymentMethod({
-//       type: 'card',
-//       card: cardElement,
-//     });
-
-//     // Send the payment method to your backend for saving
-//     const response: any = await this.http.post('http://localhost:5000/api/cards', { paymentMethod: paymentMethod }).toPromise();
-//     return {
-//       success: true,
-//       card: response.data,
-//     };
-//   } catch (error) {
-//     return {
-//       success: false,
-//       error: error.message,
-//     };
-//   }
-// }
-
-
-//   async fetchCards() {
-//     try {
-//       // Fetch the list of saved cards from your backend
-//       const response:any = await this.http.get('http://localhost:5000/api/cards').toPromise();
-//       this.cards = response.data;
-//     } catch (error) {
-//       console.error(error);
-//     }
-//   }
-
-// async onCardClick(){
-//     var stripeCardContainer = document.getElementById('stripeCardContainer');
-//     const stripe = await loadStripe('pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou');
-//     const elements = stripe.elements();
-  
-//     // Create a new Stripe card element
-//     const card = elements.create('card');
-//     card.mount(stripeCardContainer); // Replace with the appropriate ID or selector for the card container element
-
-//     this.cardModal.nativeElement.classList.add('show');
-//     this.cardModal.nativeElement.style.display = 'block';
- 
-// }
-
-
-  // async onAddCard() {
-
-  //   try {
-  //     const response = await fetch('/api/payment-intent', {
-  //       method: 'POST',
-  //     });
-  //     const { clientSecret } = await response.json();
-  
-  //     // Load Stripe
-  //     const stripe = await loadStripe('pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou');
-  //     const elements = stripe.elements({
-  //       clientSecret: clientSecret, // Use the actual client secret
-  //     });
-  //     const paymentElement = elements.create('payment');
-  //     paymentElement.mount('#payment-element');
-
-  //     const result = await this.saveCard(paymentElement);
-  
-  //     if (result.success) {
-
-  //       console.log('Card added:', result.card);
-  //     } else {
-  //       // Failed to add the card
-  //       console.error(result.error);
-  //     }
-  
-  //     // Rest of your code...
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  
-  //   // }
-  // }
-  
-  // async saveCard(paymentMethod) {
-  //   try {
-  //     // Send the payment method to your backend for saving
-  //     const response: any = await this.http.post('/api/cards', { paymentMethod: paymentMethod }).toPromise();
-  //     return {
-  //       success: true,
-  //       card: response.data,
-  //     };
-  //   } catch (error) {
-  //     return {
-  //       success: false,
-  //       error: error.message,
-  //     };
-  //   }
-  // }
-
-  // async onAddCard() {
-  // const stripe = (window as any).Stripe('pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou');
-  // // const elements = stripe.elements();
-  // const options = {
-  //   mode: 'setup',
-  //   currency: 'usd',
-  //   appearance: {/*...*/},
-  // };
-  // const elements = stripe.elements(options);
-  
-  // // Create and mount the Payment Element
-  // const paymentElement = elements.create('payment');
-  // paymentElement.mount('#payment-element');
-    
-    // const stripeCardContainer = document.getElementById('stripeCardContainer');
-    // stripeCardContainer.innerHTML = '';
-    // const stripe = await loadStripe('pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou');
-    // const elements = stripe.elements();
-    // const card = elements.create('card');
-    // card.mount(stripeCardContainer); 
-    // card.on('change', (event) => {
-    //   console.log(event);
-    //   console.log(card);   
-    //   if (event.complete) {
-    //     const cardSymbol = event.brand;
-    //     // const cardNumber = card._frame.element.querySelector('[data-placeholder]').getAttribute('data-placeholder');
-    //     this.cards.push({
-    //       symbol: cardSymbol,
-    //       number: "",
-    //       default: false
-    //     });
-    //   }
-    // });
-
-
-  // }
-
-  // onDeleteCard(card: any) {
-  //   // Delete the card from the array
-  //   const index = this.cards.indexOf(card);
-  //   if (index !== -1) {
-  //     this.cards.splice(index, 1);
-  //   }
-  // }
-
-
-
-
 
 
 // prevPage() {

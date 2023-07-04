@@ -16,6 +16,7 @@
                             <th>TotalDistance</th>
                             <th>TotalTime</th>
                             <th>EstimatePrice</th>
+                            <th>Ride Status</th>
                             <th>Assign Driver</th>
                             <th>Action</th>
                         </tr>
@@ -37,10 +38,12 @@
                             <td>{{createride.totalDistance}}</td>
                             <td>{{createride.totalTime}}</td>
                             <td>{{createride. estimatePrice}}</td>
+                            <td>{{createride. assigned}}</td>
                             <td>
                                 <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#assignDriverModal" 
                                 [disabled]="createride.assigned == 'assigning'" (click)="onAssignBtnClick(createride)">
-                                  {{createride.assigned == 'assigning'? createride.driverdata?.name : (createride.assigned == 'timeout' ? 'ReAssign Driver':'Assign Driver') }}
+                                {{createride.assigned == 'assigning'? createride.driverdata?.name :'Assign Driver' }}
+                                  <!-- {{createride.assigned == 'assigning'? createride.driverdata?.name : (createride.assigned == 'timeout' ? 'ReAssign Driver':'Assign Driver') }} -->
                                   <!-- {{assignedDriverName}} -->
                                   <!-- createride.driverdata?.name  -->
                                 </button>
