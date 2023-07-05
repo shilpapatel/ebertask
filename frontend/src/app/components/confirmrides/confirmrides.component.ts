@@ -49,6 +49,7 @@ export class ConfirmridesComponent {
     this.getDriverRideData()
     this.subscribeToListenDriverStatusUpdate()
     this.subscribeToListenDriverTypeUpdate()
+    this.subscribeToListenDriverUpdate()
     // this.onAssignBtnClick(this.selectedRide)
     // this.subscribeToListenDriverRideUpdate()
 
@@ -75,6 +76,21 @@ export class ConfirmridesComponent {
     );
 
   }
+
+  subscribeToListenDriverUpdate() {
+    this.socketService.subscribeToListenDriverUpdate().subscribe(updatedDriver => {
+      // console.log(updatedDriver);
+
+      const index = this.driverdata.findIndex(d => d._id === updatedDriver._id);
+      if (index !== -1) {
+        this.driverdata[index].assign = updatedDriver.assign;
+        console.log(this.driverdata);
+        this.onAssignBtnClick(this.selectedcreateride)
+        // this.getDriversAllData();
+      }
+      // this.toastr.success('Driver Status Updated');
+    });
+  }
   subscribeToListenDriverStatusUpdate() {
     this.socketService.subscribeToListenDriverStatusUpdate().subscribe(updatedDriver => {
       // console.log(updatedDriver);
@@ -82,11 +98,12 @@ export class ConfirmridesComponent {
       const index = this.driverdata.findIndex(d => d._id === updatedDriver._id);
       if (index !== -1) {
         this.driverdata[index].status = updatedDriver.status;
+        this.driverdata[index].rideStatus = updatedDriver.rideStatus;
         console.log(this.driverdata);
         this.onAssignBtnClick(this.selectedcreateride)
         // this.getDriversAllData();
       }
-      this.toastr.success('Driver Status Updated');
+      // this.toastr.success('Driver Status Updated');
     });
   }
 
@@ -98,7 +115,7 @@ export class ConfirmridesComponent {
          this.driverdata[index].vehicletype_id= updatedDriverType.vehicletype_id;
          console.log(this.driverdata);
          this.onAssignBtnClick(this.selectedcreateride)
-         this.toastr.success('Driver VehicleType Updated');
+        //  this.toastr.success('Driver VehicleType Updated');
        }
      });
     }
@@ -124,7 +141,7 @@ export class ConfirmridesComponent {
     console.log(this.selectedcreateride);
     this.assignedDriverName = 'Assign Driver';
     // this.selectedcreateride.assigned = "assigning";
-    // this.selectedcreateride.created = Date.now()
+     
     // console.log(this.selectedcreateride.created);
     
 
@@ -134,29 +151,24 @@ export class ConfirmridesComponent {
       const filteredDrivers = this.driverdata.filter(driver => {
         return driver.city_id === selectedCityId && driver.vehicletype_id === selectedVehicleTypeId;
       });
-      this.driverdatafiltered = filteredDrivers.filter(driver => driver.status === 'Approved');
+      console.log(filteredDrivers);
+      
+      this.driverdatafiltered = filteredDrivers.filter(driver => driver.status === 'Approved' && driver.assign === '0');
       console.log(this.driverdatafiltered, "driverfiltereddata");
     }
   }
 
   onAssignDriver(driver: any) {
     this.selectedDriver = driver;
+    // this.selectedDriver.rideStatus = "Hold";
     this.selectedcreateride.assigned = "assigning";
+    this.selectedcreateride.created = Date.now()
     this.socketService.updateDriverRide(this.selectedcreateride._id, this.selectedDriver._id,this.selectedcreateride.assigned,this.selectedcreateride.created);
-    
-    // this.assignedDriverName = this.selectedDriver.name;
-    // console.log(this.assignedDriverName);
-    // console.log(this.selectedDriver,"selecteddriver");
-    // console.log(this.selectedDriver._id,"selecteddriverid");
-    // console.log(this.selectedcreateride,"selectedride");
-    // console.log(this.selectedcreateride._id,"selectedrideid");
-    // this.selectedcreateride.assigned = "assigning";
-    // (this.selectedcreateride.assigned === "assigning")
-    // }
 }
 
  onAssignNearestDriver() {
   this.selectedcreateride.assigned = "assigning";
+  this.selectedcreateride.created = Date.now()
   if (this.driverdatafiltered.length > 0) {
     let index = 0;
     const driverCount = this.driverdatafiltered.length;
@@ -165,7 +177,7 @@ export class ConfirmridesComponent {
       if (index < driverCount) {
         const driver = this.driverdatafiltered[index];
         this.selectedDriver = driver;
-
+        this.selectedDriver.isAvailable = false;
         this.socketService.updateDriverRide(
           this.selectedcreateride._id,
           this.selectedDriver._id,
@@ -174,30 +186,13 @@ export class ConfirmridesComponent {
         );
 
         index++;
-        setTimeout(processNextDriver, 20000); // Delay in milliseconds (e.g., 1000 for 1 second)
+        // setTimeout(processNextDriver, 20000); // Delay in milliseconds (e.g., 1000 for 1 second)
       }
     };
 
     processNextDriver();
   }
-
-  //   if (this.driverdatafiltered.length > 0) {
-
-  //     for (const driver of this.driverdatafiltered) {
-  //       this.selectedDriver = driver;
-
-  //   console.log(this.assignedDriverName);
-  //   console.log(this.selectedDriver,"selecteddriver");
-  //   console.log(this.selectedDriver._id,"selecteddriverid");
-  //   console.log(this.selectedcreateride,"selectedride");
-  //   console.log(this.selectedcreateride._id,"selectedrideid");
-  //   // this.selectedcreateride.assigned = "assigning";
-  //   // (this.selectedcreateride.assigned === "assigning")
-  //   this.socketService.updateDriverRide(this.selectedcreateride._id, this.selectedDriver._id,this.selectedcreateride.assigned,this.selectedcreateride.created);
-  //   // }
-  // }  
-  //     }
-   
+ 
    }
 }
 

@@ -21,17 +21,17 @@ export class SocketService {
   //   this.socket.emit('updateDriver', driverdata);
   // }
   
-  // subscribeToListenDriverUpdate(): Observable<any> {
-  //   return new Observable<any>(observer => {
-  //     this.socket.on('driverUpdated', updatedDriverType => {
-  //       observer.next(updatedDriverType);
-  //     });
+  subscribeToListenDriverUpdate(): Observable<any> {
+    return new Observable<any>(observer => {
+      this.socket.on('driverUpdated', updatedDriver => {
+        observer.next(updatedDriver);
+      });
   
-  //     return () => {
-  //       this.socket.off('driverUpdated');
-  //     };
-  //   });
-  // }
+      return () => {
+        this.socket.off('driverUpdated');
+      };
+    });
+  }
 
 updateType(driverId: string, driverType: string): void {
   this.socket.emit('updateDriverType', { driverId, driverType });
@@ -132,32 +132,9 @@ subscribeToListenDriverTypeUpdate(): Observable<any> {
     });
   }
 
-
-  // getUpdatedDriverRideData(): Observable<any> {
-  //   return new Observable<any>((observer) => {
-  //     this.socket.on('updateDriverRideData', (driverridedata) => {
-  //       observer.next(driverridedata);
-  //     });
-
-  //     return () => {
-  //       this.socket.off('updateDriverRideData');
-  //     };
-  //   });
-  // }
-
-  getTimeoutDriverRideData(): Observable<any> {
-    return new Observable<any>((observer) => {
-      this.socket.on('driverridetimeout', timeoutResult => {
-        observer.next(timeoutResult);
-      });
-      return () => {
-        this.socket.off('driverridetimeout');
-      };
-    });
-  }
-  // updateAssignedDriverName(rideId: string, assignedDriverName: string): void {
-  //   this.socket.emit('updateAssignedDriverName', rideId, assignedDriverName);
-  // }
+  acceptDriverRide(driverrideId: string):void {
+    this.socket.emit('acceptDriverRide', driverrideId);
+  } 
 
   deleteDriverRide(driverrideId: string): Observable<any> {
     return new Observable<any>(observer => {
@@ -179,6 +156,30 @@ subscribeToListenDriverTypeUpdate(): Observable<any> {
   }
 
 }
+
+
+// getUpdatedDriverRideData(): Observable<any> {
+  //   return new Observable<any>((observer) => {
+  //     this.socket.on('updateDriverRideData', (driverridedata) => {
+  //       observer.next(driverridedata);
+  //     });
+
+  //     return () => {
+  //       this.socket.off('updateDriverRideData');
+  //     };
+  //   });
+  // }
+
+  // getTimeoutDriverRideData(): Observable<any> {
+  //   return new Observable<any>((observer) => {
+  //     this.socket.on('driverridetimeout', timeoutResult => {
+  //       observer.next(timeoutResult);
+  //     });
+  //     return () => {
+  //       this.socket.off('driverridetimeout');
+  //     };
+  //   });
+  // }
   // getAssignedDriverNameUpdate() {
   //   return this.socket.fromEvent('assignedDriverNameUpdate');
   // }

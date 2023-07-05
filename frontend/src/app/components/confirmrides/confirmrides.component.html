@@ -9,13 +9,14 @@
                             <th>RideId</th>
                             <th>UserId</th>
                             <th>User</th>
+                            <th>Pickup Time</th>
                             <th>From</th>
                             <th>To</th>
                             <!-- <th>Stops</th> -->
                             <th>VehicleType</th>
-                            <th>TotalDistance</th>
+                            <!-- <th>TotalDistance</th>
                             <th>TotalTime</th>
-                            <th>EstimatePrice</th>
+                            <th>EstimatePrice</th> -->
                             <th>Ride Status</th>
                             <th>Assign Driver</th>
                             <th>Action</th>
@@ -30,14 +31,16 @@
                             </td>
                             <td>{{createride.userdata.name}}
                             </td>
+                            <td>{{createride.datetime}}
+                            </td>
                             <td>{{createride.from}}
                             </td>
                             <td>{{createride.to}}</td>
                             <!-- <td>{{createride.stops}}</td> -->
                             <td>{{createride.vehicletypedata.vehicletype}}</td>
-                            <td>{{createride.totalDistance}}</td>
+                            <!-- <td>{{createride.totalDistance}}</td>
                             <td>{{createride.totalTime}}</td>
-                            <td>{{createride. estimatePrice}}</td>
+                            <td>{{createride. estimatePrice}}</td> -->
                             <td>{{createride. assigned}}</td>
                             <td>
                                 <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#assignDriverModal" 

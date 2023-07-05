@@ -293,7 +293,9 @@ const configureSocket = (io) => {
         driverId: null,
         assigned: 'timeout'
       };
-  
+      const result1 = await DriverList.findOneAndUpdate({assign: '1'},{assign: '0'}, { new: true });
+      io.emit('driverUpdated', result1);
+      // console.log(result1,"resultttttttttttttttttttttt");
       const result = await CreateRide.findOneAndUpdate({assigned: 'assigning'},updatedDriverId, { new: true });
       const driverridedata = await CreateRide.aggregate([
         {
@@ -350,18 +352,29 @@ const configureSocket = (io) => {
     job.start();
 
     socket.on('updatedriverride', async (data) => {
-      // console.log(data);
+      //  console.log(data);
       try {
         const driverrideId = data.driverrideId;
+        const driverId = data.driverId;
         const updatedDriverId = {
           driverId: data.driverId,
           assigned: data.assignedvalue,
-          created: data.created
+          created: data.created,
         }
-        const result = await CreateRide.findByIdAndUpdate(driverrideId, updatedDriverId, { new: true });
+        const result1 = await DriverList.findByIdAndUpdate(driverId, {assign: "1"}, { new: true });
 
+        io.emit('driverUpdated', result1);
+        const result = await CreateRide.findByIdAndUpdate(driverrideId, updatedDriverId, { new: true });
+        
         // console.log(result);
         io.emit('driverrideupdated', result);
+
+        const createdTime = new Date(data.created); // Convert created time to Date object
+        const currentTime = new Date(); // Get current time
+        const timeDifference = currentTime - createdTime; // Calculate time difference in milliseconds
+        
+
+    console.log('Time difference (in milliseconds):', timeDifference);
 
         // if(data.driverId != null){
         const driverridedata = await CreateRide.aggregate([
@@ -421,11 +434,91 @@ const configureSocket = (io) => {
       }
     });
 
+
+    socket.on('acceptDriverRide', async (data) => {
+        console.log(data);
+      try {
+        const driverrideId = data;
+        console.log(driverrideId);
+        // const driverId = data.driverId;
+        // const updatedDriverId = {
+        //   driverId: data.driverId,
+        //   assigned: data.assignedvalue,
+        //   created: data.created,
+        // }
+        // const result1 = await DriverList.findByIdAndUpdate(driverId, {assign: "1"}, { new: true });
+
+        // io.emit('driverUpdated', result1);
+        const result = await CreateRide.findByIdAndUpdate(driverrideId, {assigned:"Accepted"}, { new: true });
+        
+         console.log(result);
+        io.emit('driverrideupdated', result);
+
+        // if(data.driverId != null){
+        const driverridedata = await CreateRide.aggregate([
+          {
+            $lookup: {
+              from: 'cities',
+              foreignField: '_id',
+              localField: 'cityId',
+              as: 'citydata'
+            }
+          },
+          {
+            $unwind: '$citydata'
+          },
+          {
+            $lookup: {
+              from: 'vehicletypes',
+              foreignField: '_id',
+              localField: 'vehicleTypeId',
+              as: 'vehicletypedata'
+            }
+          },
+          {
+            $unwind: '$vehicletypedata'
+          },
+          {
+            $lookup: {
+              from: 'users',
+              foreignField: '_id',
+              localField: 'userId',
+              as: 'userdata'
+            }
+          },
+          {
+            $unwind: '$userdata'
+          },
+          {
+            $lookup: {
+              from: 'driverlists',
+              foreignField: '_id',
+              localField: 'driverId',
+              as: 'driverdata'
+            }
+          },
+          {
+            $unwind: {
+            path: '$driverdata',
+            preserveNullAndEmptyArrays:true
+          }
+        } 
+        ])
+        io.emit('driverRideData', driverridedata);
+      // }
+      } catch (err) {
+        console.log(err);
+        io.emit('acceptDriverRideError', { error: err });
+      }
+    });
+
+
+
     socket.on('deleteDriverRide', async (driverrideId) => {
       try {
         const updatedDriverId = {
           driverId: null,
-          assigned: 'pending'
+          assigned: 'rejected'
         };
     
         const result = await CreateRide.findByIdAndUpdate(driverrideId, updatedDriverId, { new: true });

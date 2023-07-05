@@ -41,6 +41,14 @@ getDriverRideData(): void {
       // this.toastr.success('Driver Ride Updated');
     });
   }
+
+  onAcceptRequest(driverrideId: string){
+    // console.log(driverrideId);
+    this.socketService.acceptDriverRide(driverrideId);
+    
+  }
+
+
    onDeleteDriver(driverrideId: string) {
     if (confirm('Are you sure you want to delete this user?')) {
       this.socketService.deleteDriverRide(driverrideId).subscribe(

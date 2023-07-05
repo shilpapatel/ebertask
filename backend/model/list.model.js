@@ -43,6 +43,7 @@ const driverlistSchema = new mongoose.Schema({
     type: {type: String, default:'None' },
     rideStatus: { type: String, default:'Online'},
     status: { type: String, default:'Approved'},
+    assign: { type: String, default:'0'},
 
     created:{
         type:Date,

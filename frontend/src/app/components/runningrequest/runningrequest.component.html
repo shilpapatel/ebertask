@@ -32,7 +32,7 @@
                             <td>{{ confirmride.totalTime }}</td>
                             <td>{{ confirmride.estimatePrice }}</td>
                             <td>
-                                <button type="button" class="btn btn-secondary btn-sm">Accept Request</button>
+                                <button type="button" class="btn btn-secondary btn-sm" (click)="onAcceptRequest(confirmride._id)">Accept Request</button>
                             </td>
                             <td>
                                 <button type="button" class="btn btn-secondary btn-sm"
