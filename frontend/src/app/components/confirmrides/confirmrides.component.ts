@@ -166,34 +166,60 @@ export class ConfirmridesComponent {
     this.socketService.updateDriverRide(this.selectedcreateride._id, this.selectedDriver._id,this.selectedcreateride.assigned,this.selectedcreateride.created);
 }
 
- onAssignNearestDriver() {
-  this.selectedcreateride.assigned = "assigning";
-  this.selectedcreateride.created = Date.now()
+async onAssignNearestDriver() {
   if (this.driverdatafiltered.length > 0) {
-    let index = 0;
     const driverCount = this.driverdatafiltered.length;
 
-    const processNextDriver = () => {
-      if (index < driverCount) {
-        const driver = this.driverdatafiltered[index];
-        this.selectedDriver = driver;
-        this.selectedDriver.isAvailable = false;
-        this.socketService.updateDriverRide(
-          this.selectedcreateride._id,
-          this.selectedDriver._id,
-          this.selectedcreateride.assigned,
-          this.selectedcreateride.created
-        );
+    for (let index = 0; index < driverCount; index++) {
+      const driver = this.driverdatafiltered[index];
+      this.selectedDriver = driver;
+      this.selectedDriver.isAvailable = false;
+      this.selectedcreateride.assigned = "assigning";
+      this.selectedcreateride.created = Date.now();
 
-        index++;
-        // setTimeout(processNextDriver, 20000); // Delay in milliseconds (e.g., 1000 for 1 second)
-      }
-    };
+      await this.socketService.updateDriverRide(
+        this.selectedcreateride._id,
+        this.selectedDriver._id,
+        this.selectedcreateride.assigned,
+        this.selectedcreateride.created
+      );
 
-    processNextDriver();
+      // Delay in milliseconds (e.g., 20000 for 20 seconds)
+      await new Promise((resolve) => setTimeout(resolve, 20000));
+    }
   }
- 
-   }
+}
+
+
+  // onAssignNearestDriver() {
+    
+  // if (this.driverdatafiltered.length > 0) {
+  //   let index = 0;
+  //   const driverCount = this.driverdatafiltered.length;
+
+  //   const processNextDriver = () => {
+  //     if (index < driverCount) {
+  //       const driver = this.driverdatafiltered[index];
+  //       this.selectedDriver = driver;
+  //       this.selectedDriver.isAvailable = false;
+  //       this.selectedcreateride.assigned = "assigning";
+  //       this.selectedcreateride.created = Date.now()
+
+
+  //       this.socketService.updateDriverRide(
+  //         this.selectedcreateride._id,
+  //         this.selectedDriver._id,
+  //         this.selectedcreateride.assigned,
+  //         this.selectedcreateride.created
+  //       );
+
+  //       index++;
+  //         setTimeout(processNextDriver, 20000); // Delay in milliseconds (e.g., 1000 for 1 second)
+  //     }
+  //   };
+  //   processNextDriver();
+  // }
+  // }
 }
 
 

@@ -287,16 +287,35 @@ const configureSocket = (io) => {
       }
     });
 
-    const job = new cron.CronJob('*/20 * * * * *', async () => {
-      // console.log('Cron job start');
-      const updatedDriverId = {
-        driverId: null,
-        assigned: 'timeout'
+    const job = new cron.CronJob('* * * * * *', async () => {
+      console.log('Cron job start');
+      const pendingRides = await CreateRide.find({ assigned: 'assigning' }).exec();
+      // console.log(pendingRides, "pendingrides");
+      const currentTime = Date.now();
+      // console.log(currentTime);
+      const timeoutDuration = 20000; // 20 seconds
+    
+      // await Promise.all(pendingRides.map(async (ride) => {
+        for (const ride of pendingRides) {
+        const rideTime = ride.created;
+        // console.log(rideTime);
+        const elapsedTime = currentTime - rideTime;
+        // console.log(elapsedTime, "elapsedtime");
+    
+        if (elapsedTime >= timeoutDuration) {
+          console.log("sdfdhgjerrt");
+          const updatedDriverId = {
+            driverId: null,
+            assigned: 'timeout'
+          };
+          const result1 = await DriverList.findOneAndUpdate({ assign: '1' }, { assign: '0' }, { new: true });
+          io.emit('driverUpdated', result1);
+          const result = await CreateRide.findOneAndUpdate({ _id: ride._id }, updatedDriverId, { new: true });
+          // console.log(result);
+          io.emit('driverrideupdated', result);
+        }
       };
-      const result1 = await DriverList.findOneAndUpdate({assign: '1'},{assign: '0'}, { new: true });
-      io.emit('driverUpdated', result1);
-      // console.log(result1,"resultttttttttttttttttttttt");
-      const result = await CreateRide.findOneAndUpdate({assigned: 'assigning'},updatedDriverId, { new: true });
+    
       const driverridedata = await CreateRide.aggregate([
         {
           $lookup: {
@@ -341,15 +360,115 @@ const configureSocket = (io) => {
         },
         {
           $unwind: {
-          path: '$driverdata',
-          preserveNullAndEmptyArrays:true
+            path: '$driverdata',
+            preserveNullAndEmptyArrays: true
+          }
         }
-      } 
-      ])
+      ]);
       io.emit('driverRideData', driverridedata);
-     
     });
-    job.start();
+    job.start()
+    
+    // const timeoutPromise = new Promise((resolve, reject) => {
+    //   setTimeout(() => {
+    //     reject(new Error('Timeout'));
+    //   }, 20000);
+    // });
+    
+    // Promise.race([job.start(), timeoutPromise])
+    //   .catch((error) => {
+    //     console.log('Job execution timed out:', error);
+    //   });
+    
+
+    // const job = new cron.CronJob('*/20 * * * * *', async () => {
+
+    //   console.log('Cron job start');
+    //     const pendingRides = await CreateRide.find({ assigned: 'assigning' }).exec();
+    // console.log(pendingRides,"pendingrides");
+    //     const currentTime = Date.now();
+    //     const timeoutDuration = 20000; // 20 seconds
+    
+    //     pendingRides.forEach(async (ride) => {
+    //       const rideTime = ride.created
+    //       console.log(rideTime);
+    //       const elapsedTime = currentTime - rideTime;
+    //       console.log(elapsedTime,"elapsedtime");
+    
+    //       if (elapsedTime >= timeoutDuration) {
+    //         const updatedDriverId = {
+    //     driverId: null,
+    //     assigned: 'timeout'
+    //   };
+    //         const result1 = await DriverList.findOneAndUpdate({assign: '1'},{assign: '0'}, { new: true });
+    //         io.emit('driverUpdated', result1);
+    //         const result = await CreateRide.findOneAndUpdate({assigned: 'assigning'},updatedDriverId, { new: true });
+    //         console.log(result);
+    //         io.emit('driverrideupdated', result);
+    //       }
+    //     });
+    //   // console.log('Cron job start');
+    //   // const updatedDriverId = {
+    //   //   driverId: null,
+    //   //   assigned: 'timeout'
+    //   // };
+    //   // const result1 = await DriverList.findOneAndUpdate({assign: '1'},{assign: '0'}, { new: true });
+    //   // io.emit('driverUpdated', result1);
+    //   // const result = await CreateRide.findOneAndUpdate({assigned: 'assigning'},updatedDriverId, { new: true });
+    //   // // io.emit('driverrideupdated', result);
+    //   const driverridedata = await CreateRide.aggregate([
+    //     {
+    //       $lookup: {
+    //         from: 'cities',
+    //         foreignField: '_id',
+    //         localField: 'cityId',
+    //         as: 'citydata'
+    //       }
+    //     },
+    //     {
+    //       $unwind: '$citydata'
+    //     },
+    //     {
+    //       $lookup: {
+    //         from: 'vehicletypes',
+    //         foreignField: '_id',
+    //         localField: 'vehicleTypeId',
+    //         as: 'vehicletypedata'
+    //       }
+    //     },
+    //     {
+    //       $unwind: '$vehicletypedata'
+    //     },
+    //     {
+    //       $lookup: {
+    //         from: 'users',
+    //         foreignField: '_id',
+    //         localField: 'userId',
+    //         as: 'userdata'
+    //       }
+    //     },
+    //     {
+    //       $unwind: '$userdata'
+    //     },
+    //     {
+    //       $lookup: {
+    //         from: 'driverlists',
+    //         foreignField: '_id',
+    //         localField: 'driverId',
+    //         as: 'driverdata'
+    //       }
+    //     },
+    //     {
+    //       $unwind: {
+    //       path: '$driverdata',
+    //       preserveNullAndEmptyArrays:true
+    //     }
+    //   } 
+    //   ])
+    //   io.emit('driverRideData', driverridedata);
+     
+    // });
+    // job.start();
 
     socket.on('updatedriverride', async (data) => {
       //  console.log(data);
@@ -372,9 +491,10 @@ const configureSocket = (io) => {
         const createdTime = new Date(data.created); // Convert created time to Date object
         const currentTime = new Date(); // Get current time
         const timeDifference = currentTime - createdTime; // Calculate time difference in milliseconds
+        const timeDifferenceInSec= timeDifference / 1000; 
         
 
-    console.log('Time difference (in milliseconds):', timeDifference);
+    // console.log('Time difference (in milliseconds):', timeDifferenceInSec);
 
         // if(data.driverId != null){
         const driverridedata = await CreateRide.aggregate([
@@ -521,14 +641,20 @@ const configureSocket = (io) => {
           assigned: 'rejected'
         };
     
-        const result = await CreateRide.findByIdAndUpdate(driverrideId, updatedDriverId, { new: true });
+        const result1 = await DriverList.findOneAndUpdate({ assign: '1' }, { assign: '0' }, { new: true });
+          io.emit('driverUpdated', result1);
+          console.log(result1);
+          // const result = await CreateRide.findByIdAndUpdate(driverrideId, updatedDriverId, { new: true });
+         const result = await CreateRide.findOneAndUpdate({ assigned: 'assigning' }, updatedDriverId, { new: true });
+        io.emit('driverrideupdated', result);
         // console.log(result, "updated result");
         // console.log(result._id, "updated id");
     
-        if (!result) {
-          io.emit('deleteDriverRideError', { message: 'Driver not found' });
-        } else {
-          io.emit('driverRideDeleted', { message: 'Driver ride updated successfully' });
+        // if (!result) {
+        //   io.emit('deleteDriverRideError', { message: 'Driver not found' });
+        // } else {
+        //   io.emit('driverRideDeleted', { message: 'Driver ride updated successfully' });
+      // }
           const driverridedata = await CreateRide.aggregate([
             {
               $lookup: {
@@ -579,7 +705,6 @@ const configureSocket = (io) => {
           } 
           ])
           io.emit('driverRideData', driverridedata);
-        }
       } catch (err) {
         console.log(err);
         io.emit('deleteDriverRideError', { error: err });
