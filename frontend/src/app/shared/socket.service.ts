@@ -120,6 +120,10 @@ subscribeToListenDriverTypeUpdate(): Observable<any> {
   updateDriverRide(driverrideId: string, driverId: string,assignedvalue:string,created:string): void {
     this.socket.emit('updatedriverride', {driverrideId, driverId ,assignedvalue,created});
   }
+
+  updateNearestDriverRide(driverrideId: string,driverdata:any,assignedvalue:string,created:string): void {
+    this.socket.emit('updatenearestdriverride', {driverrideId,driverdata ,assignedvalue,created});
+  }
   subscribeToListenDriverRideUpdate(): Observable<any> {
     return new Observable<any>(observer => {
       this.socket.on('driverrideupdated', updatedDriverRide => {

@@ -202,7 +202,8 @@ export class UsersComponent {
       // Updating an existing vehicle
       formData.append('id', this.editingUser._id);
 
-      this.usersservice.updateUser(formData).subscribe(res => {
+      this.usersservice.updateUser(formData).subscribe(
+        (res) => {
         // Update the edited vehicle in the vehicles array
         const index = this.userdatas.findIndex(v => v._id === this.editingUser._id);
         this.userdatas[index] = res['UserUpdated'];
@@ -211,17 +212,29 @@ export class UsersComponent {
         this.editingUser = null;
         this.usersForm.reset();
         //  this.getUser();
+      },
+      (error) => {
+        console.log(error);
+        
+        this.toastr.error(error.error.message);
+        // form.reset();
       });
     } else {
       // Adding a new vehicle
-      this.usersservice.addUsers(formData).subscribe(res=> {
+      this.usersservice.addUsers(formData).subscribe(
+        (res)=> {
         this.userdatas.push(res['userCreated']);
         this.toastr.success('User Added ')
          this.getUser();
 
          
         // this.router.navigate(['users']);
-      })
+      },
+      (error) => {
+        console.log(error);
+        this.toastr.error(error.error.message);
+        // form.reset();
+      });
     }
     this.isShow = !this.isShow;
   }
@@ -266,6 +279,20 @@ onDeleteUser(userId: string, event: Event) {
   }
 }
 
+onCancelBtn() {
+  // this.isShowEditType = !this.isShowEditType;
+  this.usersForm.reset();
+  // this.isShowEditBtn = false;
+}
+private apiRequest: any;
+onCancelBtnList() {
+  if (this.apiRequest) {
+    // Cancel the API request if it exists
+    this.apiRequest.cancel();
+  }
+  this.usersForm.reset(); // Reset the form fields
+  // this.isShow = false; // Hide the form container
+}
 
 // handleError(error: any) {
 //   // Handle the error according to your application's needs
@@ -279,7 +306,6 @@ onDeleteUser(userId: string, event: Event) {
     // this.AddCard(this.id)
      this.getCard(this.id)
    }
-
   async AddCard( id:any) {
     console.log(id);
     

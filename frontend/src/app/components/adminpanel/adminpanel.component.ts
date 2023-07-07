@@ -10,6 +10,8 @@ import { AdminService } from 'src/app/shared/admin.service';
 export class AdminpanelComponent implements OnInit {
   userDetails;
   openSidebar: boolean = true;
+  lastActivity: Date;
+  logoutTimer: any;
   
 
  menuSidebar = [
@@ -82,9 +84,41 @@ export class AdminpanelComponent implements OnInit {
   constructor(private adminService: AdminService, private router: Router) { }
  
  ngOnInit() {
+   // Attach event listeners for user activity
+   document.addEventListener('mousemove', this.resetTimer);
+   document.addEventListener('keypress', this.resetTimer);
+ 
+   // Initialize lastActivity with current timestamp
+   this.lastActivity = new Date();
+ 
+   // Start the timer for automatic logout
+   this.startLogoutTimer();
  }
+ resetTimer = () => {
+  // Update lastActivity with current timestamp
+  this.lastActivity = new Date();
+};
 
+startLogoutTimer() {
+  // const timeout = 30000;
+  const timeout = 60000 * 60;
+
+  // Start the timer
+  this.logoutTimer = setTimeout(() => {
+    // Calculate the time since the last activity
+    const currentTime = new Date();
+    const timeDiff = currentTime.getTime() - this.lastActivity.getTime();
+
+    if (timeDiff >= timeout) {
+      this.onLogout();
+    } else {
+      // Restart the timer
+      this.startLogoutTimer();
+    }
+  }, timeout);
+}
  onLogout(){
+  clearTimeout(this.logoutTimer);
    this.adminService.deleteToken();
    this.router.navigate(['/signin']);
  }

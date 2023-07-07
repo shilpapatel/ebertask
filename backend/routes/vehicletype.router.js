@@ -91,10 +91,11 @@ router.get('/get-vehicletype', (req, res, next) => {
 router.put('/update-vehicletype', upload.single('vehicleimg'), async (req, res, next) => {
   try {
     const url = req.protocol + '://' + req.get('host');
+    let vehicleUrl = req.file ? url + '/public/' + req.body.vehicleimg : url + '/public/'+  'car3.jpg';
     const vehicleId = req.body.id;
     const updatedVehicle = {
       vehicletype: req.body.vehicletype,
-      vehicleimg: url + '/public/' + req.file.filename,
+      vehicleimg: vehicleUrl,
     };
     const result = await VehicleType.findByIdAndUpdate(vehicleId, updatedVehicle, { new: true });
     res.status(200).json({

@@ -288,7 +288,7 @@ const configureSocket = (io) => {
     });
 
     const job = new cron.CronJob('* * * * * *', async () => {
-      console.log('Cron job start');
+      // console.log('Cron job start');
       const pendingRides = await CreateRide.find({ assigned: 'assigning' }).exec();
       // console.log(pendingRides, "pendingrides");
       const currentTime = Date.now();
@@ -303,7 +303,7 @@ const configureSocket = (io) => {
         // console.log(elapsedTime, "elapsedtime");
     
         if (elapsedTime >= timeoutDuration) {
-          console.log("sdfdhgjerrt");
+          // console.log("sdfdhgjerrt");
           const updatedDriverId = {
             driverId: null,
             assigned: 'timeout'
@@ -380,95 +380,118 @@ const configureSocket = (io) => {
     //     console.log('Job execution timed out:', error);
     //   });
     
-
-    // const job = new cron.CronJob('*/20 * * * * *', async () => {
-
-    //   console.log('Cron job start');
-    //     const pendingRides = await CreateRide.find({ assigned: 'assigning' }).exec();
-    // console.log(pendingRides,"pendingrides");
-    //     const currentTime = Date.now();
-    //     const timeoutDuration = 20000; // 20 seconds
+    socket.on('updatenearestdriverride', async (data) => {
+      try {
+        const driverrideId = data.driverrideId;
+        const driverdata = data.driverdata;
+        let currentDriverIndex = 0;
+        // console.log(driverdata);
+        // const driverId = data.driverId;
     
-    //     pendingRides.forEach(async (ride) => {
-    //       const rideTime = ride.created
-    //       console.log(rideTime);
-    //       const elapsedTime = currentTime - rideTime;
-    //       console.log(elapsedTime,"elapsedtime");
+        const assignDriverWithDelay = async (driver) => {
+          const driverId = driver._id;
+          const updatedDriverId = {
+            driverId: driverId,
+            assigned: data.assignedvalue,
+            created: data.created,
+          };
     
-    //       if (elapsedTime >= timeoutDuration) {
-    //         const updatedDriverId = {
-    //     driverId: null,
-    //     assigned: 'timeout'
-    //   };
-    //         const result1 = await DriverList.findOneAndUpdate({assign: '1'},{assign: '0'}, { new: true });
-    //         io.emit('driverUpdated', result1);
-    //         const result = await CreateRide.findOneAndUpdate({assigned: 'assigning'},updatedDriverId, { new: true });
-    //         console.log(result);
-    //         io.emit('driverrideupdated', result);
-    //       }
-    //     });
-    //   // console.log('Cron job start');
-    //   // const updatedDriverId = {
-    //   //   driverId: null,
-    //   //   assigned: 'timeout'
-    //   // };
-    //   // const result1 = await DriverList.findOneAndUpdate({assign: '1'},{assign: '0'}, { new: true });
-    //   // io.emit('driverUpdated', result1);
-    //   // const result = await CreateRide.findOneAndUpdate({assigned: 'assigning'},updatedDriverId, { new: true });
-    //   // // io.emit('driverrideupdated', result);
-    //   const driverridedata = await CreateRide.aggregate([
-    //     {
-    //       $lookup: {
-    //         from: 'cities',
-    //         foreignField: '_id',
-    //         localField: 'cityId',
-    //         as: 'citydata'
-    //       }
-    //     },
-    //     {
-    //       $unwind: '$citydata'
-    //     },
-    //     {
-    //       $lookup: {
-    //         from: 'vehicletypes',
-    //         foreignField: '_id',
-    //         localField: 'vehicleTypeId',
-    //         as: 'vehicletypedata'
-    //       }
-    //     },
-    //     {
-    //       $unwind: '$vehicletypedata'
-    //     },
-    //     {
-    //       $lookup: {
-    //         from: 'users',
-    //         foreignField: '_id',
-    //         localField: 'userId',
-    //         as: 'userdata'
-    //       }
-    //     },
-    //     {
-    //       $unwind: '$userdata'
-    //     },
-    //     {
-    //       $lookup: {
-    //         from: 'driverlists',
-    //         foreignField: '_id',
-    //         localField: 'driverId',
-    //         as: 'driverdata'
-    //       }
-    //     },
-    //     {
-    //       $unwind: {
-    //       path: '$driverdata',
-    //       preserveNullAndEmptyArrays:true
-    //     }
-    //   } 
-    //   ])
-    //   io.emit('driverRideData', driverridedata);
-     
-    // });
-    // job.start();
+          const result1 = await DriverList.findByIdAndUpdate(driverId, { assign: "1" }, { new: true });
+          io.emit('driverUpdated', result1);
+    
+          const result = await CreateRide.findByIdAndUpdate(driverrideId, updatedDriverId, { new: true });
+          io.emit('driverrideupdated', result);
+
+          currentDriverIndex++;
+          // if (currentDriverIndex < driverdata.length) {
+          //   const nextDriver = driverdata[currentDriverIndex];
+          //   // setTimeout(() => assignDriverWithDelay(nextDriver), 20000); // Delay assignment by 20 seconds
+          //   assignDriverWithDelay(nextDriver);
+          // }
+
+              // Schedule cron job to run every 20 seconds
+          const job = new cron.CronJob('*/20 * * * * *', async () => {
+              if (currentDriverIndex < driverdata.length) {
+                const driver = driverdata[currentDriverIndex];
+                assignDriverWithDelay(driver);
+            }
+          });
+          job.start();
+        };
+    
+        // Start the loop with the first driver
+        if (driverdata.length > 0) {
+          const firstDriver = driverdata[0];
+          assignDriverWithDelay(firstDriver);
+        }
+    
+          // const createdTime = new Date(data.created); // Convert created time to Date object
+          // const currentTime = new Date(); // Get current time
+          // const timeDifference = currentTime - createdTime; // Calculate time difference in milliseconds
+          // const timeDifferenceInSec = timeDifference / 1000;
+    
+          // Rest of your code for time difference calculation
+    
+          const driverridedata = await CreateRide.aggregate([
+            {
+              $lookup: {
+                from: 'cities',
+                foreignField: '_id',
+                localField: 'cityId',
+                as: 'citydata'
+              }
+            },
+            {
+              $unwind: '$citydata'
+            },
+            {
+              $lookup: {
+                from: 'vehicletypes',
+                foreignField: '_id',
+                localField: 'vehicleTypeId',
+                as: 'vehicletypedata'
+              }
+            },
+            {
+              $unwind: '$vehicletypedata'
+            },
+            {
+              $lookup: {
+                from: 'users',
+                foreignField: '_id',
+                localField: 'userId',
+                as: 'userdata'
+              }
+            },
+            {
+              $unwind: '$userdata'
+            },
+            {
+              $lookup: {
+                from: 'driverlists',
+                foreignField: '_id',
+                localField: 'driverId',
+                as: 'driverdata'
+              }
+            },
+            {
+              $unwind: {
+              path: '$driverdata',
+              preserveNullAndEmptyArrays:true
+            }
+          } 
+          ]);
+          io.emit('driverRideData', driverridedata);
+    
+          
+      
+      } catch (err) {
+        console.log(err);
+        io.emit('updatenearestdriverrideError', { error: err });
+      }
+    });
+    
+   
 
     socket.on('updatedriverride', async (data) => {
       //  console.log(data);
@@ -722,6 +745,95 @@ const configureSocket = (io) => {
 
 };
 module.exports = configureSocket;
+
+ // const job = new cron.CronJob('*/20 * * * * *', async () => {
+
+    //   console.log('Cron job start');
+    //     const pendingRides = await CreateRide.find({ assigned: 'assigning' }).exec();
+    // console.log(pendingRides,"pendingrides");
+    //     const currentTime = Date.now();
+    //     const timeoutDuration = 20000; // 20 seconds
+    
+    //     pendingRides.forEach(async (ride) => {
+    //       const rideTime = ride.created
+    //       console.log(rideTime);
+    //       const elapsedTime = currentTime - rideTime;
+    //       console.log(elapsedTime,"elapsedtime");
+    
+    //       if (elapsedTime >= timeoutDuration) {
+    //         const updatedDriverId = {
+    //     driverId: null,
+    //     assigned: 'timeout'
+    //   };
+    //         const result1 = await DriverList.findOneAndUpdate({assign: '1'},{assign: '0'}, { new: true });
+    //         io.emit('driverUpdated', result1);
+    //         const result = await CreateRide.findOneAndUpdate({assigned: 'assigning'},updatedDriverId, { new: true });
+    //         console.log(result);
+    //         io.emit('driverrideupdated', result);
+    //       }
+    //     });
+    //   // console.log('Cron job start');
+    //   // const updatedDriverId = {
+    //   //   driverId: null,
+    //   //   assigned: 'timeout'
+    //   // };
+    //   // const result1 = await DriverList.findOneAndUpdate({assign: '1'},{assign: '0'}, { new: true });
+    //   // io.emit('driverUpdated', result1);
+    //   // const result = await CreateRide.findOneAndUpdate({assigned: 'assigning'},updatedDriverId, { new: true });
+    //   // // io.emit('driverrideupdated', result);
+    //   const driverridedata = await CreateRide.aggregate([
+    //     {
+    //       $lookup: {
+    //         from: 'cities',
+    //         foreignField: '_id',
+    //         localField: 'cityId',
+    //         as: 'citydata'
+    //       }
+    //     },
+    //     {
+    //       $unwind: '$citydata'
+    //     },
+    //     {
+    //       $lookup: {
+    //         from: 'vehicletypes',
+    //         foreignField: '_id',
+    //         localField: 'vehicleTypeId',
+    //         as: 'vehicletypedata'
+    //       }
+    //     },
+    //     {
+    //       $unwind: '$vehicletypedata'
+    //     },
+    //     {
+    //       $lookup: {
+    //         from: 'users',
+    //         foreignField: '_id',
+    //         localField: 'userId',
+    //         as: 'userdata'
+    //       }
+    //     },
+    //     {
+    //       $unwind: '$userdata'
+    //     },
+    //     {
+    //       $lookup: {
+    //         from: 'driverlists',
+    //         foreignField: '_id',
+    //         localField: 'driverId',
+    //         as: 'driverdata'
+    //       }
+    //     },
+    //     {
+    //       $unwind: {
+    //       path: '$driverdata',
+    //       preserveNullAndEmptyArrays:true
+    //     }
+    //   } 
+    //   ])
+    //   io.emit('driverRideData', driverridedata);
+     
+    // });
+    // job.start();
 
 
  // console.log(result, "updated result");

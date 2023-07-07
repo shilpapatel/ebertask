@@ -7,8 +7,8 @@ import { SocketService } from 'src/app/shared/socket.service';
   styleUrls: ['./ridehistory.component.css']
 })
 export class RidehistoryComponent {
-
   createridedata: any[] = [];
+  selectedcreateride: any;
   constructor(private socketService: SocketService) { }
   ngOnInit(): void {
     this.getDriverRideData()
@@ -19,7 +19,7 @@ getDriverRideData(): void {
       (driverridedata: any) => {
         // this.createridedata = driverridedata;
         this.createridedata =driverridedata.filter(createride => createride.assigned === 'Accepted');
-         console.log(this.createridedata,"driverridedata");  
+        //  console.log(this.createridedata,"driverridedata");  
       },
       (error: any) => {
         console.error(error);
@@ -34,13 +34,20 @@ getDriverRideData(): void {
           this.createridedata= updatedDriverRide
           // this.createridedata[index].driverId = updatedDriverRide.driverId;
           this.createridedata[index].assigned = updatedDriverRide.assigned;
-           console.log(this.createridedata);
+          //  console.log(this.createridedata);
            this.getDriverRideData()
           // this.onAssignBtnClick(this.selectedRide)
         }
 
       // this.toastr.success('Driver Ride Updated');
     });
+  }
+
+
+  onselectedride(createridedata:any){
+    this.selectedcreateride = createridedata
+    // console.log(this.selectedridedata,"selected");
+    
   }
 
 }

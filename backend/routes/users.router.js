@@ -167,11 +167,24 @@ router.post('/add-user', upload.single('profile'), async (req, res, next) => {
 
   });
    
-  } catch (err) {
-      console.log(err);
-      res.status(500).json({
-          error: err,
-      });
+  } catch (error) {
+      console.log(error);
+      if (error.keyPattern.email) {
+        return res.status(500).send({
+          success: false,
+          message: "email already exist" 
+        })
+      } 
+      if (error.keyPattern.phone) {
+        return res.status(500).send({
+          success: false,
+          message: "phone no already exist" 
+        })
+      }
+      res.status(500).send(error);
+      // res.status(500).json({
+      //     error: err,
+      // });
   }
 });
 
@@ -240,11 +253,24 @@ router.put('/update-user', upload.single('profile'), async (req, res, next) => {
       message: 'User updated successfully!',
       UserUpdated: result,
     });
-  } catch (err) {
+  } catch (error) {
+    if (error.keyPattern.email) {
+      return res.status(500).send({
+        success: false,
+        message: "email already exist" 
+      })
+    } 
+    if (error.keyPattern.phone) {
+      return res.status(500).send({
+        success: false,
+        message: "phone no already exist" 
+      })
+    }
+    res.status(500).send(error);
     // console.log(err);
-    res.status(500).json({
-      error: err,
-    });
+    // res.status(500).json({
+    //   error: err,
+    // });
   }
 });
 

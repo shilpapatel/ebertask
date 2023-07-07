@@ -22,7 +22,7 @@ declare const google: any;
 })
 export class CreaterideComponent {
 
-
+  currentDateTime: string;
   isShow = false;
   isShowDirection = false;
   countries: any;
@@ -109,6 +109,7 @@ export class CreaterideComponent {
   // }
 
   ngOnInit(): void {
+    this.currentDateTime = this.datePipe.transform(new Date(), 'yyyy-MM-ddTHH:mm');
     // this.onAddStop();
     // this.initAutocomplete();
 

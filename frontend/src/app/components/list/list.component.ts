@@ -265,13 +265,20 @@ export class ListComponent {
     if (this.editingDriver) {
       formData.append('id', this.editingDriver._id);
       // this.socketService.updateDriver(formData);
-      this.listService.updateDriver(formData).subscribe(res => {
+      this.listService.updateDriver(formData).subscribe(
+        (res) => {
         const index = this.driverdata.findIndex(v => v._id === this.editingDriver._id);
         this.driverdata[index] = res['driverUpdated'];
         this.getDriver();
         this.toastr.success('Driver Updated ')
         this.editingDriver = null;
         this.driversForm.reset();
+
+      },
+      (error) => {
+        console.log(error);
+        
+        this.toastr.error(error.error.message);
       });
     } else {
       // Adding a new vehicle

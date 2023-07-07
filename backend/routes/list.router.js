@@ -89,13 +89,27 @@ router.post('/add-driver', upload.single('profile'), async (req, res, next) => {
       //     profile: result.profile,
       // },
     });
-
-  } catch (error) {
-    console.log(error.message);
-    res.status(500).json({
-      error: error.message,
-    });
-  }
+  }catch (error) {
+      if (error.keyPattern.email) {
+        return res.status(500).send({
+          success: false,
+          message: "email already exist" 
+        })
+      } 
+      if (error.keyPattern.phone) {
+        return res.status(500).send({
+          success: false,
+          message: "phone no already exist" 
+        })
+      }
+      res.status(500).send(error);
+    }
+  // } catch (error) {
+  //   console.log(error.message);
+  //   res.status(500).json({
+  //     error: error.message,
+  //   });
+  // }
 });
 
 
@@ -275,12 +289,27 @@ router.put('/update-driver', upload.single('profile'), async (req, res, next) =>
       message: 'Driver updated successfully!',
       driverUpdated: result,
     });
-  } catch (err) {
-     console.log(err);
-    res.status(500).json({
-      error: err,
-    });
+  }catch (error) {
+    if (error.keyPattern.email) {
+      return res.status(500).send({
+        success: false,
+        message: "email already exist" 
+      })
+    } 
+    if (error.keyPattern.phone) {
+      return res.status(500).send({
+        success: false,
+        message: "phone no already exist" 
+      })
+    }
+    res.status(500).send(error);
   }
+  // } catch (err) {
+  //    console.log(err);
+  //   res.status(500).json({
+  //     error: err,
+  //   });
+  // }
 });
 
 router.put('/update-status/:id', async (req, res) => {

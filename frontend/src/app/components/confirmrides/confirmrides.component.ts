@@ -166,28 +166,33 @@ export class ConfirmridesComponent {
     this.socketService.updateDriverRide(this.selectedcreateride._id, this.selectedDriver._id,this.selectedcreateride.assigned,this.selectedcreateride.created);
 }
 
-async onAssignNearestDriver() {
-  if (this.driverdatafiltered.length > 0) {
-    const driverCount = this.driverdatafiltered.length;
+ onAssignNearestDriver() {
+  console.log(this.driverdatafiltered);
+  this.selectedcreateride.assigned = "assigning";
+  this.selectedcreateride.created = Date.now()
+  this.socketService.updateNearestDriverRide(this.selectedcreateride._id, this.driverdatafiltered,this.selectedcreateride.assigned,this.selectedcreateride.created);
+  
+  // if (this.driverdatafiltered.length > 0) {
+  //   const driverCount = this.driverdatafiltered.length;
 
-    for (let index = 0; index < driverCount; index++) {
-      const driver = this.driverdatafiltered[index];
-      this.selectedDriver = driver;
-      this.selectedDriver.isAvailable = false;
-      this.selectedcreateride.assigned = "assigning";
-      this.selectedcreateride.created = Date.now();
+  //   for (let index = 0; index < driverCount; index++) {
+  //     const driver = this.driverdatafiltered[index];
+  //     this.selectedDriver = driver;
+  //     this.selectedDriver.isAvailable = false;
+  //     this.selectedcreateride.assigned = "assigning";
+  //     this.selectedcreateride.created = Date.now();
 
-      await this.socketService.updateDriverRide(
-        this.selectedcreateride._id,
-        this.selectedDriver._id,
-        this.selectedcreateride.assigned,
-        this.selectedcreateride.created
-      );
+  //     await this.socketService.updateDriverRide(
+  //       this.selectedcreateride._id,
+  //       this.selectedDriver._id,
+  //       this.selectedcreateride.assigned,
+  //       this.selectedcreateride.created
+  //     );
 
-      // Delay in milliseconds (e.g., 20000 for 20 seconds)
-      await new Promise((resolve) => setTimeout(resolve, 20000));
-    }
-  }
+  //     // Delay in milliseconds (e.g., 20000 for 20 seconds)
+  //     // await new Promise((resolve) => setTimeout(resolve, 20000));
+  //   }
+  // }
 }
 
 

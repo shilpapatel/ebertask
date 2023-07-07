@@ -21,7 +21,7 @@
                         </tr>
                     </thead>
                     <tbody id="tbody">
-                        <tr class="align-middle" id="tabletr" *ngFor="let confirmride of createridedata; let i = index">
+                        <tr class="align-middle" id="tabletr" *ngFor="let confirmride of createridedata;  let i = index" data-bs-toggle="modal" data-bs-target="#exampleModal"  (click)="onselectedride(confirmride)"> 
                             <td>{{i + 1}}</td>
                             <td>{{ confirmride._id}}</td>
                             <td>{{confirmride.driverdata?.name ?confirmride.driverdata.name:'null'}}</td>
@@ -60,3 +60,48 @@
     </div>
 </div>
 </div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Create ride Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+    <div class="modal-body">
+        <ng-container *ngIf="selectedcreateride">
+            <p><strong>User :</strong></p>
+            <p>UserId: {{selectedcreateride.userdata._id }}</p>
+            <p>Name: {{selectedcreateride.userdata.name}}</p>
+            <p>Email: {{selectedcreateride.userdata.email}}</p>
+            <p>Phone: {{ selectedcreateride.userdata.phone }}</p>
+            <br>
+            <p><strong>Driver :</strong></p>
+            <p>UserId: {{selectedcreateride.driverdata._id }}</p>
+            <p>Name: {{selectedcreateride.driverdata.name}}</p>
+            <p>Email: {{selectedcreateride.driverdata.email}}</p>
+            <p>Phone: {{ selectedcreateride.driverdata.phone }}</p>
+            <br>
+            <p><strong>Service :</strong></p>
+            <p>VehicleTypeId: {{selectedcreateride.vehicleTypeId }}</p>
+            <p>VehicleType: {{selectedcreateride.vehicleType }}</p>
+            <br>
+            <p>CityId: {{selectedcreateride.cityId }}</p>
+            <p>From: {{selectedcreateride.from }}</p>
+            <p>To: {{ selectedcreateride.to }}</p>
+            <p>Stops: {{ selectedcreateride.stops }}</p>
+
+            <p>TotalDistance: {{selectedcreateride.totalDistance }}</p>
+            <p>TotalTime: {{selectedcreateride.totalTime }}</p>
+            <p>EstimatePrice: {{selectedcreateride.estimatePrice }}</p>
+            <p>PaymentOption: {{selectedcreateride.paymentOption }}</p>
+            <p>DateTime: {{selectedcreateride.datetime }}</p>
+       </ng-container>
+      </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+        </div>
+      </div>
+    </div>
+  </div>
