@@ -1,3 +1,30 @@
+<div class="container">
+    <div class="form-group row m-2 d-flex justify-content-center">
+        <div class="col-sm-1 m-1">
+            <select class="form-control bg-secondary text-white" [(ngModel)]="sortOrder" (ngModelChange)="onSort()">
+                <option value="asc">Asc</option>
+                <option value="desc">Desc</option>
+            </select>
+        </div>
+        <div class="col-sm-5 m-1">
+            <input type="text" class="form-control" placeholder="Search by name" [(ngModel)]="searchQuery">
+        </div>
+        <div class="col-sm-1 m-1">
+            <button class="btn btn-secondary" (click)="onSearch()">Search</button>
+        </div>
+        <div class="col-sm-2 m-1">
+            <button class="btn btn-secondary" (click)="clearSearch()">Clear</button>
+        </div>
+        <div class="col-sm-2 m-1">
+            <button class="btn btn-secondary d-flex align-items-center" (click)="downloadDataAsCsv()"><mat-icon>arrow_downward</mat-icon>Download</button>
+          </div>
+        <!-- <div class="col-sm-2 m-1">
+            <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                (click)="onAddBtnDriver()">Add</button>
+        </div> -->
+    </div>
+</div>
+
 
 <div class="container">
     <div class="row my-4">
@@ -21,10 +48,11 @@
                         </tr>
                     </thead>
                     <tbody id="tbody">
-                        <tr class="align-middle" id="tabletr" *ngFor="let confirmride of createridedata;  let i = index" data-bs-toggle="modal" data-bs-target="#exampleModal"  (click)="onselectedride(confirmride)"> 
+                        <tr class="align-middle" id="tabletr" *ngFor="let confirmride of createridedata;  let i = index"
+                            data-bs-toggle="modal" data-bs-target="#exampleModal" (click)="onselectedride(confirmride)">
                             <td>{{i + 1}}</td>
                             <td>{{ confirmride._id}}</td>
-                            <td>{{confirmride.driverdata?.name ?confirmride.driverdata.name:'null'}}</td>
+                            <td>{{confirmride.driverdata?.name ?confirmride.driverdata.name:'no driver'}}</td>
                             <td>{{ confirmride.from }}</td>
                             <td>{{ confirmride.to }}</td>
                             <td>{{ confirmride.stops.join(', ') }}</td>
@@ -33,7 +61,8 @@
                             <td>{{ confirmride.totalTime }}</td>
                             <td>{{ confirmride.estimatePrice }}</td>
                             <td>
-                                <button type="button" class="btn btn-secondary btn-sm"><mat-icon>info</mat-icon></button>
+                                <button type="button"
+                                    class="btn btn-secondary btn-sm"><mat-icon>info</mat-icon></button>
                             </td>
                             <!-- <td>
                                 <button type="button" class="btn btn-secondary btn-sm"
@@ -46,9 +75,9 @@
                 <div *ngIf="createridedata.length === 0" class="text-center">
                     <p class="text-muted">No Running rides are available.</p>
                 </div>
-        </div>
+            </div>
 
-        <!-- <div class="pagination">
+            <div class="pagination">
                 <button class="btn btn-secondary" [disabled]="currentPage === 1" (click)="prevPage()">Previous</button>
                 <ng-container *ngFor="let page of generatePageArray()">
                     <button class="btn btn-secondary" [class.active]="page === currentPage" (click)="goToPage(page)">{{
@@ -56,52 +85,52 @@
                 </ng-container>
                 <button class="btn btn-secondary" [disabled]="currentPage === totalPages"
                     (click)="nextPage()">Next</button>
-            </div> -->
+            </div>
+        </div>
     </div>
-</div>
 </div>
 
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Create ride Details</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-    <div class="modal-body">
-        <ng-container *ngIf="selectedcreateride">
-            <p><strong>User :</strong></p>
-            <p>UserId: {{selectedcreateride.userdata._id }}</p>
-            <p>Name: {{selectedcreateride.userdata.name}}</p>
-            <p>Email: {{selectedcreateride.userdata.email}}</p>
-            <p>Phone: {{ selectedcreateride.userdata.phone }}</p>
-            <br>
-            <p><strong>Driver :</strong></p>
-            <p>UserId: {{selectedcreateride.driverdata._id }}</p>
-            <p>Name: {{selectedcreateride.driverdata.name}}</p>
-            <p>Email: {{selectedcreateride.driverdata.email}}</p>
-            <p>Phone: {{ selectedcreateride.driverdata.phone }}</p>
-            <br>
-            <p><strong>Service :</strong></p>
-            <p>VehicleTypeId: {{selectedcreateride.vehicleTypeId }}</p>
-            <p>VehicleType: {{selectedcreateride.vehicleType }}</p>
-            <br>
-            <p>CityId: {{selectedcreateride.cityId }}</p>
-            <p>From: {{selectedcreateride.from }}</p>
-            <p>To: {{ selectedcreateride.to }}</p>
-            <p>Stops: {{ selectedcreateride.stops }}</p>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Create ride Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ng-container *ngIf="selectedcreateride">
+                    <p><strong>User :</strong></p>
+                    <p>UserId: {{selectedcreateride.userdata._id }}</p>
+                    <p>Name: {{selectedcreateride.userdata.name}}</p>
+                    <p>Email: {{selectedcreateride.userdata.email}}</p>
+                    <p>Phone: {{ selectedcreateride.userdata.phone }}</p>
+                    <br>
+                    <p><strong>Driver :</strong></p>
+                    <p>UserId: {{selectedcreateride.driverdata._id }}</p>
+                    <p>Name: {{selectedcreateride.driverdata.name}}</p>
+                    <p>Email: {{selectedcreateride.driverdata.email}}</p>
+                    <p>Phone: {{ selectedcreateride.driverdata.phone }}</p>
+                    <br>
+                    <p><strong>Service :</strong></p>
+                    <p>VehicleTypeId: {{selectedcreateride.vehicleTypeId }}</p>
+                    <p>VehicleType: {{selectedcreateride.vehicleType }}</p>
+                    <br>
+                    <p>CityId: {{selectedcreateride.cityId }}</p>
+                    <p>From: {{selectedcreateride.from }}</p>
+                    <p>To: {{ selectedcreateride.to }}</p>
+                    <p>Stops: {{ selectedcreateride.stops }}</p>
 
-            <p>TotalDistance: {{selectedcreateride.totalDistance }}</p>
-            <p>TotalTime: {{selectedcreateride.totalTime }}</p>
-            <p>EstimatePrice: {{selectedcreateride.estimatePrice }}</p>
-            <p>PaymentOption: {{selectedcreateride.paymentOption }}</p>
-            <p>DateTime: {{selectedcreateride.datetime }}</p>
-       </ng-container>
-      </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+                    <p>TotalDistance: {{selectedcreateride.totalDistance }}</p>
+                    <p>TotalTime: {{selectedcreateride.totalTime }}</p>
+                    <p>EstimatePrice: {{selectedcreateride.estimatePrice }}</p>
+                    <p>PaymentOption: {{selectedcreateride.paymentOption }}</p>
+                    <p>DateTime: {{selectedcreateride.datetime }}</p>
+                </ng-container>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+            </div>
         </div>
-      </div>
     </div>
-  </div>
+</div>

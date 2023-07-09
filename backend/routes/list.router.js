@@ -176,7 +176,6 @@ router.get('/get-drivers', async (req, res, next) => {
     const count = await DriverList.countDocuments({ $or: [{ name: searchRegex }, { email: searchRegex }, { phone: searchRegex }] });
     const totalPages = Math.ceil(count / limit);
     const skip = (page - 1) * limit;
-
     const pipeline = [
       {
         $lookup: {

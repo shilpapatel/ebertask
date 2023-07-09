@@ -287,6 +287,117 @@ const configureSocket = (io) => {
       }
     });
 
+  //   socket.on('getDriverRideHistory', async (params) => {
+  //     try {
+  //       const page = parseInt(params.page) || 1;
+  //       const limit = parseInt(params.pageSize) || 3;
+  //       const searchQuery = params.searchQuery || '';
+  //       const sortField = params.sortField || 'assigned'; // Default sort field is 'name'
+  //       const sortOrder = params.sortOrder || 'asc';
+  //   let sortOptions = {};
+  //   sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
+
+  //   const searchRegex = new RegExp(searchQuery, 'i');
+  //   const countPipeline = [
+  //     {
+  //       $match: {
+  //         $or: [
+  //           { from: searchRegex },
+  //           { to: searchRegex },
+  //           { assigned: searchRegex },
+  //           { estimatePrice: searchRegex }
+  //         ]
+  //       }
+  //     },
+  //     {
+  //       $count: 'total'
+  //     }
+  //   ];
+
+  //   const countResult = await CreateRide.aggregate(countPipeline);
+  //   const count = countResult.length > 0 ? countResult[0].total : 0;
+  //   // const count = await DriverList.countDocuments({ $or: [{ from: searchRegex }, { to: searchRegex }, {assigned: searchRegex }] });
+  //   const totalPages = Math.ceil(count / limit);
+  //   const skip = (page - 1) * limit;
+  //   const pipeline = [
+  //     {
+  //     $lookup: {
+  //       from: 'cities',
+  //       foreignField: '_id',
+  //       localField: 'cityId',
+  //       as: 'citydata'
+  //     }
+  //   },
+  //   {
+  //     $unwind: '$citydata'
+  //   },
+  //   {
+  //     $lookup: {
+  //       from: 'vehicletypes',
+  //       foreignField: '_id',
+  //       localField: 'vehicleTypeId',
+  //       as: 'vehicletypedata'
+  //     }
+  //   },
+  //   {
+  //     $unwind: '$vehicletypedata'
+  //   },
+  //   {
+  //     $lookup: {
+  //       from: 'users',
+  //       foreignField: '_id',
+  //       localField: 'userId',
+  //       as: 'userdata'
+  //     }
+  //   },
+  //   {
+  //     $unwind: '$userdata'
+  //   },
+  //   {
+  //     $lookup: {
+  //       from: 'driverlists',
+  //       foreignField: '_id',
+  //       localField: 'driverId',
+  //       as: 'driverdata'
+  //     }
+  //   },
+  //   {
+  //     $unwind: {
+  //     path: '$driverdata',
+  //     preserveNullAndEmptyArrays:true
+  //   }
+  //   },
+  //   {
+  //     $match: {
+  //       $or: [
+  //         { from: searchRegex },
+  //         { to: searchRegex },
+  //         { assigned: searchRegex },
+  //         { estimatePrice: searchRegex },
+  //       ]
+  //     }
+  //   },
+  //   {
+  //     $sort: sortOptions
+  //   },
+  //   {
+  //     $skip: skip
+  //   },
+  //   {
+  //     $limit: limit
+  //   }, 
+  // ]
+  // const driverridedata = await CreateRide.aggregate(pipeline);
+       
+  //       io.emit('driverRideHistoryData', driverridedata,totalPages,page);
+
+  //     } catch (error) {
+  //       console.log(error);
+  //       socket.emit('getDriverRideHistoryError', { error });
+  //     }
+  //   });
+
+
     const job = new cron.CronJob('* * * * * *', async () => {
       // console.log('Cron job start');
       const pendingRides = await CreateRide.find({ assigned: 'assigning' }).exec();
@@ -731,6 +842,84 @@ const configureSocket = (io) => {
       } catch (err) {
         console.log(err);
         io.emit('deleteDriverRideError', { error: err });
+      }
+    });
+
+
+    socket.on('deleteConfirmRide', async (driverrideId) => {
+      try {
+        const updatedDriverId = {
+          // driverId: null,
+          assigned: 'cancelled'
+        };
+    
+        // const result1 = await DriverList.findOneAndUpdate({ assign: '1' }, { assign: '0' }, { new: true });
+        //   io.emit('driverUpdated', result1);
+          // console.log(result1);
+          const result = await CreateRide.findByIdAndUpdate(driverrideId, updatedDriverId, { new: true });
+        //  const result = await CreateRide.findOneAndUpdate({ assigned: 'assigning' }, updatedDriverId, { new: true });
+        io.emit('driverrideupdated', result);
+        // console.log(result, "updated result");
+        // console.log(result._id, "updated id");
+    
+        // if (!result) {
+        //   io.emit('deleteDriverRideError', { message: 'Driver not found' });
+        // } else {
+        //   io.emit('driverRideDeleted', { message: 'Driver ride updated successfully' });
+      // }
+          const driverridedata = await CreateRide.aggregate([
+            {
+              $lookup: {
+                from: 'cities',
+                foreignField: '_id',
+                localField: 'cityId',
+                as: 'citydata'
+              }
+            },
+            {
+              $unwind: '$citydata'
+            },
+            {
+              $lookup: {
+                from: 'vehicletypes',
+                foreignField: '_id',
+                localField: 'vehicleTypeId',
+                as: 'vehicletypedata'
+              }
+            },
+            {
+              $unwind: '$vehicletypedata'
+            },
+            {
+              $lookup: {
+                from: 'users',
+                foreignField: '_id',
+                localField: 'userId',
+                as: 'userdata'
+              }
+            },
+            {
+              $unwind: '$userdata'
+            },
+            {
+              $lookup: {
+                from: 'driverlists',
+                foreignField: '_id',
+                localField: 'driverId',
+                as: 'driverdata'
+              }
+            },
+            {
+              $unwind: {
+              path: '$driverdata',
+              preserveNullAndEmptyArrays:true
+            }
+          } 
+          ])
+          io.emit('driverRideData', driverridedata);
+      } catch (err) {
+        console.log(err);
+        io.emit('deleteConfirmRideError', { error: err });
       }
     });
 

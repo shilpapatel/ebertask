@@ -21,7 +21,6 @@ export class ConfirmridesComponent {
   private socket: Socket;
   // assignedDriverName: string;
   assignedDriverName: string = 'Assign Driver';
-
   selectedUserId: string | undefined;
   selectedUserData: any | undefined;
   filteredRides:any
@@ -39,6 +38,8 @@ export class ConfirmridesComponent {
   sortField: string = 'name';
   activeDrivers: any[] = [];
   selectedcreateride: any;
+
+  
 
   constructor(private http: HttpClient, private formBuilder: FormBuilder, public router: Router, private toastr: ToastrService,
     private createrideService: CreaterideService, public usersservice: UsersService,
@@ -68,14 +69,26 @@ export class ConfirmridesComponent {
     this.socketService.getDriverRideData().subscribe(
       (driverridedata: any) => {
         this.createridedata = driverridedata;
+        this.createridedata =driverridedata.filter(createride => createride.assigned === 'pending' || createride.assigned === 'timeout' || createride.assigned === 'rejected' || createride.assigned === 'accepted');
         //  console.log(this.createridedata,"driverridedata");  
       },
       (error: any) => {
         console.error(error);
       }
     );
-
   }
+
+  // getDriverRideData(): void {
+  //   this.socketService.getDriverRideData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder).subscribe(
+  //     (data: any) => {
+  //       this.createridedata = data.driverridedata.filter(createride => createride.assigned === 'pending' || createride.assigned === 'timeout' || createride.assigned === 'rejected' || createride.assigned === 'accepted');;
+  //       this.totalPages = data.totalPages;
+  //     },
+  //     (error: any) => {
+  //       console.error(error);
+  //     }
+  //   );
+  // }
 
   subscribeToListenDriverUpdate() {
     this.socketService.subscribeToListenDriverUpdate().subscribe(updatedDriver => {
@@ -171,7 +184,26 @@ export class ConfirmridesComponent {
   this.selectedcreateride.assigned = "assigning";
   this.selectedcreateride.created = Date.now()
   this.socketService.updateNearestDriverRide(this.selectedcreateride._id, this.driverdatafiltered,this.selectedcreateride.assigned,this.selectedcreateride.created);
+ }
+
+ onDeleteConfirmRide(createrideId:any){
+  // const rideId = createrideId;
+  // console.log(rideId);
+  if (confirm('Are you sure you want to delete this user?')) {
+    this.socketService.deleteConfirmRide(createrideId).subscribe(
+      response => {
+        
+        this.getDriverRideData();
+      },
+      error => {
+        console.log(error);
+      }
+    );
+   }
   
+
+ }
+}
   // if (this.driverdatafiltered.length > 0) {
   //   const driverCount = this.driverdatafiltered.length;
 
@@ -193,8 +225,6 @@ export class ConfirmridesComponent {
   //     // await new Promise((resolve) => setTimeout(resolve, 20000));
   //   }
   // }
-}
-
 
   // onAssignNearestDriver() {
     
@@ -225,11 +255,6 @@ export class ConfirmridesComponent {
   //   processNextDriver();
   // }
   // }
-}
-
-
-
-
 
   // getCreateRide() {
   //   this.createrideService.getCreateRide().subscribe((res) => {

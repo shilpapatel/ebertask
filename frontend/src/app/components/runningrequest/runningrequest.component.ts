@@ -8,6 +8,14 @@ import { SocketService } from 'src/app/shared/socket.service';
 })
 export class RunningrequestComponent {
   createridedata: any[] = [];
+
+  currentPage: number = 1;
+  totalPages: number = 0;
+  pageSize: number = 3;
+  searchQuery: string = '';
+  sortOrder: string = 'asc'; 
+  sortField: string = 'assigned';
+  
   constructor(private socketService: SocketService) { }
   ngOnInit(): void {
     this.getDriverRideData()
@@ -25,6 +33,18 @@ getDriverRideData(): void {
       }
     );
   }
+
+// getDriverRideData(): void {
+//   this.socketService.getDriverRideData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder).subscribe(
+//     (data: any) => {
+//       this.createridedata = data.driverridedata.filter(createride => createride.assigned === 'assigning');;
+//       this.totalPages = data.totalPages;
+//     },
+//     (error: any) => {
+//       console.error(error);
+//     }
+//   );
+// }
   subscribeToListenDriverRideUpdate() {
     this.socketService.subscribeToListenDriverRideUpdate().subscribe(updatedDriverRide => {
       console.log(updatedDriverRide);

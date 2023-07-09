@@ -102,6 +102,7 @@ subscribeToListenDriverTypeUpdate(): Observable<any> {
     });
   }
   getDriverRideData(): Observable<any> {
+
     return new Observable<any>((observer) => {
       this.socket.emit('getDriverRide');
 
@@ -114,6 +115,47 @@ subscribeToListenDriverTypeUpdate(): Observable<any> {
       };
     });
   }
+
+  getDriverRideHistoryData(page: number, pageSize: number, searchQuery: string, sortField: string, sortOrder: string): Observable<any> {
+    const params = {
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+      searchQuery: searchQuery,
+      sortField: sortField,
+      sortOrder: sortOrder
+    };
+    return new Observable<any>((observer) => {
+      this.socket.emit('getDriverRideHistory', params);
+  
+      this.socket.on('driverRideHistoryData', (driverridedata, totalPages, currentPage) => {
+        observer.next({ driverridedata, totalPages, currentPage });
+      });
+  
+      return () => {
+        this.socket.off('driverRideHistoryData');
+      };
+    });
+  }
+  // getDriverRideData(page: number, pageSize: number, searchQuery: string, sortField: string, sortOrder: string): Observable<any> {
+  //   const params = {
+  //     page: page.toString(),
+  //     pageSize: pageSize.toString(),
+  //     searchQuery: searchQuery,
+  //     sortField: sortField,
+  //     sortOrder: sortOrder
+  //   };
+  //   return new Observable<any>((observer) => {
+  //     this.socket.emit('getDriverRide', params);
+  
+  //     this.socket.on('driverRideData', (driverridedata, totalPages, currentPage) => {
+  //       observer.next({ driverridedata, totalPages, currentPage });
+  //     });
+  
+  //     return () => {
+  //       this.socket.off('driverRideData');
+  //     };
+  //   });
+  // }
   // updateDriverRide(driverrideId: string, driverId: string,assignedvalue:string): void {
   //   this.socket.emit('updatedriverride', {driverrideId, driverId ,assignedvalue});
   // }
@@ -156,6 +198,25 @@ subscribeToListenDriverTypeUpdate(): Observable<any> {
         this.socket.off('driverRideDeleted');
         this.socket.off('deleteDriverRideError');
       };
+    });
+  }
+
+  deleteConfirmRide(createrideId: string): Observable<any> {
+    return new Observable<any>(observer => {
+      this.socket.emit('deleteConfirmRide', createrideId);
+
+      // this.socket.on('driverRideDeleted', response => {
+      //   observer.next(response);
+      // });
+
+      // this.socket.on('deleteDriverRideError', error => {
+      //   observer.error(error);
+      // });
+
+      // return () => {
+      //   this.socket.off('driverRideDeleted');
+      //   this.socket.off('deleteConfirmRideError');
+      // };
     });
   }
 

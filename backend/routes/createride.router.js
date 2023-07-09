@@ -3,24 +3,27 @@ const router = express.Router();
 const multer = require('multer')
 const mongoose = require('mongoose');
 const accountSid = 'ACb44d005c170946735f2e9a3280b96aab';
-const authToken = 'db965c28b6ab4012ad67085ed3571f03';
+const authToken = '[db965c28b6ab4012ad67085ed3571f03]';
 const client = require('twilio')(accountSid, authToken);
 
 
 const DIR = './public/'
 let CreateRide = require('../model/createride.model')
-async  function sendmessage(){
-  await  client.messages
+function sendmessage(){
+client.messages
   .create({
     body:'Hello From Eber',
-    from: "+18145262612",
-    to: "+918733930293",
+    from: '+18145262612',
+    to: '+919173899440'
   })
-  .then((message) => console.log(message.sid))
-  .catch((error)=>{
+  .then((message) => console.log(message.sid,"message"))
+  .done()
+  .catch((error) => {
     console.log(error);
-  }
-  )
+  });
+  // .catch((error)=>{
+  //   console.log(error);
+  // })
 }
 router.post('/add-ride', async (req, res, next) => {
   try {
@@ -28,7 +31,7 @@ router.post('/add-ride', async (req, res, next) => {
     // console.log(rideData);
     const newRide = new CreateRide(rideData);
     const rideCreated = await newRide.save();
-    await sendmessage()
+    sendmessage()
     res.status(201).json({
       message: 'Ride created successfully!',
       rideCreated,

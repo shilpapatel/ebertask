@@ -28,7 +28,6 @@ export class ListService {
       sortField: sortField,
     sortOrder: sortOrder
     };
-
     return this.http.get<any>(`${this.baseURL}/get-drivers`, { params });
   }
 
