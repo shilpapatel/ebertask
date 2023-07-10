@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CsvExportService } from 'src/app/shared/csv-export.service';
 import { SocketService } from 'src/app/shared/socket.service';
+declare const google: any;
 
 @Component({
   selector: 'app-ridehistory',
@@ -22,38 +23,150 @@ export class RidehistoryComponent {
   ngOnInit(): void {
     this.getDriverRideData()
      this.subscribeToListenDriverRideUpdate()
+     this.initMap()
   }
 
+  // initMap() {
+  //   const myLatLng = { lat: 22.309157, lng: 70.703702 };
+  //   const mapOptions = {
+  //     center: myLatLng,
+  //     zoom: 7,
+  //     mapTypeId: google.maps.MapTypeId.ROADMAP
+  //   };
+  
+  //   const map = new google.maps.Map(document.getElementById('googleMap'), mapOptions);
+  
+  //   const geocoder = new google.maps.Geocoder();
+  
+  //   const fromAddress = this.selectedcreateride.from; // Replace with the actual address of the "From" location
+  //   const toAddress = this.selectedcreateride.to; // Replace with the actual address of the "To" location
+  // console.log(fromAddress);
+  // console.log(toAddress);
+  
+  //   // Geocode the "From" location address
+  //   geocoder.geocode({ address: fromAddress }, (results, status) => {
+  //     if (status === google.maps.GeocoderStatus.OK) {
+  //       const fromLatLng = results[0].geometry.location;
+  
+  //       // Create a marker for the "From" location
+  //       const fromMarker = new google.maps.Marker({
+  //         position: fromLatLng,
+  //         map: map,
+  //         title: 'From Location'
+  //       });
+  
+  //       // Geocode the "To" location address
+  //       geocoder.geocode({ address: toAddress }, (results, status) => {
+  //         if (status === google.maps.GeocoderStatus.OK) {
+  //           const toLatLng = results[0].geometry.location;
+  
+  //           // Create a marker for the "To" location
+  //           const toMarker = new google.maps.Marker({
+  //             position: toLatLng,
+  //             map: map,
+  //             title: 'To Location'
+  //           });
+  
+  //           // Create a polyline between the "From" and "To" locations
+  //           const polyline = new google.maps.Polyline({
+  //             path: [fromLatLng, toLatLng],
+  //             strokeColor: '#FF0000',
+  //             strokeOpacity: 1.0,
+  //             strokeWeight: 2
+  //           });
+  
+  //           polyline.setMap(map);
+  //         } else {
+  //           console.log('Geocode was not successful for the "To" location: ' + status);
+  //         }
+  //       });
+  //     } else {
+  //       console.log('Geocode was not successful for the "From" location: ' + status);
+  //     }
+  //   });
+  // }
+  
+  // initMap() {
+  //   const myLatLng = { lat: 22.309157, lng: 70.703702 };
+  //   const mapOptions = {
+  //     center: myLatLng,
+  //     zoom: 7,
+  //     mapTypeId: google.maps.MapTypeId.ROADMAP
+  //   };
+  
+  //   const map = new google.maps.Map(document.getElementById('googleMap'), mapOptions);
+  
+  //   const fromLatLng = new google.maps.LatLng(); // Replace with the actual "From" coordinates
+  //   const toLatLng = new google.maps.LatLng();
+  
+  //   const polyline = new google.maps.Polyline({
+  //     path: [fromLatLng, toLatLng],
+  //     strokeColor: '#FF0000',
+  //     strokeOpacity: 1.0,
+  //     strokeWeight: 2
+  //   });
+  //   const fromMarker = new google.maps.Marker({
+  //     position: fromLatLng,
+  //     map: map,
+  //     title: 'From Location'
+  //   });
+  
+  //   const toMarker = new google.maps.Marker({
+  //     position: toLatLng,
+  //     map: map,
+  //     title: 'To Location'
+  //   });
+  
+  //   polyline.setMap(map);
+  // }
+  // initMap() {
+  //   const myLatLng = { lat: 22.309157, lng: 70.703702 };//22.309157, 70.703702
+  //   const mapOptions = {
+  //     center: myLatLng,
+  //     zoom: 7,
+  //     mapTypeId: google.maps.MapTypeId.ROADMAP
+  //   };
+
+  //   const map = new google.maps.Map(document.getElementById('googleMap'), mapOptions);
+
+  //   // const directionsService = new google.maps.DirectionsService();
+  //   // const directionsDisplay = new google.maps.DirectionsRenderer();
+  //   // directionsDisplay.setMap(map);
+  // }
   downloadDataAsCsv(): void {
      this.csvExportService.exportToCsv(this.createridedata, 'ridehistory.csv');
   }
 
-getDriverRideData(): void {
-    this.socketService.getDriverRideData().subscribe(
-      (driverridedata: any) => {
-        console.log(driverridedata);
+// getDriverRideData(): void {
+//     this.socketService.getDriverRideData().subscribe(
+//       (driverridedata: any) => {
+//         console.log(driverridedata);
         
-        // this.createridedata = driverridedata;
-        this.createridedata =driverridedata.filter(createride => createride.assigned === 'cancelled');
-        //  console.log(this.createridedata,"driverridedata");  
+//         // this.createridedata = driverridedata;
+//         this.createridedata =driverridedata.filter(createride => createride.assigned === 'cancelled');
+//         //  console.log(this.createridedata,"driverridedata");  
+//       },
+//       (error: any) => {
+//         console.error(error);
+//       }
+//     );
+//   }
+
+  getDriverRideData(): void {
+    this.socketService.getDriverRideHistoryData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder).subscribe(
+      (data: any) => {
+        console.log(data.driverridedata);
+        
+        this.createridedata = data.driverridedata;
+        // this.createridedata = data.driverridedata.filter(createride => createride.assigned === 'cancelled');
+        this.totalPages = data.totalPages;
+        this.currentPage = data.currentPage
       },
       (error: any) => {
         console.error(error);
       }
     );
   }
-
-  // getDriverRideData(): void {
-  //   this.socketService.getDriverRideHistoryData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder).subscribe(
-  //     (data: any) => {
-  //       this.createridedata = data.driverridedata.filter(createride => createride.assigned === 'cancelled');;
-  //       this.totalPages = data.totalPages;
-  //     },
-  //     (error: any) => {
-  //       console.error(error);
-  //     }
-  //   );
-  // }
 
   generatePageArray(): number[] {
     return Array(this.totalPages).fill(0).map((_, index) => index + 1);
@@ -112,7 +225,67 @@ getDriverRideData(): void {
   onselectedride(createridedata:any){
     this.selectedcreateride = createridedata
     // console.log(this.selectedridedata,"selected");
-    
+    this.initMap()
+  }
+
+  initMap() {
+    const myLatLng = { lat: 22.309157, lng: 70.703702 };
+    const mapOptions = {
+      center: myLatLng,
+      zoom: 7,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+  
+    const map = new google.maps.Map(document.getElementById('googleMap'), mapOptions);
+  
+    const geocoder = new google.maps.Geocoder();
+  
+    const fromAddress = this.selectedcreateride.from; // Replace with the actual address of the "From" location
+    const toAddress = this.selectedcreateride.to; // Replace with the actual address of the "To" location
+  console.log(fromAddress);
+  console.log(toAddress);
+  
+    // Geocode the "From" location address
+    geocoder.geocode({ address: fromAddress }, (results, status) => {
+      if (status === google.maps.GeocoderStatus.OK) {
+        const fromLatLng = results[0].geometry.location;
+  
+        // Create a marker for the "From" location
+        const fromMarker = new google.maps.Marker({
+          position: fromLatLng,
+          map: map,
+          title: 'From Location'
+        });
+  
+        // Geocode the "To" location address
+        geocoder.geocode({ address: toAddress }, (results, status) => {
+          if (status === google.maps.GeocoderStatus.OK) {
+            const toLatLng = results[0].geometry.location;
+  
+            // Create a marker for the "To" location
+            const toMarker = new google.maps.Marker({
+              position: toLatLng,
+              map: map,
+              title: 'To Location'
+            });
+  
+            // Create a polyline between the "From" and "To" locations
+            const polyline = new google.maps.Polyline({
+              path: [fromLatLng, toLatLng],
+              strokeColor: '#FF0000',
+              strokeOpacity: 1.0,
+              strokeWeight: 2
+            });
+  
+            polyline.setMap(map);
+          } else {
+            console.log('Geocode was not successful for the "To" location: ' + status);
+          }
+        });
+      } else {
+        console.log('Geocode was not successful for the "From" location: ' + status);
+      }
+    });
   }
 
 }

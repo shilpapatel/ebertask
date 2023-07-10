@@ -12,7 +12,6 @@ export class AdminpanelComponent implements OnInit {
   openSidebar: boolean = true;
   lastActivity: Date;
   logoutTimer: any;
-  
 
  menuSidebar = [
    // {
@@ -126,4 +125,55 @@ startLogoutTimer() {
  showSubmenu(itemEl: HTMLElement) {
    itemEl.classList.toggle("showMenu");
  }
+
 }
+
+// // Import the browser-specific notification types
+// declare var Notification: any;
+// export class DashboardComponent implements OnInit {
+
+//   ngOnInit() {
+//     // Check if driver is not found
+//     if (!driverFound) {
+//       this.showNotification('Driver Not Found', 'Please check again later.');
+//     }
+//   }
+
+//   showNotification(title: string, message: string) {
+//     // Check if the browser supports notifications
+//     if (!('Notification' in window)) {
+//       console.log('This browser does not support system notifications.');
+//       return;
+//     }
+
+//     // Request permission to display notifications
+//     Notification.requestPermission().then((permission) => {
+//       if (permission === 'granted') {
+//         // Create a new notification
+//         new Notification(title, { body: message });
+//       } else {
+//         console.log('Notification permission denied.');
+//       }
+//     });
+//   }
+
+
+//  // Function to handle push notification received
+//  handlePushNotification() {
+//   // Increment the notification count
+//   this.notificationCount++;
+//   // Play a sound using the Web Audio API
+//   this.playSoundNotification();
+// }
+
+// // Function to handle driver found and decrease notification count
+// handleDriverFound() {
+//   // Decrement the notification count
+//   this.notificationCount--;
+// }
+
+// // Function to play a sound notification
+// playSoundNotification() {
+//   // Use the Web Audio API to play a sound
+//   // Implementation depends on your specific requirements
+// }

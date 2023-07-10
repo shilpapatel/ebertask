@@ -8,6 +8,20 @@ ul {
   padding: 0;
 }
 
+.home-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: #848d8d;
+  height: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.notification-icon{
+  padding-top: 5px;
+  margin-top: 20px;
+}
 .logbtn {
   cursor: pointer;
   color: #000;
@@ -97,16 +111,6 @@ logbtn:hover {
   flex-direction: column;
 }
 
-.home-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background-color: #848d8d;
-  height: 80px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 
 /* .home-section .home-header {
       background-color: #848d8d;

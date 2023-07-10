@@ -36,6 +36,7 @@ import { SettingsComponent } from './components/settings/settings.component';
 import { AdminpanelModule } from './components/adminpanel/adminpanel.module';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatBadgeModule } from '@angular/material/badge';
 
 @NgModule({
   declarations: [
@@ -67,6 +68,7 @@ import { MatMenuModule } from '@angular/material/menu';
     NgxPaginationModule,AdminpanelModule,
     MatIconModule,
     MatMenuModule,
+    MatBadgeModule,
     NgxSpinnerModule
     
     

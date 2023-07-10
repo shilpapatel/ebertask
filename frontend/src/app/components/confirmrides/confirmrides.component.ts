@@ -169,6 +169,8 @@ export class ConfirmridesComponent {
       this.driverdatafiltered = filteredDrivers.filter(driver => driver.status === 'Approved' && driver.assign === '0');
       console.log(this.driverdatafiltered, "driverfiltereddata");
     }
+
+   
   }
 
   onAssignDriver(driver: any) {
@@ -204,6 +206,20 @@ export class ConfirmridesComponent {
 
  }
 }
+
+
+ // if (this.driverdatafiltered.length === 0) {
+    //   // Send a request to the backend to trigger the push notification
+    //   this.http.post('/api/send-notification', { rideId: this.selectedcreateride.id }).subscribe(
+    //     () => {
+    //       console.log('Notification sent to admin');
+    //     },
+    //     error => {
+    //       console.error('Error sending notification:', error);
+    //     }
+    //   );
+    // }
+    
   // if (this.driverdatafiltered.length > 0) {
   //   const driverCount = this.driverdatafiltered.length;
 

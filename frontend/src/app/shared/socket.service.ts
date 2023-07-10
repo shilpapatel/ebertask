@@ -126,9 +126,12 @@ subscribeToListenDriverTypeUpdate(): Observable<any> {
     };
     return new Observable<any>((observer) => {
       this.socket.emit('getDriverRideHistory', params);
+      console.log(params);
+      
   
       this.socket.on('driverRideHistoryData', (driverridedata, totalPages, currentPage) => {
         observer.next({ driverridedata, totalPages, currentPage });
+        
       });
   
       return () => {

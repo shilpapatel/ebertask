@@ -26,7 +26,7 @@
 </div>
 
 
-<div class="container">
+<div class="container ">
     <div class="row my-4">
         <div class="col-lg-12">
             <div class="table-responsive">
@@ -77,13 +77,13 @@
                 </div>
             </div>
 
-            <div class="pagination">
-                <button class="btn btn-secondary" [disabled]="currentPage === 1" (click)="prevPage()">Previous</button>
+            <div class="pagination d-flex justify-content-center">
+                <button class="btn btn-secondary mx-1" [disabled]="currentPage === 1" (click)="prevPage()">Previous</button>
                 <ng-container *ngFor="let page of generatePageArray()">
-                    <button class="btn btn-secondary" [class.active]="page === currentPage" (click)="goToPage(page)">{{
+                    <button class="btn btn-secondary mx-1" [class.active]="page === currentPage" (click)="goToPage(page)">{{
                         page }}</button>
                 </ng-container>
-                <button class="btn btn-secondary" [disabled]="currentPage === totalPages"
+                <button class="btn btn-secondary mx-1" [disabled]="currentPage === totalPages"
                     (click)="nextPage()">Next</button>
             </div>
         </div>
@@ -91,7 +91,7 @@
 </div>
 
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Create ride Details</h5>
@@ -100,32 +100,37 @@
             <div class="modal-body">
                 <ng-container *ngIf="selectedcreateride">
                     <p><strong>User :</strong></p>
-                    <p>UserId: {{selectedcreateride.userdata._id }}</p>
+                    <!-- <p>UserId: {{selectedcreateride.userdata._id }}</p> -->
                     <p>Name: {{selectedcreateride.userdata.name}}</p>
                     <p>Email: {{selectedcreateride.userdata.email}}</p>
                     <p>Phone: {{ selectedcreateride.userdata.phone }}</p>
                     <br>
-                    <p><strong>Driver :</strong></p>
+                    <!-- <p><strong>Driver :</strong></p>
                     <p>UserId: {{selectedcreateride.driverdata._id }}</p>
                     <p>Name: {{selectedcreateride.driverdata.name}}</p>
                     <p>Email: {{selectedcreateride.driverdata.email}}</p>
                     <p>Phone: {{ selectedcreateride.driverdata.phone }}</p>
-                    <br>
+                    <br> -->
                     <p><strong>Service :</strong></p>
-                    <p>VehicleTypeId: {{selectedcreateride.vehicleTypeId }}</p>
+                    <!-- <p>VehicleTypeId: {{selectedcreateride.vehicleTypeId }}</p> -->
                     <p>VehicleType: {{selectedcreateride.vehicleType }}</p>
                     <br>
-                    <p>CityId: {{selectedcreateride.cityId }}</p>
-                    <p>From: {{selectedcreateride.from }}</p>
-                    <p>To: {{ selectedcreateride.to }}</p>
-                    <p>Stops: {{ selectedcreateride.stops }}</p>
-
+                    <!-- <p>CityId: {{selectedcreateride.cityId }}</p> -->
+                    <p><strong>From: </strong> </p>
+                    <p>{{selectedcreateride.from }}</p>
+                    <br>
+                    <p><strong>To: </strong> </p>
+                    <p>{{ selectedcreateride.to }}</p>
+                    <!-- <p>Stops: {{ selectedcreateride.stops }}</p> -->
+                    <br>
                     <p>TotalDistance: {{selectedcreateride.totalDistance }}</p>
                     <p>TotalTime: {{selectedcreateride.totalTime }}</p>
                     <p>EstimatePrice: {{selectedcreateride.estimatePrice }}</p>
-                    <p>PaymentOption: {{selectedcreateride.paymentOption }}</p>
-                    <p>DateTime: {{selectedcreateride.datetime }}</p>
+                    <!-- <p>PaymentOption: {{selectedcreateride.paymentOption }}</p>
+                    <p>DateTime: {{selectedcreateride.datetime }}</p> -->
                 </ng-container>
+                
+                <div id="googleMap" class="map-container"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

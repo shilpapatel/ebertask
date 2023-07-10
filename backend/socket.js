@@ -4,6 +4,17 @@ let DriverList = require('./model/list.model')
 let RunningRequest = require('./model/runningrequest.model')
 let CreateRide = require('./model/createride.model')
 
+    // cron.schedule('*/20 * * * * *', () => {
+    //   console.log("cron start");
+    //   socket.setMaxListeners(100);
+    // });
+
+    // const job = new cron.CronJob('*/20 * * * * *', () => {
+    //   console.log('Cron job start');
+    // });
+    // job.start();
+
+
 const configureSocket = (io) => {
   let activeDrivers = [];
   io.on('connection', (socket) => {
@@ -34,7 +45,6 @@ const configureSocket = (io) => {
         io.emit('updateDriverStatusError', { error: err });
       }
     });
-
 
     socket.on('updateDriverType', async (data) => {
 
@@ -84,9 +94,6 @@ const configureSocket = (io) => {
     //     });
     //   }
     // });
-
-
-
 
     socket.on('getDriversWithoutPage', async () => {
       try {
@@ -145,17 +152,6 @@ const configureSocket = (io) => {
         console.log(error);
       }
     });
-
-    // cron.schedule('*/20 * * * * *', () => {
-    //   console.log("cron start");
-    //   socket.setMaxListeners(100);
-    // });
-
-    // const job = new cron.CronJob('*/20 * * * * *', () => {
-    //   console.log('Cron job start');
-    // });
-    // job.start();
-
 
     socket.on('addDriverRide', async (data) => {
       try {
@@ -287,115 +283,119 @@ const configureSocket = (io) => {
       }
     });
 
-  //   socket.on('getDriverRideHistory', async (params) => {
-  //     try {
-  //       const page = parseInt(params.page) || 1;
-  //       const limit = parseInt(params.pageSize) || 3;
-  //       const searchQuery = params.searchQuery || '';
-  //       const sortField = params.sortField || 'assigned'; // Default sort field is 'name'
-  //       const sortOrder = params.sortOrder || 'asc';
-  //   let sortOptions = {};
-  //   sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
+    socket.on('getDriverRideHistory', async (params) => {
+      console.log(params);
+      try {
+        const page = parseInt(params.page) || 1;
+        const limit = parseInt(params.pageSize) || 3;
+        const searchQuery = params.searchQuery || '';
+        const sortField = params.sortField || 'assigned'; // Default sort field is 'name'
+        const sortOrder = params.sortOrder || 'asc';
+    let sortOptions = {};
+    sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
 
-  //   const searchRegex = new RegExp(searchQuery, 'i');
-  //   const countPipeline = [
-  //     {
-  //       $match: {
-  //         $or: [
-  //           { from: searchRegex },
-  //           { to: searchRegex },
-  //           { assigned: searchRegex },
-  //           { estimatePrice: searchRegex }
-  //         ]
-  //       }
-  //     },
-  //     {
-  //       $count: 'total'
-  //     }
-  //   ];
+    const searchRegex = new RegExp(searchQuery, 'i');
+    const countPipeline = [
+      {
+        $match: {
+          $or: [
+            { from: searchRegex },
+            { to: searchRegex },
+            { assigned: searchRegex },
+            { estimatePrice: searchRegex }
+          ],
+          assigned:{$in:["cancelled","completed"]}
+        }
+      },
+      {
+        $count: 'total'
+      }
+    ];
 
-  //   const countResult = await CreateRide.aggregate(countPipeline);
-  //   const count = countResult.length > 0 ? countResult[0].total : 0;
-  //   // const count = await DriverList.countDocuments({ $or: [{ from: searchRegex }, { to: searchRegex }, {assigned: searchRegex }] });
-  //   const totalPages = Math.ceil(count / limit);
-  //   const skip = (page - 1) * limit;
-  //   const pipeline = [
-  //     {
-  //     $lookup: {
-  //       from: 'cities',
-  //       foreignField: '_id',
-  //       localField: 'cityId',
-  //       as: 'citydata'
-  //     }
-  //   },
-  //   {
-  //     $unwind: '$citydata'
-  //   },
-  //   {
-  //     $lookup: {
-  //       from: 'vehicletypes',
-  //       foreignField: '_id',
-  //       localField: 'vehicleTypeId',
-  //       as: 'vehicletypedata'
-  //     }
-  //   },
-  //   {
-  //     $unwind: '$vehicletypedata'
-  //   },
-  //   {
-  //     $lookup: {
-  //       from: 'users',
-  //       foreignField: '_id',
-  //       localField: 'userId',
-  //       as: 'userdata'
-  //     }
-  //   },
-  //   {
-  //     $unwind: '$userdata'
-  //   },
-  //   {
-  //     $lookup: {
-  //       from: 'driverlists',
-  //       foreignField: '_id',
-  //       localField: 'driverId',
-  //       as: 'driverdata'
-  //     }
-  //   },
-  //   {
-  //     $unwind: {
-  //     path: '$driverdata',
-  //     preserveNullAndEmptyArrays:true
-  //   }
-  //   },
-  //   {
-  //     $match: {
-  //       $or: [
-  //         { from: searchRegex },
-  //         { to: searchRegex },
-  //         { assigned: searchRegex },
-  //         { estimatePrice: searchRegex },
-  //       ]
-  //     }
-  //   },
-  //   {
-  //     $sort: sortOptions
-  //   },
-  //   {
-  //     $skip: skip
-  //   },
-  //   {
-  //     $limit: limit
-  //   }, 
-  // ]
-  // const driverridedata = await CreateRide.aggregate(pipeline);
+    const countResult = await CreateRide.aggregate(countPipeline);
+    const count = countResult.length > 0 ? countResult[0].total : 0;
+    //  const count = await DriverList.countDocuments({ $or: [{ from: searchRegex }, { to: searchRegex }, {assigned: searchRegex }],assigned:{$in:["cancelled","completed"]}});
+    const totalPages = Math.ceil(count / limit);
+    const skip = (page - 1) * limit;
+    const pipeline = [
+      {
+      $lookup: {
+        from: 'cities',
+        foreignField: '_id',
+        localField: 'cityId',
+        as: 'citydata'
+      }
+    },
+    {
+      $unwind: '$citydata'
+    },
+    {
+      $lookup: {
+        from: 'vehicletypes',
+        foreignField: '_id',
+        localField: 'vehicleTypeId',
+        as: 'vehicletypedata'
+      }
+    },
+    {
+      $unwind: '$vehicletypedata'
+    },
+    {
+      $lookup: {
+        from: 'users',
+        foreignField: '_id',
+        localField: 'userId',
+        as: 'userdata'
+      }
+    },
+    {
+      $unwind: '$userdata'
+    },
+    {
+      $lookup: {
+        from: 'driverlists',
+        foreignField: '_id',
+        localField: 'driverId',
+        as: 'driverdata'
+      }
+    },
+    {
+      $unwind: {
+      path: '$driverdata',
+      preserveNullAndEmptyArrays:true
+    }
+    },
+    {
+      $match: {
+        $or: [
+          { from: searchRegex },
+          { to: searchRegex },
+          { assigned: searchRegex },
+          { estimatePrice: searchRegex },
+        ],
+        assigned:{$in:["cancelled","completed"]}
+      }
+    },
+    {
+      $sort: sortOptions
+    },
+    {
+      $skip: skip
+    },
+    {
+      $limit: limit
+    }, 
+  ]
+  const driverridedata = await CreateRide.aggregate(pipeline);
+  console.log(driverridedata);
        
-  //       io.emit('driverRideHistoryData', driverridedata,totalPages,page);
+        io.emit('driverRideHistoryData', driverridedata,totalPages,page);
 
-  //     } catch (error) {
-  //       console.log(error);
-  //       socket.emit('getDriverRideHistoryError', { error });
-  //     }
-  //   });
+      } catch (error) {
+        console.log(error);
+        socket.emit('getDriverRideHistoryError', { error });
+      }
+    });
 
 
     const job = new cron.CronJob('* * * * * *', async () => {
@@ -602,8 +602,6 @@ const configureSocket = (io) => {
       }
     });
     
-   
-
     socket.on('updatedriverride', async (data) => {
       //  console.log(data);
       try {
@@ -688,7 +686,6 @@ const configureSocket = (io) => {
       }
     });
 
-
     socket.on('acceptDriverRide', async (data) => {
         console.log(data);
       try {
@@ -766,8 +763,6 @@ const configureSocket = (io) => {
       }
     });
 
-
-
     socket.on('deleteDriverRide', async (driverrideId) => {
       try {
         const updatedDriverId = {
@@ -844,7 +839,6 @@ const configureSocket = (io) => {
         io.emit('deleteDriverRideError', { error: err });
       }
     });
-
 
     socket.on('deleteConfirmRide', async (driverrideId) => {
       try {
@@ -924,7 +918,6 @@ const configureSocket = (io) => {
     });
 
   
-
     socket.on('disconnect', () => {
       console.log('Client disconnected');
     });
