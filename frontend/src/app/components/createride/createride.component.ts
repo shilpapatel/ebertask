@@ -33,7 +33,8 @@ export class CreaterideComponent {
   usersForm: FormGroup;
   userphoneForm: FormGroup;
   bookrideForm: FormGroup;
-  directionForm: FormGroup;
+  from: string;
+  to:string;
   userdatas: any[] = [];
   editingUser: any;
   callingCodes: string[] = [];
@@ -46,7 +47,7 @@ export class CreaterideComponent {
   searchQuery: string = '';
   sortOrder: string = 'asc';
   sortField: string = 'name';
-
+  
   fromCoordinates: any;
   ridecity: any;
   _id: string;
@@ -85,8 +86,8 @@ export class CreaterideComponent {
       phone: [''],
     })
     this.userphoneForm = this.formBuilder.group({
-      code: [''],
-      phone: [''],
+      code: ['', Validators.required],
+      phone: ['', [Validators.required, Validators.pattern('[0-9]+'), Validators.minLength(10), Validators.maxLength(10)]],
     })
     // this.directionForm = this.formBuilder.group({
     //   from: [''],
@@ -96,10 +97,10 @@ export class CreaterideComponent {
     this.bookrideForm = this.formBuilder.group({
       totalDistance: [''],
       totalTime: [''],
-      vehicletype: [''],
-      paymentoption: [''],
-      bookride: [''],
-      datetime: ['']
+      vehicletype: ['', Validators.required],
+      paymentoption: ['', Validators.required],
+      bookride: ['', Validators.required],
+      datetime: ['', Validators.required]
     });
   }
   // getUser() {
@@ -319,14 +320,19 @@ export class CreaterideComponent {
               totalDistance += leg.distance.value;
               totalTime += leg.duration.value;
             });
+            console.log(totalDistance);
+            console.log(totalTime);
+            
+            
 
             this.totalDistanceInKm = (totalDistance / 1000).toFixed(2); // Convert meters to kilometers
             // this.totalTimeInHr = (totalTime / 3600).toFixed(2); // Convert seconds to hours
-            this.totalTimeInHr = Math.floor(totalTime / 3600); // Convert seconds to hours
+            // this.totalTimeInHr = Math.floor(totalTime / 3600); // Convert seconds to hours
+            this.totalTimeInHr = (totalTime / 3600);
             this.totalTimeInMin = (Math.round(totalTime % 3600)/60).toFixed(0); 
 
             this.totalDistanceInput.value = `${this.totalDistanceInKm} km`;
-            this.totalTimeInput.value = `${this.totalTimeInHr} hr  ${this.totalTimeInMin} minutes`;
+            this.totalTimeInput.value = `${Math.floor(this.totalTimeInHr)} hr  ${this.totalTimeInMin} minutes`;
             console.log(this.totalTimeInput.value);
             
 
@@ -491,7 +497,12 @@ export class CreaterideComponent {
       let minFare = Number(vehicle.minfare);
 
       let estimatePrice = basePrice + ((Number(this.totalDistanceInKm) - baseDistance) * unitPerDistance) + (Number(this.totalTimeInHr) * unitPerTime);
-      estimatePrice = Math.round(estimatePrice);
+      // console.log(estimatePrice);
+      // console.log(this.totalDistanceInKm);
+      // console.log(this.totalTimeInHr);
+      
+      
+      estimatePrice = Math.ceil(estimatePrice);
 
       if (estimatePrice < minFare) {
         estimatePrice = minFare;
@@ -516,8 +527,9 @@ export class CreaterideComponent {
   onBookRideSubmit() {
 
     if (
-      !this.usersForm.valid ||
-      !this.bookrideForm.valid ||
+      !this.userphoneForm.valid ||
+       !this.usersForm.valid ||
+       !this.bookrideForm.valid ||
       !this.usersForm.get('name').value ||
       !this.usersForm.get('email').value ||
       !this.usersForm.get('phone').value ||
@@ -580,7 +592,7 @@ export class CreaterideComponent {
       },
       error => {
         console.log(error);
-        this.toastr.error("please fill all fields")
+        // this.toastr.error("please fill all fields")
       }
     );
     // this.createrideService.addRide(rideData).subscribe(

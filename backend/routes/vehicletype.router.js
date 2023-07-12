@@ -73,7 +73,7 @@ router.post('/create-vehicletype', upload.single('vehicleimg'), async (req, res,
     });
   } catch (error) {
       console.log(error);
-      res.status(500).json({
+      res.status(400).json({
           error: error,
       });
     }
@@ -104,7 +104,7 @@ router.put('/update-vehicletype', upload.single('vehicleimg'), async (req, res, 
     });
   } catch (err) {
     // console.log(err);
-    res.status(500).json({
+    res.status(400).json({
       error: err,
     });
   }

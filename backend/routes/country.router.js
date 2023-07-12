@@ -8,6 +8,7 @@ const Country = require('../model/country.model');
 
 router.post('/country', async (req, res, next) => {
   try {
+      
       const countrydata = new Country({
         // _id: new mongoose.Types.ObjectId(),
         country: req.body.country,
@@ -28,12 +29,12 @@ router.post('/country', async (req, res, next) => {
   catch (error) {
     console.error(error);
     if (error.keyPattern.country) {
-      return res.status(500).send({
+      return res.status(409).send({
         success: false,
         message: "country already exist" 
       })
     } 
-    res.status(500).send(error);
+    res.status(400).send(error);
   }
 });
 

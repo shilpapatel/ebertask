@@ -22,7 +22,7 @@ router.post('/signup', async (req, res, next) => {
     } catch (e) {
         //res.status(400).send(e)
         if (e.code == 11000)
-            res.status(422).send(['Duplicate email adrress found.']);
+            res.status(409).send(['Duplicate email adrress found.']);
         else
             return next(e);
     }
@@ -31,28 +31,35 @@ router.post('/signin', async (req, res, next) => {
     try {
         const email = req.body.email;
         const password = req.body.password;
-    
+
         const adminemail = await Admin.findOne({ email: email })
-        const isMatch = await bcrypt.compare(password, adminemail.password)
-        const token = await adminemail.generateAuthToken();
-        res.cookie("jwt", token, {
-            // expires:new Date(Date.now() + 30000),
-            httpOnly: true
-        })
-        if (isMatch) {
-            res.status(200).json({ "token": token });
-        } else {
-            res.send("password not match")
+
+        if (!adminemail) {
+            throw new Error('admin not found')
         }
+        else{
+            const isMatch = await bcrypt.compare(password, adminemail.password)
+            const token = await adminemail.generateAuthToken();
+            res.cookie("jwt", token, {
+                // expires:new Date(Date.now() + 30000),
+                httpOnly: true
+            })
+            if (isMatch) {
+                res.status(200).json({ "token": token });
+            } else {
+                 throw new Error("Incorrect password");
+            }
+        }
+ 
     } catch (error) {
-        console.log(error)
-        res.status(400).send(error)
+        console.log(error.message)
+        // res.status(400).send(error)
+        res.status(400).json(error.message);
     }
 });
-// router.get('/userProfile',jwtHelper.verifyJwtToken, ctrlUser.userProfile);
+
 
 module.exports = router;
 
 
 
- 

@@ -8,6 +8,7 @@ import { CreaterideService } from 'src/app/shared/createride.service';
 import { ListService } from 'src/app/shared/list.service';
 import { UsersService } from 'src/app/shared/users.service';
 import { SocketService } from 'src/app/shared/socket.service';
+import { NotificationService } from 'src/app/shared/notification.service';
 
 @Component({
   selector: 'app-confirmrides',
@@ -43,7 +44,7 @@ export class ConfirmridesComponent {
 
   constructor(private http: HttpClient, private formBuilder: FormBuilder, public router: Router, private toastr: ToastrService,
     private createrideService: CreaterideService, public usersservice: UsersService,
-    public listService: ListService, private socketService: SocketService) { }
+    public listService: ListService, private socketService: SocketService, private notificationService: NotificationService) { }
 
   ngOnInit(): void {
     this.getDriversAllData()
@@ -168,9 +169,26 @@ export class ConfirmridesComponent {
       
       this.driverdatafiltered = filteredDrivers.filter(driver => driver.status === 'Approved' && driver.assign === '0');
       console.log(this.driverdatafiltered, "driverfiltereddata");
-    }
 
-   
+      if (this.driverdatafiltered.length === 0) {
+        this.notificationService.incrementNotificationCount();  // Increment notification count
+        this.showNotification('Driver Not Found'); // Show browser notification
+      } else {
+        this.notificationService.decrementNotificationCount();// Decrement notification count
+      }
+    }  
+  }
+
+  showNotification(message: string) {
+    if (Notification.permission === 'granted') {
+      const notification = new Notification('Notification Title', { body: message });
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          const notification = new Notification('Notification Title', { body: message });
+        }
+      });
+    }
   }
 
   onAssignDriver(driver: any) {

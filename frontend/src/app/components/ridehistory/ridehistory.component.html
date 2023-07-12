@@ -1,7 +1,70 @@
+<!-- <div class="flex-container">
+    <div>
+      <form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
+        <label for="vehicle">Vehicle Type :</label>
+        <select id="vehicle" #vehicle (change)="onSelectedvehicle(vehicle.value)" formControlName="vehicle_id">
+          <option value ="">Select vehicle</option>
+          <option [value]="vehicle._id" *ngFor="let vehicle of vehicledata">
+            {{ vehicle.vehiclename }}
+          </option>
+        </select>
+  
+        <label for="cashCard" style="padding-left: 20px;">Payment options :</label>
+        <select id="cashCard" formControlName="cashCard">
+          <option value="">Select option</option>
+          <option value="cash">Cash</option>
+          <option value="card">Card</option>
+        </select>
+  
+        <label for="dateRange"  style="padding-left: 20px;" >From Date  : </label>
+        <input type="date" id="dateRange" formControlName="fromdate" />
+  
+        <label for="dateRange"  style="padding-left: 20px;" > To Date  :</label>
+        <input type="date" id="dateRange" formControlName="todate" />
+  
+  
+        <label for="pickupLocation"  style="padding-left: 20px;" >Pickup Location  :</label>
+        <input type="text" id="pickupLocation" formControlName="pickupLocation" />
+  
+        <label for="dropoffLocation"  style="padding-left: 20px;" >Drop-off Location:</label>
+        <input type="text" id="dropoffLocation" formControlName="dropoffLocation" />
+  
+        <button mat-raised-button type="submit"  style="margin-left: 20px;" >Filter</button>
+      </form>
+    </div>
+  </div> -->
+  <div class="container">
+    <div class="form-group row m-2 d-flex justify-content-center">
+        <div class="col-sm-1 m-1">
+            <select class="form-control bg-secondary text-white text-center" >
+                <option value="asc">Cash</option>
+                <option value="desc">Card</option>
+            </select>
+        </div>
+        <div class="col-sm-1 m-1">
+            <select class="form-control bg-secondary text-white text-center">
+                <!-- <option value="">Select option</option> -->
+                <!-- <ng-container *ngFor="let vehicleType of getUniqueVehicleTypes(createridedata)"> -->
+                    <option *ngFor="let vehicleType of getUniqueVehicleTypes(createridedata)" [value]="vehicleType">{{ vehicleType }}</option>
+                <!-- </ng-container> -->
+            </select>
+        </div>
+        <div class="col-sm-2 m-1">
+            <input type="date" class="form-control" [(ngModel)]="startDate">
+          </div>
+        <div class="col-sm-2 m-1">
+            <input type="date" class="form-control" [(ngModel)]="endDate">
+        </div>
+        <div class="col-sm-1 m-1">
+            <input type="text" class="form-control" [(ngModel)]="fromFilter">
+        </div>
+    </div>
+  </div>
+
 <div class="container">
     <div class="form-group row m-2 d-flex justify-content-center">
         <div class="col-sm-1 m-1">
-            <select class="form-control bg-secondary text-white" [(ngModel)]="sortOrder" (ngModelChange)="onSort()">
+            <select class="form-control bg-secondary text-white text-center" [(ngModel)]="sortOrder" (ngModelChange)="onSort()">
                 <option value="asc">Asc</option>
                 <option value="desc">Desc</option>
             </select>
@@ -35,14 +98,16 @@
                         <tr class="table-dark text-center">
                             <th>Id</th>
                             <th>RideId</th>
-                            <th>Driver Name</th>
+                            <!-- <th>Driver Name</th> -->
                             <th>From</th>
                             <th>To</th>
-                            <th>Stops</th>
+                            <!-- <th>Stops</th> -->
                             <th>VehicleType</th>
+                            <th>Date</th>
                             <th>TotalDistance</th>
                             <th>TotalTime</th>
                             <th>EstimatePrice</th>
+                            <th>Ride Status</th>
                             <th>Request</th>
                             <!-- <th>Action</th> -->
                         </tr>
@@ -52,14 +117,16 @@
                             data-bs-toggle="modal" data-bs-target="#exampleModal" (click)="onselectedride(confirmride)">
                             <td>{{i + 1}}</td>
                             <td>{{ confirmride._id}}</td>
-                            <td>{{confirmride.driverdata?.name ?confirmride.driverdata.name:'no driver'}}</td>
+                            <!-- <td>{{confirmride.driverdata?.name ?confirmride.driverdata.name:'no driver'}}</td> -->
                             <td>{{ confirmride.from }}</td>
                             <td>{{ confirmride.to }}</td>
-                            <td>{{ confirmride.stops.join(', ') }}</td>
+                            <!-- <td>{{ confirmride.stops.join(', ') }}</td> -->
                             <td>{{ confirmride.vehicleType}}</td>
+                            <td>{{ confirmride.datetime}}</td>
                             <td>{{ confirmride.totalDistance }}</td>
                             <td>{{ confirmride.totalTime }}</td>
                             <td>{{ confirmride.estimatePrice }}</td>
+                            <td>{{ confirmride.assigned}}</td>
                             <td>
                                 <button type="button"
                                     class="btn btn-secondary btn-sm"><mat-icon>info</mat-icon></button>

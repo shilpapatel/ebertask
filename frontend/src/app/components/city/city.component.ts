@@ -92,6 +92,10 @@ export class CityComponent implements OnInit, AfterViewInit {
     // this.initAutocomplete();
   }
   onsubmitCityForm(form: NgForm) {
+    // if(form.invalid){
+    //   form.markAllAsTouched();
+    //   return;
+    // }
     if (this.isupdated) {
       console.log("edited");
 
@@ -119,10 +123,11 @@ export class CityComponent implements OnInit, AfterViewInit {
             }
             this.getCity();
             this.toastr.success(res.message);
+            this.isShow = !this.isShow;
             this.polygon.setMap(null);
             this.marker.setMap(null);
             this.markerselectedlocation.setMap(null);
-            this.isShow = !this.isShow;
+            form.reset();
           },
           (error) => {
             this.toastr.warning(error.error.message);
@@ -154,6 +159,7 @@ export class CityComponent implements OnInit, AfterViewInit {
             this.polygon.setMap(null);
             this.marker.setMap(null);
             this.markerselectedlocation.setMap(null);
+            
           },
           (error) => {
             this.toastr.warning(error.error.message);
@@ -161,7 +167,7 @@ export class CityComponent implements OnInit, AfterViewInit {
 
             form.reset();
           });
-
+          form.reset();
       } else {
         this.toastr.warning('Please draw a polygon on the map before submitting the form.', 'Warning');
       }
@@ -269,6 +275,7 @@ export class CityComponent implements OnInit, AfterViewInit {
     }
   }
   onAddBtnCity() {
+
     this.isShowAddBtn = true;
     this.isShowEditBtn = false;
     if (this.isShow) {
@@ -277,6 +284,7 @@ export class CityComponent implements OnInit, AfterViewInit {
     else {
       this.isShow = !this.isShow;
     }
+    // form.reset();
   }
 
   initMap(): void {

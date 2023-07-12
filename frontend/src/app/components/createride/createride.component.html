@@ -1,11 +1,10 @@
-
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-5">
             <div class="card m-2">
                 <div class="card-body">
                     <div class="userphoneformcontainer">
-                        <form [formGroup]="userphoneForm" (ngSubmit)="onGetUserDetails()"  novalidate>
+                        <form [formGroup]="userphoneForm" (ngSubmit)="onGetUserDetails()" novalidate>
                             <div class="form-group row">
                                 <label for="phone" class="col-form-label col-sm-2">Phone</label>
                                 <div class="col-sm-10">
@@ -17,15 +16,41 @@
                                                 <option *ngFor="let code of callingCodes" [value]="code">{{ code }}
                                                 </option>
                                             </select>
+                                            <div *ngIf="userphoneForm.controls['code'].errors?.['required'] && userphoneForm.controls['code'].touched"
+                                            class="text-danger">Code is required.</div> 
                                         </div>
-                                        <input type="tel" class="form-control" id="phone" name="phone"
-                                            placeholder="Enter Phone No" formControlName="phone" pattern="[0-9]+" minlength="10" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                                        <div class="phone-input-container">
+                                            <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter Phone No"
+                                              formControlName="phone" pattern="[0-9]+" minlength="10" maxlength="10"
+                                              oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                                            <div *ngIf="userphoneForm.controls['phone'].errors?.['required'] && userphoneForm.controls['phone'].touched"
+                                              class="text-danger ms-3">Phone number is required.</div>
+                                            <div *ngIf="userphoneForm.controls['phone'].errors?.['pattern'] && userphoneForm.controls['phone'].touched"
+                                              class="text-danger ms-3">Please enter valid phone number.</div>
+                                            <div *ngIf="userphoneForm.controls['phone'].errors?.['minlength'] && userphoneForm.controls['phone'].touched"
+                                              class="text-danger ms-3">Phone number must be 10 digits.</div>
+                                            <div *ngIf="userphoneForm.controls['phone'].errors?.['maxlength'] && userphoneForm.controls['phone'].touched"
+                                              class="text-danger ms-3">Phone number must be 10 digits.</div>
+                                          </div>
+                                        <!-- <input type="tel" class="form-control" id="phone" name="phone"
+                                            placeholder="Enter Phone No" formControlName="phone" pattern="[0-9]+"
+                                            minlength="10" maxlength="10"
+                                            oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                                        <div *ngIf="userphoneForm.controls['phone'].errors?.['required'] && userphoneForm.controls['phone'].touched"
+                                            class="text-danger">Phone is required.</div>
+                                        <div *ngIf="userphoneForm.controls['phone'].errors?.['pattern'] && userphoneForm.controls['phone'].touched"
+                                            class="text-danger">Please enter a valid phone number.</div>
+                                        <div *ngIf="userphoneForm.controls['phone'].errors?.['minlength'] && userphoneForm.controls['phone'].touched"
+                                            class="text-danger">Phone number must be at least 10 digits long.</div>
+                                        <div *ngIf="userphoneForm.controls['phone'].errors?.['maxlength'] && userphoneForm.controls['phone'].touched"
+                                            class="text-danger">Phone number cannot exceed 10 digits.</div> -->
+
                                     </div>
                                 </div>
                             </div>
                             <div class="form-group m-2">
                                 <div class="col-sm-10">
-                                    <button class="btn btn-secondary btn-block" >Get Details</button>
+                                    <button class="btn btn-secondary btn-block" [disabled]="userphoneForm.invalid" >Get Details</button>
                                 </div>
                             </div>
                         </form>
@@ -57,39 +82,59 @@
                     </div>
 
                     <div class="directionformcontainer">
-                        <!-- *ngIf="isShowDirection"> -->
-                        <form>
+                        <form #directionForm="ngForm">
                             <div class="form-group">
-                                <label for="from" class="col-form-label">From <i
-                                        class="far fa-dot-circle"></i></label>
-                                <!-- <div class="col-sm-10 "> -->
-                                    <input type="text" id="from" placeholder="Origin" class="form-control">
-                                <!-- </div> -->
-
+                                <label for="from" class="col-form-label">From <i class="far fa-dot-circle"></i></label>
+                                <input type="text" id="from" placeholder="Origin" class="form-control" name="from"
+                                    required [(ngModel)]="from">
+                                <div *ngIf="directionForm.controls['from']?.invalid && directionForm.controls['from']?.touched"
+                                    class="text-danger">
+                                    From is required.
+                                </div>
                             </div>
+
                             <div class="form-group">
+                                <label for="to" class="col-form-label">To <i class="fas fa-map-marker-alt"></i></label>
+                                <input type="text" id="to" placeholder="Destination" class="form-control" name="to"
+                                    required [(ngModel)]="to">
+                                <div *ngIf="directionForm.controls['to']?.invalid && directionForm.controls['to']?.touched"
+                                    class="text-danger">
+                                    To is required.
+                                </div>
+                            </div>
+
+                            <div class="form-group" *ngFor="let stop of stops; let i = index">
+                                <label for="stop{{ i }}" class="col-form-label">Stop {{ i + 1 }}</label>
+                                <input type="text" id="stop{{ i }}" placeholder="Stop {{ i + 1 }}" class="form-control"
+                                    name="stop{{ i }}" required [(ngModel)]="stop.name" (input)="initAutocomplete()">
+                                <div *ngIf="directionForm.controls['stop' + i]?.invalid && directionForm.controls['stop' + i]?.touched"
+                                    class="text-danger">
+                                    Stop is required.
+                                </div>
+                            </div>
+
+                            <!-- <div class="form-group">
+                                <label for="from" class="col-form-label">From <i class="far fa-dot-circle"></i></label>
+                                    <input type="text" id="from" placeholder="Origin" class="form-control">
+                            </div> -->
+                            <!-- <div class="form-group">
                                 <label for="to" class="col-form-label">To <i
                                         class="fas fa-map-marker-alt"></i></label>
-
-                                <!-- <div class="col-sm-4"> -->
                                     <input type="text" id="to" placeholder="Destination" class="form-control">
-                                <!-- </div> -->
-                            </div>
-                            
-                            <div class="form-group" *ngFor="let stop of stops; let i = index">
-                                <label for="stop{{ i }}" class="col-form-label" ml-5>Stop {{ i + 1 }}</label>
+                            </div> -->
 
-                                <!-- <div class="col-sm-4"> -->
+                            <!-- <div class="form-group" *ngFor="let stop of stops; let i = index">
+                                <label for="stop{{ i }}" class="col-form-label" ml-5>Stop {{ i + 1 }}</label>
                                     <input type="text" id="stop{{ i }}" [(ngModel)]="stop.name"
                                         placeholder="Stop {{ i + 1 }}" (input)="initAutocomplete()" class="form-control"
                                         [ngModelOptions]="{standalone: true}">
-                                <!-- </div> -->
-                            </div>
+
+                            </div> -->
 
                             <div class="form-group row my-2">
                                 <div class="col-sm-10">
-                                    <button id="calcButton" class="btn btn-secondary mx-2"
-                                        (click)="ondirectionbtn()"  [disabled]="isbuttonshow" >Direction</button>
+                                    <button id="calcButton" class="btn btn-secondary mx-2" (click)="ondirectionbtn()"
+                                        [disabled]="isbuttonshow">Direction</button>
                                     <button class="btn btn-secondary mx-2" (click)="onAddStop()">Add Stop</button>
                                 </div>
                             </div>
@@ -101,68 +146,92 @@
                         <form [formGroup]="bookrideForm" (ngSubmit)="onBookRideSubmit()">
                             <div class="form-group">
                                 <label for="totalDistance" class="col-form-label" ml-5>Total Distance</label>
-
-                                    <input type="text" id="totalDistance" formControlName="totalDistance" placeholder="Total Distance"
-                                        class="form-control" readonly>
+                                <input type="text" id="totalDistance" formControlName="totalDistance"
+                                    placeholder="Total Distance" class="form-control" readonly>
+                                <!-- <div
+                                    *ngIf="bookrideForm.get('totalDistance').invalid && bookrideForm.get('totalDistance').touched">
+                                    <small class="text-danger">Total Distance is required.</small>
+                                </div> -->
 
                             </div>
-                    
+
                             <div class="form-group">
                                 <label for="totalTime" class="col-form-label" ml-5>Total Time</label>
-
-                                    <input type="text" id="totalTime" formControlName="totalTime" placeholder="Total Time"
-                                        class="form-control" readonly>
+                                <input type="text" id="totalTime" formControlName="totalTime" placeholder="Total Time"
+                                    class="form-control" readonly>
+                                <!-- <div
+                                    *ngIf="bookrideForm.get('totalTime').invalid && bookrideForm.get('totalTime').touched">
+                                    <small class="text-danger">Total Time is required.</small>
+                                </div> -->
 
                             </div>
-                    
+
                             <div class="form-group " *ngIf="showEstimatedPrices">
                                 <h3>Estimated Price</h3>
                                 <div class="form-group">
-                                    <p *ngFor="let vehicleType of vehicleTypesService">{{ vehicleType }} : {{ getEstimatedPrice(vehicleType)
+                                    <p *ngFor="let vehicleType of vehicleTypesService">{{ vehicleType }} : {{
+                                        getEstimatedPrice(vehicleType)
                                         }}</p>
                                 </div>
                             </div>
-                    
+
                             <div class="form-group">
                                 <label for="vehicletypemenu" class="col-form-label" ml-5> Vehicle Type</label>
 
-                                    <select class="form-control" formControlName="vehicletype" id="vehicletypemenu">
-                                        <option value="" disabled selected>Select Vehicle Type</option>
-                                        <option *ngFor="let vehicleType of vehicleTypesService" [value]="vehicleType">
-                                            {{vehicleType}}
-                                        </option>
-                                    </select>
-                               
+                                <select class="form-control" formControlName="vehicletype" id="vehicletypemenu">
+                                    <option value="" disabled selected>Select Vehicle Type</option>
+                                    <option *ngFor="let vehicleType of vehicleTypesService" [value]="vehicleType">
+                                        {{vehicleType}}
+                                    </option>
+                                </select>
+                                <div
+                                    *ngIf="bookrideForm.get('vehicletype').invalid && bookrideForm.get('vehicletype').touched">
+                                    <small class="text-danger">Please select a Vehicle Type.</small>
+                                </div>
                             </div>
-                    
+
                             <div class="form-group">
                                 <label for="paymentmethodmenu" class="col-form-label" ml-5> Payment Method</label>
 
-                                    <select class="form-control" formControlName="paymentoption" id="paymentmethodmenu">
-                                        <option value="" disabled selected>Select Payment Option</option>
-                                        <option value="Cash">Cash</option>
-                                        <option value="Card">Card</option>
-                                    </select>
+                                <select class="form-control" formControlName="paymentoption" id="paymentmethodmenu">
+                                    <option value="" disabled selected>Select Payment Option</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Card">Card</option>
+                                </select>
+                                <div
+                                    *ngIf="bookrideForm.get('paymentoption').invalid && bookrideForm.get('paymentoption').touched">
+                                    <small class="text-danger">Please select a Payment Method.</small>
+                                </div>
 
                             </div>
-                    
+
                             <div class="form-group">
                                 <label for="bookridemenu" class="col-form-label ml-5">Book Ride</label>
-                                    <select class="form-control" formControlName="bookride" id="bookridemenu" (change)="onOptionChange()">
-                                        <option value="" disabled selected>Select Book Ride</option>
-                                        <option value="now">Now</option>
-                                        <option value="schedule">Schedule</option>
-                                    </select>
+                                <select class="form-control" formControlName="bookride" id="bookridemenu"
+                                    (change)="onOptionChange()">
+                                    <option value="" disabled selected>Select Book Ride</option>
+                                    <option value="now">Now</option>
+                                    <option value="schedule">Schedule</option>
+                                </select>
+                                <div
+                                    *ngIf="bookrideForm.get('bookride').invalid && bookrideForm.get('bookride').touched">
+                                    <small class="text-danger">Please select a Book Ride option.</small>
+                                </div>
                             </div>
-                
+
                             <div class="form-group">
                                 <label for="datetimepicker" class="col-form-label ml-5">Date and Time</label>
-                                    <input type="datetime-local" class="form-control" formControlName="datetime" id="datetimepicker" [min]="currentDateTime">
+                                <input type="datetime-local" class="form-control" formControlName="datetime"
+                                    id="datetimepicker" [min]="currentDateTime">
+                                <div
+                                    *ngIf="bookrideForm.get('datetime').invalid && bookrideForm.get('datetime').touched">
+                                    <small class="text-danger">Please select a Date and Time.</small>
+                                </div>
                             </div>
-                    
+
                             <div class="form-group row my-2">
                                 <div class="col-sm-10">
-                                    <button id="calcButton" class="btn btn-secondary mx-2">Book Ride</button>
+                                    <button id="calcButton" class="btn btn-secondary mx-2" [disabled]="!bookrideForm.valid">Book Ride</button>
                                 </div>
                             </div>
                         </form>

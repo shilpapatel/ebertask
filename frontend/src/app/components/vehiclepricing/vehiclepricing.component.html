@@ -25,6 +25,7 @@
                       {{countrydata.country}}
                     </option>
                   </select>
+                  <div *ngIf="vehiclePricingForm.get('country_id').invalid && (vehiclePricingForm.get('country_id').dirty || vehiclePricingForm.get('country_id').touched)" class="text-danger"> Country required</div>
                 </div>
               </div>
               <div class="form-group row m-2">
@@ -36,6 +37,7 @@
                       {{citydata.city}}
                     </option>
                   </select>
+                  <div *ngIf="vehiclePricingForm.get('city_id').invalid && (vehiclePricingForm.get('city_id').dirty || vehiclePricingForm.get('city_id').touched)" class="text-danger"> City required</div>
                 </div>
               </div>
               <div class="form-group row m-2">
@@ -47,19 +49,25 @@
                       {{vehicle.vehicletype}}
                     </option>
                   </select>
+                  <div *ngIf="vehiclePricingForm.get('vehicletype_id').invalid && (vehiclePricingForm.get('vehicletype_id').dirty || vehiclePricingForm.get('vehicletype_id').touched)" class="text-danger"> Vehicle type required</div>
+                  
                 </div>
               </div>
               <div class="form-group row m-2">
                 <label for="driverprofit" class="col-sm-2 col-form-label">Driver Profit</label>
                 <div class="col-sm-10">
                   <input type="text" class="form-control" formControlName="driverprofit" id="driverprofit"
-                    placeholder="driverprofit" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
+                    placeholder="driverprofit" pattern="[0-9]+" minlength="1" maxlength="3" oninput="if (this.value.startsWith('0')) { this.value = this.value.substring(1); } this.value = this.value.replace(/[^0-9\.]/g, '').replace(/(\..*)\./g, '$1');">
+                    <div *ngIf="vehiclePricingForm.get('driverprofit').invalid && (vehiclePricingForm.get('driverprofit').dirty || vehiclePricingForm.get('driverprofit').touched)" class="text-danger"> Driver profit required</div>
+                    
                 </div>
               </div>
               <div class="form-group row m-2">
                 <label for="minfare" class="col-sm-2 col-form-label">Min. Fare</label>
                 <div class="col-sm-10">
-                  <input type="text" class="form-control" formControlName="minfare" id="minfare" placeholder="minfare" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
+                  <input type="text" class="form-control" formControlName="minfare" id="minfare" placeholder="minfare" pattern="[0-9]+" minlength="1" maxlength="5" oninput="if (this.value.startsWith('0')) { this.value = this.value.substring(1); } this.value = this.value.replace(/[^0-9\.]/g, '').replace(/(\..*)\./g, '$1');">
+                  <div *ngIf="vehiclePricingForm.get('minfare').invalid && (vehiclePricingForm.get('minfare').dirty || vehiclePricingForm.get('minfare').touched)" class="text-danger"> Minfare required</div>
+
                 </div>
               </div>
               <div class="form-group row m-2">
@@ -71,37 +79,43 @@
                       {{distbaseprice}}
                     </option>
                   </select>
+                  <div *ngIf="vehiclePricingForm.get('distanceforbaseprice').invalid && (vehiclePricingForm.get('distanceforbaseprice').dirty || vehiclePricingForm.get('distanceforbaseprice').touched)" class="text-danger"> Distance for baseprice required</div>
+
                 </div>
               </div>
               <div class="form-group row m-2">
                 <label for="baseprice" class="col-sm-2 col-form-label">Base Price</label>
                 <div class="col-sm-10">
-                  <input type="text" class="form-control" formControlName="baseprice" id="baseprice" placeholder="baseprice" pattern="[0-9]+" minlength="1" maxlength="5" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
+                  <input type="text" class="form-control" formControlName="baseprice" id="baseprice" placeholder="baseprice" pattern="[0-9]+" minlength="1" maxlength="5" oninput="if (this.value.startsWith('0')) { this.value = this.value.substring(1); } this.value = this.value.replace(/[^0-9\.]/g, '').replace(/(\..*)\./g, '$1');">
+                  <div *ngIf="vehiclePricingForm.get('baseprice').invalid && (vehiclePricingForm.get('baseprice').dirty || vehiclePricingForm.get('baseprice').touched)" class="text-danger"> Baseprice required</div>
                 </div>
               </div>
               <div class="form-group row m-2">
                 <label for="priceperunitdistance" class="col-sm-2 col-form-label">Price Per Unit Distance</label>
                 <div class="col-sm-10">
                   <input type="text" class="form-control" formControlName="priceperunitdistance" id="priceperunitdistance"
-                    placeholder="priceperunitdistance" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
-                </div>
+                    placeholder="priceperunitdistance" pattern="[0-9]+" minlength="1" maxlength="3" oninput="if (this.value.startsWith('0')) { this.value = this.value.substring(1); } this.value = this.value.replace(/[^0-9\.]/g, '').replace(/(\..*)\./g, '$1');">
+                    <div *ngIf="vehiclePricingForm.get('priceperunitdistance').invalid && (vehiclePricingForm.get('priceperunitdistance').dirty || vehiclePricingForm.get('priceperunitdistance').touched)" class="text-danger"> Price per unit distance required</div>
+                  </div>
               </div>
               <div class="form-group row m-2">
                 <label for="priceperunittime" class="col-sm-2 col-form-label">Price Per Unit Time</label>
                 <div class="col-sm-10">
                   <input type="text" class="form-control" formControlName="priceperunittime" id="priceperunittime"
-                    placeholder="priceperunittime" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
-                </div>
+                    placeholder="priceperunittime" pattern="[0-9]+" minlength="1" maxlength="3" oninput="if (this.value.startsWith('0')) { this.value = this.value.substring(1); } this.value = this.value.replace(/[^0-9\.]/g, '').replace(/(\..*)\./g, '$1');">
+                    <div *ngIf="vehiclePricingForm.get('priceperunittime').invalid && (vehiclePricingForm.get('priceperunittime').dirty || vehiclePricingForm.get('priceperunittime').touched)" class="text-danger"> Price per unit time required</div>
+                  </div>
               </div>
               <div class="form-group row m-2">
                 <label for="maxspace" class="col-sm-2 col-form-label">Max Space</label>
                 <div class="col-sm-10">
-                  <input type="text" class="form-control" formControlName="maxspace" id="maxspace" placeholder="maxspace" pattern="[0-9]+" minlength="1" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
+                  <input type="text" class="form-control" formControlName="maxspace" id="maxspace" placeholder="maxspace" pattern="[0-9]+" minlength="1" maxlength="2" oninput="if (this.value.startsWith('0')) { this.value = this.value.substring(1); } this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
+                  <div *ngIf="vehiclePricingForm.get('maxspace').invalid && (vehiclePricingForm.get('maxspace').dirty || vehiclePricingForm.get('maxspace').touched)" class="text-danger"> Max space required</div>
                 </div>
               </div>
           
               <div class="modal-footer d-flex justify-content-center">
-                  <button class="btn btn-secondary mx-2" [disabled]="!vehiclePricingForm.valid"  data-bs-dismiss="modal" *ngIf="isShowAddBtn">Add Vehicle
+                  <button class="btn btn-secondary mx-2" *ngIf="isShowAddBtn">Add Vehicle
                     Price</button>
                   <button class="btn btn-secondary mx-2" data-bs-dismiss="modal" *ngIf="isShowEditBtn">Update
                     Vehicle Price</button>
@@ -113,7 +127,7 @@
   </div>
 </div>
 
-
+<!-- oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" -->
 
 <div class="container">
   <div class="row my-4">

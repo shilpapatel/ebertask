@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminService } from 'src/app/shared/admin.service';
-
+import { NotificationService } from 'src/app/shared/notification.service';
+declare var Notification: any; 
 @Component({
   selector: 'app-adminpanel',
   templateUrl: './adminpanel.component.html',
@@ -12,6 +13,7 @@ export class AdminpanelComponent implements OnInit {
   openSidebar: boolean = true;
   lastActivity: Date;
   logoutTimer: any;
+  notificationCount: number = 0;
 
  menuSidebar = [
    // {
@@ -80,9 +82,13 @@ export class AdminpanelComponent implements OnInit {
      sub_menu: []
    }
  ]
-  constructor(private adminService: AdminService, private router: Router) { }
+  constructor(private adminService: AdminService, private router: Router,private notificationService: NotificationService) { }
  
  ngOnInit() {
+  
+  this.notificationService.getNotificationCountSubject().subscribe(count => {
+    this.notificationCount = count;
+  });
    // Attach event listeners for user activity
    document.addEventListener('mousemove', this.resetTimer);
    document.addEventListener('keypress', this.resetTimer);
@@ -99,7 +105,7 @@ export class AdminpanelComponent implements OnInit {
 };
 
 startLogoutTimer() {
-  // const timeout = 30000;
+  //  const timeout = 5000;
   const timeout = 60000 * 60;
 
   // Start the timer

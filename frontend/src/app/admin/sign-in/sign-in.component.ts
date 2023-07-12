@@ -32,13 +32,17 @@ export class SignInComponent implements OnInit {
 
    this.adminService.login(this.adminSignInForm.value).subscribe( 
      res =>{
+      console.log(res,"afdgfgh");
+      
       this.adminService.setToken(res['token']);
       this.toastr.success('Login Successfully');
       this.router.navigateByUrl('/adminpanel');
+      // this.toastr.error(res.error.message);
+
    },
    err =>{
-     console.log("err: ", err.message)
-     this.toastr.error(err.message);
+     console.log("err: ", err.error)
+     this.toastr.error(err.error);
 
    });
   }

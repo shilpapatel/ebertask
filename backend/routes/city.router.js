@@ -18,12 +18,12 @@ router.post('/city', async (req, res) => {
   } catch (error) {
     console.error(error);
     if (error.keyPattern.city) {
-      return res.status(500).send({
+      return res.status(409).send({
         success: false,
         message: "city already exist" 
       })
     } 
-    res.status(500).send(error);
+    res.status(400).send(error);
   }
 });
 
@@ -66,12 +66,12 @@ router.get('/city', async (req, res, next) => {
     } catch (error) {
       console.error(error);
       if (error.keyPattern.city) {
-        return res.status(500).send({
+        return res.status(409).send({
           success: false,
           message: "city already exist" 
         })
       } 
-      res.status(500).send(error);
+      res.status(400).send(error);
     }
   });
   module.exports = router;

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CountryService } from 'src/app/shared/country.service';
 import { Country } from 'src/app/shared/country.model';
@@ -26,7 +26,7 @@ export class CountryComponent implements OnInit {
   isShow = false;
 
   searchQuery: string = '';
-
+  // isModalShow = true;
   constructor(private fb: FormBuilder, private countryService: CountryService,private toastr: ToastrService) { }
 
   ngOnInit() {
@@ -66,10 +66,17 @@ export class CountryComponent implements OnInit {
     this.onSearch();
   }
   onAddBtnCountry() {
+    this.countryForm.reset();
     this.isShow = !this.isShow;
   }
   onSubmitCountryForm() {
-     if (this.countryForm.valid) {
+   
+    //  if (this.countryForm.valid) {
+      if(this.countryForm.invalid){
+        this.countryForm.markAllAsTouched();
+        return;
+      }
+      else{
       const formValue = this.countryForm.value;
       const countryData: Country = {
         country: formValue.country,
@@ -98,8 +105,23 @@ export class CountryComponent implements OnInit {
       });
 
       this.isShow = !this.isShow;
-      this.countryForm.reset();
-     }
+      // this.isModalShow = false;
+      // const modal = document.getElementById('exampleModal')
+      const modalElement = document.getElementById('exampleModal');
+      if (modalElement) {
+        modalElement.classList.remove('show');
+        modalElement.style.display = 'none';
+        modalElement.setAttribute('aria-hidden', 'true');
+        modalElement.removeAttribute('aria-modal');
+        document.body.classList.remove('modal-open');
+        const modalBackdrop = document.getElementsByClassName('modal-backdrop')[0];
+        if (modalBackdrop) {
+          modalBackdrop.parentNode?.removeChild(modalBackdrop);
+        }
+      }
+      this.countryForm.reset();     
+      
+    }
   }
 
   onCountrySelected() {
@@ -131,7 +153,7 @@ export class CountryComponent implements OnInit {
   }
 
   onCancelBtn() {
-    this.countryForm.reset(); // Reset the form fields
+    // this.countryForm.reset(); // Reset the form fields
     this.isShow = false; // Hide the form container
   }
 }

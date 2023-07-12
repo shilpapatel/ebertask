@@ -96,7 +96,7 @@ router.post('/create-intent/:userId', async (req, res) => {
     res.json({client_secret: intent.client_secret});
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to create intent' });
+    res.status(400).json({ error: 'Failed to create intent' });
   }
   });
 
@@ -118,7 +118,7 @@ router.post('/create-intent/:userId', async (req, res) => {
     res.json(paymentMethods.data );
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to retrieve card details' });
+    res.status(400).json({ error: 'Failed to retrieve card details' });
   }
 });
 
@@ -132,7 +132,7 @@ router.delete('/delete-card/:cardId', async (req, res) => {
     res.status(200).json({ message: 'Card deleted successfully' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to delete card' });
+    res.status(400).json({ error: 'Failed to delete card' });
   }
 });
 
@@ -141,13 +141,14 @@ router.delete('/delete-card/:cardId', async (req, res) => {
 router.post('/add-user', upload.single('profile'), async (req, res, next) => {
   try {
       const url = req.protocol + '://' + req.get('host');
+      let profileUrl = req.file ? url + '/public/' + req.body.profile : url + '/public/' + 'profile1.png';
       // console.log(req.body.code);
       const user = new User({
         // _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
         email: req.body.email,
         phone: req.body.code + req.body.phone,
-        profile:url + '/public/' + req.file.filename,
+        profile:profileUrl,
     });
     const userCreated = await user.save();
 
@@ -170,26 +171,23 @@ router.post('/add-user', upload.single('profile'), async (req, res, next) => {
   } catch (error) {
       console.log(error);
       if (error.keyPattern.email) {
-        return res.status(500).send({
+        return res.status(409).send({
           success: false,
           message: "email already exist" 
         })
       } 
       if (error.keyPattern.phone) {
-        return res.status(500).send({
+        return res.status(409).send({
           success: false,
           message: "phone no already exist" 
         })
       }
-      res.status(500).send(error);
+      res.status(400).send(error);
       // res.status(500).json({
       //     error: err,
       // });
   }
 });
-
-
-
 
 router.get('/get-users', async (req, res, next) => {
   try {
@@ -197,31 +195,86 @@ router.get('/get-users', async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 3;
     const searchQuery = req.query.searchQuery || '';
     const sortField = req.query.sortField || 'name'; // Default sort field is 'name'
-    const sortOrder = req.query.sortOrder || 'asc'; 
+    const sortOrder = req.query.sortOrder || 'desc';
     let sortOptions = {};
     sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
 
     const searchRegex = new RegExp(searchQuery, 'i');
-    const count = await User.countDocuments({$or: [{ name: searchRegex },{ email: searchRegex },{ phone: searchRegex }]});
-    const totalPages = Math.ceil(count / limit);
-    const skip = (page - 1) * limit;
 
-    const data = await User.find({ $or: [{ name: searchRegex },{ email: searchRegex },{ phone: searchRegex }] })
-      // .sort({ name: 1 })
-      .sort(sortOptions)
-      .skip(skip)
-      .limit(limit);
+    const data = await User.aggregate([
+      {
+        $match: {
+          $or: [
+            { name: searchRegex },
+            { email: searchRegex },
+            { phone: searchRegex }
+          ]
+        }
+      },
+      {
+        $facet: {
+          metadata: [
+            { $count: 'total' },
+          ],
+          users: [
+            { $sort: sortOptions },
+            { $skip: (page - 1) * limit },
+            { $limit: limit }
+          ]
+        }
+      }
+    ]);
+
+    const metadata = data[0].metadata[0];
+    const totalDocuments = metadata ? metadata.total : 0;
+    const totalPages = Math.ceil(totalDocuments / limit);
+    const users = data[0].users;
 
     res.status(200).json({
       message: 'Users retrieved successfully!',
-      userdata: data,
+      userdata: users,
       totalPages: totalPages,
       currentPage: page,
+      totalDocuments: totalDocuments
     });
   } catch (error) {
     next(error);
   }
 });
+
+
+
+// router.get('/get-users', async (req, res, next) => {
+//   try {
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = parseInt(req.query.limit) || 3;
+//     const searchQuery = req.query.searchQuery || '';
+//     const sortField = req.query.sortField || 'name'; // Default sort field is 'name'
+//     const sortOrder = req.query.sortOrder || 'asc'; 
+//     let sortOptions = {};
+//     sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
+
+//     const searchRegex = new RegExp(searchQuery, 'i');
+//     const count = await User.countDocuments({$or: [{ name: searchRegex },{ email: searchRegex },{ phone: searchRegex }]});
+//     const totalPages = Math.ceil(count / limit);
+//     const skip = (page - 1) * limit;
+
+//     const data = await User.find({ $or: [{ name: searchRegex },{ email: searchRegex },{ phone: searchRegex }] })
+//       // .sort({ name: 1 })
+//       .sort(sortOptions)
+//       .skip(skip)
+//       .limit(limit);
+
+//     res.status(200).json({
+//       message: 'Users retrieved successfully!',
+//       userdata: data,
+//       totalPages: totalPages,
+//       currentPage: page,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 
 router.delete('/delete-user/:id', async (req, res, next) => {
@@ -234,19 +287,20 @@ router.delete('/delete-user/:id', async (req, res, next) => {
     res.status(200).json({ message: 'User deleted successfully' });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: err });
+    res.status(400).json({ error: err });
   }
 });
 
 router.put('/update-user', upload.single('profile'), async (req, res, next) => {
   try {
     const url = req.protocol + '://' + req.get('host');
+    let profileUrl = req.file ? url + '/public/' + req.body.profile : url + '/public/' + 'profile1.png';
     const userId = req.body.id;
     const updatedUser = {
       name: req.body.name,
       email: req.body.email,
       phone: req.body.code + req.body.phone,
-      profile: url + '/public/' + req.file.filename,
+      profile: profileUrl
     };
     const result = await User.findByIdAndUpdate(userId, updatedUser, { new: true });
     res.status(200).json({
@@ -255,18 +309,18 @@ router.put('/update-user', upload.single('profile'), async (req, res, next) => {
     });
   } catch (error) {
     if (error.keyPattern.email) {
-      return res.status(500).send({
+      return res.status(409).send({
         success: false,
         message: "email already exist" 
       })
     } 
     if (error.keyPattern.phone) {
-      return res.status(500).send({
+      return res.status(409).send({
         success: false,
         message: "phone no already exist" 
       })
     }
-    res.status(500).send(error);
+    res.status(400).send(error);
     // console.log(err);
     // res.status(500).json({
     //   error: err,
@@ -294,7 +348,7 @@ router.delete('/cards/:userId/:cardId', async (req, res) => {
     res.status(200).json({ message: 'Card deleted successfully' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to delete card' });
+    res.status(400).json({ error: 'Failed to delete card' });
   }
 });
 

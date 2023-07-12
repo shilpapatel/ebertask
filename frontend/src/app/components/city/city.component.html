@@ -1,54 +1,57 @@
 <!-- <ngx-spinner type="ball-scale-multiple"></ngx-spinner> -->
-<ngx-spinner
-  bdColor="rgba(51,51,51,0.8)"
-  size="medium"
-  color="#fff"
-  type="ball-scale-multiple"
->
-  <p style="font-size: 20px; color: white">Loading...</p>
+<ngx-spinner bdColor="rgba(51,51,51,0.8)" size="medium" color="#fff" type="ball-scale-multiple">
+    <p style="font-size: 20px; color: white">Loading...</p>
 </ngx-spinner>
 
 <div class="container">
     <div class="text-center">
-        <button class="btn btn-secondary mt-2" (click)="onAddBtnCity()">Add City</button>
+        <button class="btn btn-secondary m-2" (click)="onAddBtnCity()">Add City</button>
     </div>
 
     <div class="d-flex justify-content-center align-items-center" *ngIf="isShow">
         <div class="border border-secondary p-3 rounded">
-        <form #cityForm="ngForm" (ngSubmit)="onsubmitCityForm(cityForm)">
-            <div class="form-group row m-2">
-                <label for="countrymenu" class="col-sm-2 col-form-label" ml-5>Country</label>
-                <div class="col-sm-10 ">
-                    <select class="form-control ms-3" [(ngModel)]="selectedCountry" (change)="onCountrySelected()"
-                        name="country_id" id="countrymenu">
-                        <option value="" disabled selected>Select Country</option>
-                        <option *ngFor="let countrydata of countriesrcvd" [value]="countrydata._id">
-                            {{countrydata.country}}
-                        </option>
-                    </select>
+            <form #cityForm="ngForm" (ngSubmit)="onsubmitCityForm(cityForm)">
+                <div class="form-group row m-2">
+                    <label for="countrymenu" class="col-sm-2 col-form-label" ml-5>Country</label>
+                    <div class="col-sm-10 ">
+                        <select class="form-control ms-3" [(ngModel)]="selectedCountry" (change)="onCountrySelected()"
+                            name="country_id" id="countrymenu" required>
+                            <option value="" disabled selected>Select Country</option>
+                            <option *ngFor="let countrydata of countriesrcvd" [value]="countrydata._id">
+                                {{countrydata.country}}
+                            </option>
+                        </select>
+                        <div class="text-danger ms-3" *ngIf="cityForm.controls['country_id'].invalid && cityForm.controls['country_id'].touched">
+                            Country is required.
+                        </div>
+                        <!-- <div class="text-danger" *ngIf="selectedCountry.invalid && selectedCountry.touched">
+                            <div *ngIf="selectedCountry.errors['required']">country is required.</div>
+                        </div> -->
+                    </div>
                 </div>
-            </div>
+                <div class="form-group row m-2">
+                    <label for="citymenu" class="col-sm-2 col-form-label" ml-5>City</label>
+                    <div class="col-sm-10">
+                        <input type="text" [(ngModel)]="enteredLocation" #locationInput="ngModel" id="citylocation"
+                            (input)="initAutocomplete()" name="location" placeholder="Enter location"
+                            class="form-control ms-3" [disabled]="isbuttonshow" required>
+                        <div class="text-danger ms-3" *ngIf="locationInput.invalid && locationInput.touched">
+                            <div *ngIf="locationInput.errors['required']">City is required.</div>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="form-group row m-2">
-                <label for="citymenu" class="col-sm-2 col-form-label" ml-5>City</label>
-                <div class="col-sm-10">
-                    <input type="text" [(ngModel)]="enteredLocation" #locationInput id="citylocation"
-                        (input)="initAutocomplete()" name="location" placeholder="Enter location"
-                        class="form-control ms-3" [disabled]="isbuttonshow" required>
+                <div class="form-group row m-2">
+                    <div class="col-sm-10">
+                        <button class="btn btn-secondary mx-2" [disabled]="!cityForm.valid"
+                            *ngIf="isShowAddBtn">Add</button>
+                        <button class="btn btn-secondary mx-2" [disabled]="!cityForm.valid"
+                            *ngIf="isShowEditBtn">Update</button>
+                        <button class="btn btn-secondary mx-2" (click)="onCancelBtn(cityForm)">Cancel</button>
+                    </div>
                 </div>
-            </div>
-           
-            <div class="form-group row m-2">
-                <div class="col-sm-10">
-                    <button class="btn btn-secondary mx-2" [disabled]="!cityForm.valid"
-                        *ngIf="isShowAddBtn">Add</button>
-                    <button class="btn btn-secondary mx-2" [disabled]="!cityForm.valid"
-                        *ngIf="isShowEditBtn">Update</button>
-                    <button class="btn btn-secondary mx-2" (click)="onCancelBtn(cityForm)">Cancel</button>
-                </div>
-            </div>
-        </form>
-    </div>
+            </form>
+        </div>
     </div>
     <div #mapContainer id="map"></div>
     <!-- <div id="output"></div> -->
@@ -88,8 +91,9 @@
                                 </td>
                                 <td>{{citydt.city}}
                                 </td>
-                                <td><button class="text-success border-0 bg-transparent edit" data-bs-toggle="modal" data-bs-target="#exampleModal"
-                                        (click)="onEditCity(citydt)"><i class="fas fa-edit fa-lg mx-1"></i></button>
+                                <td><button class="text-success border-0 bg-transparent edit" data-bs-toggle="modal"
+                                        data-bs-target="#exampleModal" (click)="onEditCity(citydt)"><i
+                                            class="fas fa-edit fa-lg mx-1"></i></button>
                                     <!-- <a href="#" class="text-danger delete" id="" ><i
                                             class="fas fa-trash fa-lg mx-1"></i></a> -->
                                 </td>
@@ -110,7 +114,7 @@
 <!-- <div class="text-center">
         <button class="btn btn-secondary mt-2" data-bs-toggle="modal" data-bs-target="#exampleModal" (click)="onAddBtnCity()">Add City</button>
     </div> -->
-    <!-- <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<!-- <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">

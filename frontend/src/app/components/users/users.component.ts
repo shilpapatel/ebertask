@@ -68,7 +68,7 @@ export class UsersComponent {
       email: ['', [Validators.required, Validators.email]],
       code:['',[Validators.required]],
       phone: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(10)]],
-      profile: [null, [Validators.required]]
+      profile: [null]
     })
   }
   // getUser() {
@@ -155,6 +155,7 @@ export class UsersComponent {
   }
 
   onAddBtnUser() {
+    this.usersForm.reset();
     // this.isShow = !this.isShow;
     this.isShowAddBtn = true;
     this.isShowEditBtn = false;
@@ -192,6 +193,11 @@ export class UsersComponent {
   }
 
   onSubmit() {
+    if(this.usersForm.invalid){
+      this.usersForm.markAllAsTouched();
+      return;
+    }
+    else{
     var formData: any = new FormData();
     formData.append('name', this.usersForm.value.name);
     formData.append('email', this.usersForm.value.email);
@@ -236,7 +242,21 @@ export class UsersComponent {
         // form.reset();
       });
     }
+    const modalElement = document.getElementById('exampleModal');
+    if (modalElement) {
+      modalElement.classList.remove('show');
+      modalElement.style.display = 'none';
+      modalElement.setAttribute('aria-hidden', 'true');
+      modalElement.removeAttribute('aria-modal');
+      document.body.classList.remove('modal-open');
+      const modalBackdrop = document.getElementsByClassName('modal-backdrop')[0];
+      if (modalBackdrop) {
+        modalBackdrop.parentNode?.removeChild(modalBackdrop);
+      }
+    }
+    this.usersForm.reset()
     this.isShow = !this.isShow;
+  }
   }
 
 

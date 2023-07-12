@@ -28,7 +28,7 @@ router.post('/add-vehicleprice', async (req, res) => {
   });
 } catch (err) {
       console.log(err);
-      res.status(500).json({
+      res.status(400).json({
           error: err,
       });
   }
@@ -93,7 +93,7 @@ router.delete('/delete-vehicleprice/:id', async (req, res, next) => {
     res.status(200).json({ message: 'VehiclePrice deleted successfully' });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: err });
+    res.status(400).json({ error: err });
   }
 });
 router.put('/update-vehicleprice/:id', async (req, res, next) => {
@@ -118,7 +118,7 @@ router.put('/update-vehicleprice/:id', async (req, res, next) => {
     });
   } catch (err) {
     // console.log(err);
-    res.status(500).json({
+    res.status(400).json({
       error: err,
     });
   }

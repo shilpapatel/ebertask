@@ -253,47 +253,67 @@ export class ListComponent {
     // this.userForm.get('profile').updateValueAndValidity();
   }
   onSubmit() {
-    var formData: any = new FormData();
+    if(this.driversForm.invalid){
+      this.driversForm.markAllAsTouched();
+      return;
+    }
+    else{
+      var formData: any = new FormData();
 
-    formData.append('name', this.driversForm.value.name);
-    formData.append('email', this.driversForm.value.email);
-    formData.append('phone', this.driversForm.value.phone);
-    formData.append('code', this.driversForm.value.code);
-    formData.append('profile', this.driversForm.value.profile);
-    formData.append('country_id', this.driversForm.value.country_id);
-    formData.append('city_id', this.driversForm.value.city_id);
-    if (this.editingDriver) {
-      formData.append('id', this.editingDriver._id);
-      // this.socketService.updateDriver(formData);
-      this.listService.updateDriver(formData).subscribe(
-        (res) => {
-        const index = this.driverdata.findIndex(v => v._id === this.editingDriver._id);
-        this.driverdata[index] = res['driverUpdated'];
-        this.getDriver();
-        this.toastr.success('Driver Updated ')
-        this.editingDriver = null;
-        this.driversForm.reset();
-
-      },
-      (error) => {
-        console.log(error);
-        
-        this.toastr.error(error.error.message);
-      });
-    } else {
-      // Adding a new vehicle
-      this.listService.addDrivers(formData).subscribe(
-        (res)=> {
-        this.driverdata.push(res['driverCreated']);
-         this.getDriver();
-        this.toastr.success('Driver Added ')
-        // this.router.navigate(['users']);
-      },
-      (error) =>{
-        
-        this.toastr.error(error.error.message)
+      formData.append('name', this.driversForm.value.name);
+      formData.append('email', this.driversForm.value.email);
+      formData.append('phone', this.driversForm.value.phone);
+      formData.append('code', this.driversForm.value.code);
+      formData.append('profile', this.driversForm.value.profile);
+      formData.append('country_id', this.driversForm.value.country_id);
+      formData.append('city_id', this.driversForm.value.city_id);
+      if (this.editingDriver) {
+        formData.append('id', this.editingDriver._id);
+        // this.socketService.updateDriver(formData);
+        this.listService.updateDriver(formData).subscribe(
+          (res) => {
+          const index = this.driverdata.findIndex(v => v._id === this.editingDriver._id);
+          this.driverdata[index] = res['driverUpdated'];
+          this.getDriver();
+          this.toastr.success('Driver Updated ')
+          this.editingDriver = null;
+          this.driversForm.reset();
+  
+        },
+        (error) => {
+          console.log(error);
+          
+          this.toastr.error(error.error.message);
+        });
+      } else {
+        // Adding a new vehicle
+        this.listService.addDrivers(formData).subscribe(
+          (res)=> {
+          this.driverdata.push(res['driverCreated']);
+           this.getDriver();
+          this.toastr.success('Driver Added ')
+          // this.router.navigate(['users']);
+        },
+        (error) =>{
+          
+          this.toastr.error(error.error.message)
+        }
+        )
       }
-      )
+      const modalElement = document.getElementById('exampleModal');
+      if (modalElement) {
+        modalElement.classList.remove('show');
+        modalElement.style.display = 'none';
+        modalElement.setAttribute('aria-hidden', 'true');
+        modalElement.removeAttribute('aria-modal');
+        document.body.classList.remove('modal-open');
+        const modalBackdrop = document.getElementsByClassName('modal-backdrop')[0];
+        if (modalBackdrop) {
+          modalBackdrop.parentNode?.removeChild(modalBackdrop);
+        }
+      }
+      this.driversForm.reset(); 
+      
     }
     // this.isShow = !this.isShow;
   }

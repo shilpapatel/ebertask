@@ -47,7 +47,7 @@ router.get('/get-settings', async (req, res, next) => {
         settingsUpdated: result,
       });
     } catch (err) {
-      res.status(500).json({
+      res.status(400).json({
         error: err,
       });
     }

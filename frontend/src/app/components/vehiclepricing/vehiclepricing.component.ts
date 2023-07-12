@@ -65,6 +65,7 @@ export class VehiclepricingComponent implements OnInit{
   }
 
   onAddBtnVehiclePricing() {
+    this.vehiclePricingForm.reset();
     // this.isShow = !this.isShow;
     this.isShowAddBtn = true;
     this.isShowEditBtn = false;
@@ -109,20 +110,11 @@ export class VehiclepricingComponent implements OnInit{
   
 }
   onSubmitvehiclePricingForm(){
-//     var formData: any = new FormData();
-
-//     formData.append('country', this.vehiclePricingForm.value.country);
-//     formData.append('city', this.vehiclePricingForm.value.city);
-//     formData.append('vehicletype', this.vehiclePricingForm.value.vehicletype);
-//     formData.append('driverprofit', this.vehiclePricingForm.value.driverprofit);
-//     formData.append('minfare', this.vehiclePricingForm.value.minfare);
-//     formData.append('distanceforbaseprice', this.vehiclePricingForm.value.distanceforbaseprice);
-//     formData.append('baseprice', this.vehiclePricingForm.value.baseprice);
-//     formData.append('priceperunitdistance', this.vehiclePricingForm.value.priceperunitdistance);
-//     formData.append('priceperunittime', this.vehiclePricingForm.value.priceperunittime);
-//     formData.append('maxspace', this.vehiclePricingForm.value.maxspace);
-// console.log(formData);
-if (this.vehiclePricingForm.valid) {
+if(this.vehiclePricingForm.invalid){
+  this.vehiclePricingForm.markAllAsTouched();
+  return;
+}
+else{
   const formValue = this.vehiclePricingForm.value;
   // console.log(formValue);
   
@@ -168,6 +160,19 @@ if (this.vehiclePricingForm.valid) {
         // this.router.navigate(['users']);
       })
     }
+    const modalElement = document.getElementById('exampleModal');
+    if (modalElement) {
+      modalElement.classList.remove('show');
+      modalElement.style.display = 'none';
+      modalElement.setAttribute('aria-hidden', 'true');
+      modalElement.removeAttribute('aria-modal');
+      document.body.classList.remove('modal-open');
+      const modalBackdrop = document.getElementsByClassName('modal-backdrop')[0];
+      if (modalBackdrop) {
+        modalBackdrop.parentNode?.removeChild(modalBackdrop);
+      }
+    }
+    this.vehiclePricingForm.reset();
     this.isShow = !this.isShow;
   }
   }

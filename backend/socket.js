@@ -289,8 +289,14 @@ const configureSocket = (io) => {
         const page = parseInt(params.page) || 1;
         const limit = parseInt(params.pageSize) || 3;
         const searchQuery = params.searchQuery || '';
-        const sortField = params.sortField || 'assigned'; // Default sort field is 'name'
+        const sortField = params.sortField || 'datetime'; // Default sort field is 'name'
         const sortOrder = params.sortOrder || 'asc';
+        // const startDate = params.startDate || '';
+        // const endDate= params.endDate || '';
+        // const startDateTime = startDate ? new Date(startDate) : null;
+        // const endDateTime = endDate ? new Date(endDate) : null;
+        // console.log(startDateTime);
+        // console.log(endDateTime);
     let sortOptions = {};
     sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
 
@@ -298,6 +304,10 @@ const configureSocket = (io) => {
     const countPipeline = [
       {
         $match: {
+          // $and: [
+          //   { datetime: { $gte: startDateTime } },
+          //   { datetime: { $lte: endDateTime } }
+          // ],
           $or: [
             { from: searchRegex },
             { to: searchRegex },
@@ -387,7 +397,7 @@ const configureSocket = (io) => {
     }, 
   ]
   const driverridedata = await CreateRide.aggregate(pipeline);
-  console.log(driverridedata);
+  // console.log(driverridedata);
        
         io.emit('driverRideHistoryData', driverridedata,totalPages,page);
 

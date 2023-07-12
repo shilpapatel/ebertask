@@ -17,7 +17,12 @@ export class RidehistoryComponent {
   pageSize: number = 3;
   searchQuery: string
   sortOrder: string = 'asc'; 
-  sortField: string = 'assigned';
+  sortField: string = 'datetime';
+  filterField: string = 'from';
+  startDate: string = '';
+  endDate: string = '';
+  fromFilter:string = '';
+  tofilter:string = '';
 
   constructor(private socketService: SocketService, private csvExportService: CsvExportService) { }
   ngOnInit(): void {
@@ -26,113 +31,7 @@ export class RidehistoryComponent {
      this.initMap()
   }
 
-  // initMap() {
-  //   const myLatLng = { lat: 22.309157, lng: 70.703702 };
-  //   const mapOptions = {
-  //     center: myLatLng,
-  //     zoom: 7,
-  //     mapTypeId: google.maps.MapTypeId.ROADMAP
-  //   };
-  
-  //   const map = new google.maps.Map(document.getElementById('googleMap'), mapOptions);
-  
-  //   const geocoder = new google.maps.Geocoder();
-  
-  //   const fromAddress = this.selectedcreateride.from; // Replace with the actual address of the "From" location
-  //   const toAddress = this.selectedcreateride.to; // Replace with the actual address of the "To" location
-  // console.log(fromAddress);
-  // console.log(toAddress);
-  
-  //   // Geocode the "From" location address
-  //   geocoder.geocode({ address: fromAddress }, (results, status) => {
-  //     if (status === google.maps.GeocoderStatus.OK) {
-  //       const fromLatLng = results[0].geometry.location;
-  
-  //       // Create a marker for the "From" location
-  //       const fromMarker = new google.maps.Marker({
-  //         position: fromLatLng,
-  //         map: map,
-  //         title: 'From Location'
-  //       });
-  
-  //       // Geocode the "To" location address
-  //       geocoder.geocode({ address: toAddress }, (results, status) => {
-  //         if (status === google.maps.GeocoderStatus.OK) {
-  //           const toLatLng = results[0].geometry.location;
-  
-  //           // Create a marker for the "To" location
-  //           const toMarker = new google.maps.Marker({
-  //             position: toLatLng,
-  //             map: map,
-  //             title: 'To Location'
-  //           });
-  
-  //           // Create a polyline between the "From" and "To" locations
-  //           const polyline = new google.maps.Polyline({
-  //             path: [fromLatLng, toLatLng],
-  //             strokeColor: '#FF0000',
-  //             strokeOpacity: 1.0,
-  //             strokeWeight: 2
-  //           });
-  
-  //           polyline.setMap(map);
-  //         } else {
-  //           console.log('Geocode was not successful for the "To" location: ' + status);
-  //         }
-  //       });
-  //     } else {
-  //       console.log('Geocode was not successful for the "From" location: ' + status);
-  //     }
-  //   });
-  // }
-  
-  // initMap() {
-  //   const myLatLng = { lat: 22.309157, lng: 70.703702 };
-  //   const mapOptions = {
-  //     center: myLatLng,
-  //     zoom: 7,
-  //     mapTypeId: google.maps.MapTypeId.ROADMAP
-  //   };
-  
-  //   const map = new google.maps.Map(document.getElementById('googleMap'), mapOptions);
-  
-  //   const fromLatLng = new google.maps.LatLng(); // Replace with the actual "From" coordinates
-  //   const toLatLng = new google.maps.LatLng();
-  
-  //   const polyline = new google.maps.Polyline({
-  //     path: [fromLatLng, toLatLng],
-  //     strokeColor: '#FF0000',
-  //     strokeOpacity: 1.0,
-  //     strokeWeight: 2
-  //   });
-  //   const fromMarker = new google.maps.Marker({
-  //     position: fromLatLng,
-  //     map: map,
-  //     title: 'From Location'
-  //   });
-  
-  //   const toMarker = new google.maps.Marker({
-  //     position: toLatLng,
-  //     map: map,
-  //     title: 'To Location'
-  //   });
-  
-  //   polyline.setMap(map);
-  // }
-  // initMap() {
-  //   const myLatLng = { lat: 22.309157, lng: 70.703702 };//22.309157, 70.703702
-  //   const mapOptions = {
-  //     center: myLatLng,
-  //     zoom: 7,
-  //     mapTypeId: google.maps.MapTypeId.ROADMAP
-  //   };
 
-  //   const map = new google.maps.Map(document.getElementById('googleMap'), mapOptions);
-
-  //   // const directionsService = new google.maps.DirectionsService();
-  //   // const directionsDisplay = new google.maps.DirectionsRenderer();
-  //   // directionsDisplay.setMap(map);
-  // }
   downloadDataAsCsv(): void {
      this.csvExportService.exportToCsv(this.createridedata, 'ridehistory.csv');
   }
@@ -151,6 +50,13 @@ export class RidehistoryComponent {
 //       }
 //     );
 //   }
+getUniqueVehicleTypes(createridedata: any[]): string[] {
+  const uniqueTypes = new Set<string>();
+  for (const confirmride of createridedata) {
+      uniqueTypes.add(confirmride.vehicleType);
+  }
+  return Array.from(uniqueTypes);
+}
 
   getDriverRideData(): void {
     this.socketService.getDriverRideHistoryData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder).subscribe(

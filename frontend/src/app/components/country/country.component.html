@@ -10,12 +10,12 @@
     <button class="btn btn-secondary" (click)="clearSearch()">Clear</button>
   </div>
   <div class="col-sm-2 m-1">
-    <button class="btn btn-secondary btnsearchcountry" data-bs-toggle="modal" data-bs-target="#exampleModal" (click)="onAddBtnCountry()" *ngIf="!isShow">add</button>
+    <button class="btn btn-secondary btnsearchcountry" data-bs-toggle="modal" data-bs-target="#exampleModal" (click)="onAddBtnCountry()">add</button>
   </div>
 </div>
 </div>
 
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" >
   <div class="modal-dialog">
       <div class="modal-content">
           <div class="modal-header">
@@ -31,6 +31,14 @@
                     <option value="" disabled selected>Select Country</option>
                     <option *ngFor="let country of countries" [value]="country.name.common">{{ country.name.common }}</option>
                   </select>
+                  <div *ngIf="countryForm.get('country').invalid && (countryForm.get('country').dirty || countryForm.get('country').touched)" class="text-danger">
+                    <div [hidden]="!countryForm.get('country')?.errors?.['required']" class="text-danger" >Country is required </div>
+                  </div>
+
+<!-- <div *ngIf="countryForm.get('countryname')?.invalid && (countryForm.get('countryname')?.dirty || countryForm.get('countryname')?.touched)">
+  <div [hidden]="!countryForm.get('countryname')?.errors?.['required']" class="text-danger"
+   >Country Name is required </div>
+</div> -->
                 </div>
               </div>
               <div class="form-group row m-2">
@@ -54,15 +62,19 @@
               <div class="form-group row m-2">
                 <label for="flag" class="col-sm-2 col-form-label">Flag</label>
                 <div class="col-sm-10">
-                  <img [src]="countryForm.get('flag').value" id="flag" alt="flag" width="100" height="100">
+                  <!-- <img [src]="countryForm.get('flag').value" id="flag" alt="flag" width="100" height="100"> -->
+                  <img [src]="countryForm.get('flag').value" id="flag" width="100">
                 </div>
               </div>
-              <div class="modal-footer d-flex justify-content-center">
-                <button type="submit" class="btn btn-secondary mx-2" data-bs-dismiss="modal">Add Country</button>
-                <button class="btn btn-secondary mx-2" data-bs-dismiss="modal" (click)="onCancelBtn()">Cancel</button>
+              <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-secondary mx-2">Add Country</button>
               </div>
             </form>
           </div>
+              <div class="modal-footer d-flex justify-content-center">
+                <button class="btn btn-secondary mx-2" data-bs-dismiss="modal" (click)="onCancelBtn()">Cancel</button>
+              </div>
+          
       </div>
   </div>
 </div>

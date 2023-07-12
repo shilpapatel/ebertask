@@ -98,54 +98,62 @@ export class VehicletypeComponent {
   }
   submitVehicleForm() {
 
-    const selectedVehicleType = this.vehicleForm.value.vehicletype;
-
-  if (!this.selectedVehicleTypes.includes(selectedVehicleType)) {
-    this.selectedVehicleTypes.push(selectedVehicleType);
-
-    var formData: any = new FormData();
-    formData.append('vehicletype', selectedVehicleType);
-    formData.append('vehicleimg', this.vehicleForm.value.vehicleimg);
-
-    if (this.selectedVehicle) {
-      // Updating an existing vehicle
-      formData.append('id', this.selectedVehicle._id);
-
-      this.vehicletypeService.updateVehicleType(formData).subscribe((res:any) => {
-        // Update the edited vehicle in the vehicles array
-        const index = this.vehicles.findIndex(v => v._id === this.selectedVehicle._id);
-        this.vehicles[index] = res['VehicleTypeUpdated'];
-        this.toastr.success(res.message);
-        this.selectedVehicle = null;
-      });
-    } else {
-      // Adding a new vehicle
-      this.vehicletypeService.addVehicleType(formData).subscribe(
-        (res:any) => {
-            this.vehicles.push(res['VehicleTypCreated']);
-             this.toastr.success(res.message);
-        },
-        (error) => {
-          this.toastr.error(error.error.message);
-        // res => {
-        // this.vehicles.push(res['VehicleTypCreated']);
-        // this.toastr.success({res.message});
-      });
+    if(this.vehicleForm.invalid){
+      this.vehicleForm.markAllAsTouched();
+      return;
     }
-  }
-    // const selectedVehicleType = this.vehicleForm.value.vehicletype;
-    // if (!this.selectedVehicleTypes.includes(selectedVehicleType)) {
-    //   this.selectedVehicleTypes.push(selectedVehicleType);
-    // var formData: any = new FormData();
-    // formData.append('vehicletype', selectedVehicleType);
-    // formData.append('vehicleimg', this.vehicleForm.value.vehicleimg);
-    // this.vehicletypeService
-    //   .addVehicleType(formData).subscribe(res => {
-    //     this.vehicles.push(res['VehicleTypCreated'])
-    //   })
-    // }
-    this.isShow = !this.isShow;
-    this.vehicleForm.reset();
+    else{
+
+      const selectedVehicleType = this.vehicleForm.value.vehicletype;
+
+      if (!this.selectedVehicleTypes.includes(selectedVehicleType)) {
+        this.selectedVehicleTypes.push(selectedVehicleType);
+    
+        var formData: any = new FormData();
+        formData.append('vehicletype', selectedVehicleType);
+        formData.append('vehicleimg', this.vehicleForm.value.vehicleimg);
+    
+        if (this.selectedVehicle) {
+          // Updating an existing vehicle
+          formData.append('id', this.selectedVehicle._id);
+    
+          this.vehicletypeService.updateVehicleType(formData).subscribe((res:any) => {
+            // Update the edited vehicle in the vehicles array
+            const index = this.vehicles.findIndex(v => v._id === this.selectedVehicle._id);
+            this.vehicles[index] = res['VehicleTypeUpdated'];
+            this.toastr.success(res.message);
+            this.selectedVehicle = null;
+          });
+        } else {
+          // Adding a new vehicle
+          this.vehicletypeService.addVehicleType(formData).subscribe(
+            (res:any) => {
+                this.vehicles.push(res['VehicleTypCreated']);
+                 this.toastr.success(res.message);
+            },
+            (error) => {
+              this.toastr.error(error.error.message);
+            // res => {
+            // this.vehicles.push(res['VehicleTypCreated']);
+            // this.toastr.success({res.message});
+          });
+        }
+      }
+        // const selectedVehicleType = this.vehicleForm.value.vehicletype;
+        // if (!this.selectedVehicleTypes.includes(selectedVehicleType)) {
+        //   this.selectedVehicleTypes.push(selectedVehicleType);
+        // var formData: any = new FormData();
+        // formData.append('vehicletype', selectedVehicleType);
+        // formData.append('vehicleimg', this.vehicleForm.value.vehicleimg);
+        // this.vehicletypeService
+        //   .addVehicleType(formData).subscribe(res => {
+        //     this.vehicles.push(res['VehicleTypCreated'])
+        //   })
+        // }
+        this.isShow = !this.isShow;
+        this.vehicleForm.reset();
+    }
+   
   }
 onEditBtnVehicle(vehicle: any){
 

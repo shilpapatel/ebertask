@@ -18,7 +18,7 @@ router.post('/add-driverride', async (req, res, next) => {
   });
   } catch (err) {
       console.log(err);
-      res.status(500).json({
+      res.status(400).json({
           error: err,
       });
   }
@@ -48,7 +48,7 @@ router.delete('/delete-driverride/:id', async (req, res, next) => {
     res.status(200).json({ message: 'Driver deleted successfully' });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: err });
+    res.status(400).json({ error: err });
   }
 });
 module.exports = router;

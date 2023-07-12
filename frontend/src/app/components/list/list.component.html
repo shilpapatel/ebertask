@@ -69,6 +69,7 @@
                                     {{countrydata.country}}
                                 </option>
                             </select>
+                            <div *ngIf="driversForm.get('country_id').invalid && (driversForm.get('country_id').dirty || driversForm.get('country_id').touched)" class="text-danger"> ** Country required **</div>
                         </div>
                     </div>
                     <div class="form-group row m-2">
@@ -80,6 +81,7 @@
                                     {{citydata.city}}
                                 </option>
                             </select>
+                            <div *ngIf="driversForm.get('city_id').invalid && (driversForm.get('city_id').dirty || driversForm.get('city_id').touched)" class="text-danger"> ** City required **</div>
                         </div>
                     </div>
 
@@ -136,8 +138,8 @@
 
                     <!-- <div class="form-group row m-3"> -->
                         <div class="d-flex justify-content-center">
-                            <button class="btn btn-secondary m-2" [disabled]="!driversForm.valid"
-                                *ngIf="isShowAddBtn" data-bs-dismiss="modal">Add
+                            <button class="btn btn-secondary m-2" 
+                                *ngIf="isShowAddBtn">Add
                                 Driver</button>
                             <button class="btn btn-secondary m-2" [disabled]="!driversForm.valid"
                                 *ngIf="isShowEditBtn" data-bs-dismiss="modal">Update
