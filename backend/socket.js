@@ -779,6 +779,136 @@ const configureSocket = (io) => {
         }
       };
     
+      socket.on('getDriverRide', async (params) => {
+        console.log(params,"paramsssssssss");
+        try {
+  
+          const page = parseInt(params.page) || 1;
+          const limit = parseInt(params.pageSize) || 3;
+          const searchQuery = params.searchQuery || '';
+          const sortField = params.sortField || 'datetime'; // Default sort field is 'name'
+          const sortOrder = params.sortOrder || 'asc';
+          const paymentFilter = params.paymentFilter || '';
+          const vehicleTypeFilter = params.vehicleTypeFilter || '';
+          const fromFilter = params.fromFilter || '';
+          const toFilter = params.toFilter || '';
+          const startDateFilter = params.startDateFilter || '';
+          const endDateFilter= params.endDateFilter || '';
+          const startDateTime = startDateFilter ? moment(startDateFilter).format('DD-MMM-YYYY hh:mm A') : null;
+          const endDateTime = endDateFilter ? moment(endDateFilter).format('DD-MMM-YYYY hh:mm A') : null;
+          console.log(startDateTime);
+          console.log(endDateTime);
+  
+          let sortOptions = {};
+          sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1; 
+          const searchRegex = new RegExp(searchQuery, 'i');
+          const skip = (page - 1) * limit;
+  
+          const data = await CreateRide.aggregate([
+            // {
+            //   $match: {
+            //     assigned: {
+            //       $in: ["pending", "timeout", "rejected", "accepted", "assigning"]
+            //     }
+            //   }
+            // },
+            {
+              $lookup: {
+                from: 'cities',
+                foreignField: '_id',
+                localField: 'cityId',
+                as: 'citydata'
+              }
+            },
+            {
+              $unwind: '$citydata'
+            },
+            {
+              $lookup: {
+                from: 'vehicletypes',
+                foreignField: '_id',
+                localField: 'vehicleTypeId',
+                as: 'vehicletypedata'
+              }
+            },
+            {
+              $unwind: '$vehicletypedata'
+            },
+            {
+              $lookup: {
+                from: 'users',
+                foreignField: '_id',
+                localField: 'userId',
+                as: 'userdata'
+              }
+            },
+            {
+              $unwind: '$userdata'
+            },
+            {
+              $lookup: {
+                from: 'driverlists',
+                foreignField: '_id',
+                localField: 'driverId',
+                as: 'driverdata'
+              }
+            },
+            {
+              $unwind: {
+              path: '$driverdata',
+              preserveNullAndEmptyArrays:true
+            }
+            },
+            {
+              $match: {
+                $or: [
+                      { from: searchRegex },
+                      { to: searchRegex },
+                      { assigned: searchRegex },
+                      { estimatePrice: searchRegex }
+                    ],
+                datetime: startDateTime && endDateTime ? { $gte: startDateTime, $lte: endDateTime } : { $exists: true },  
+                // $and: [
+                //       { datetime: { $gte: startDateTime } },
+                //       { datetime: { $lte: endDateTime } }
+                //     ],
+                // datetime: { $gte: startDateTime, $lte: endDateTime},
+                assigned:{$in:["pending", "timeout", "rejected", "accepted", "assigning"]},
+                paymentOption: { $regex: paymentFilter, $options: 'i' },
+                vehicleType: { $regex: vehicleTypeFilter, $options: 'i' },
+                from: { $regex: fromFilter, $options: 'i' },
+                to: { $regex: toFilter, $options: 'i' }
+              }
+            },
+            {
+              $facet: {
+                paginatedResults: [
+                  { $sort: sortOptions },
+                  { $skip: skip },
+                  { $limit: limit }
+                ],
+                totalCount: [
+                  { $count: 'count' }
+                ]
+              }
+            } 
+          ])
+  
+          const metadata = data[0].totalCount[0];
+      const totalDocuments = metadata ? metadata.count : 0;
+      const totalPages = Math.ceil(totalDocuments / limit);
+      const driverridedata = data[0].paginatedResults;
+      io.emit('driverRideData', driverridedata,totalPages,page);
+      // console.log('Data:', driverridedata);
+      // console.log('Total Count:', totalDocuments);
+      // console.log('Total Pages:', totalPages);
+      // console.log(driverridedata,"confirmmmmmmmmmmmmmmmmmmm");
+  
+        } catch (error) {
+          console.log(error);
+          socket.emit('getDriverRideError', { error });
+        }
+      });
       // const driverridedata = await CreateRide.aggregate([
       //   {
       //     $match: {
