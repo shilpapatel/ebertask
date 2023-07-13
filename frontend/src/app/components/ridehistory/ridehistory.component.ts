@@ -18,11 +18,14 @@ export class RidehistoryComponent {
   searchQuery: string
   sortOrder: string = 'asc'; 
   sortField: string = 'datetime';
-  filterField: string = 'from';
-  startDate: string = '';
-  endDate: string = '';
+  // filterField: string = 'from';
+  paymentFilter: string = '';
+  vehicleTypeFilter: string = '';
+  startDateFilter: string = '';
+  endDateFilter: string = '';
   fromFilter:string = '';
-  tofilter:string = '';
+  toFilter:string = '';
+  
 
   constructor(private socketService: SocketService, private csvExportService: CsvExportService) { }
   ngOnInit(): void {
@@ -51,18 +54,25 @@ export class RidehistoryComponent {
 //     );
 //   }
 getUniqueVehicleTypes(createridedata: any[]): string[] {
+  console.log(createridedata);
+  
   const uniqueTypes = new Set<string>();
   for (const confirmride of createridedata) {
       uniqueTypes.add(confirmride.vehicleType);
+      // console.log(confirmride.vehicleType);
+      
   }
   return Array.from(uniqueTypes);
 }
 
+
   getDriverRideData(): void {
-    this.socketService.getDriverRideHistoryData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder).subscribe(
+    this.socketService.getDriverRideHistoryData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder,this.paymentFilter, this.vehicleTypeFilter, this.fromFilter, this.toFilter,this.startDateFilter,
+      this.endDateFilter).subscribe(
       (data: any) => {
-        console.log(data.driverridedata);
+        console.log(data);
         
+        console.log(data.driverridedata);
         this.createridedata = data.driverridedata;
         // this.createridedata = data.driverridedata.filter(createride => createride.assigned === 'cancelled');
         this.totalPages = data.totalPages;
@@ -73,6 +83,35 @@ getUniqueVehicleTypes(createridedata: any[]): string[] {
       }
     );
   }
+  applyFilter(): void {
+    this.currentPage = 1; // Reset to the first page when applying filters
+    this.getDriverRideData();
+  }
+  clearFilter(): void {
+    this.paymentFilter = '';
+    this.vehicleTypeFilter = '';
+    this.fromFilter = '';
+    this.toFilter = '';
+    this.startDateFilter = '';
+    this.endDateFilter = '';
+    this.currentPage = 1; // Reset to the first page when clearing filters
+    this.getDriverRideData();
+  }
+  // applyFilters(): void {
+  //   this.socketService.getDriverRideHistoryData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder,this.paymentFilter, this.vehicleTypeFilter, this.fromFilter, this.toFilter).subscribe(
+  //     (data: any) => {
+  //       console.log(data.driverridedata);
+        
+  //       this.createridedata = data.driverridedata;
+  //       // this.createridedata = data.driverridedata.filter(createride => createride.assigned === 'cancelled');
+  //       this.totalPages = data.totalPages;
+  //       this.currentPage = data.currentPage
+  //     },
+  //     (error: any) => {
+  //       console.error(error);
+  //     }
+  //   );
+  // }
 
   generatePageArray(): number[] {
     return Array(this.totalPages).fill(0).map((_, index) => index + 1);

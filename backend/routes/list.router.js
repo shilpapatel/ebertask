@@ -273,9 +273,9 @@ router.get('/get-drivers', async (req, res, next) => {
     const totalDocuments = metadata ? metadata.count : 0;
     const totalPages = Math.ceil(totalDocuments / limit);
     const drivers = data[0].paginatedResults;
-    // console.log('Data:', drivers);
-    // console.log('Total Count:', totalDocuments);
-    // console.log('Total Pages:', totalPages);
+    console.log('Data:', drivers);
+    console.log('Total Count:', totalDocuments);
+    console.log('Total Pages:', totalPages);
     res.status(200).json({
       message: 'Drivers retrieved successfully!',
       driverlistdata: drivers,

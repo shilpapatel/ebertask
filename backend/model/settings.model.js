@@ -11,6 +11,15 @@ let settingsSchema = new mongoose.Schema(
       type: String,
       default: '1'
     },
+    twilioauthtoken:{},
+    twilioacoountsid:{},
+    nodemaileremail:{},
+    nodemailerpassword:{},
+    stripepublickey:{},
+    stripesecretkey:{}
+
+
+
   },
 )
 

@@ -24,7 +24,16 @@ export class SettingsComponent implements OnInit {
     private toastr: ToastrService, private http: HttpClient) {
     this.rideForm = this.fb.group({
       requesttime: ['10'],
-      maxstops: ['1']
+      maxstops: ['1'],
+      twilioacoountsid : ['ACb44d005c170946735f2e9a3280b96aab'],
+      twilioauthtoken:['db965c28b6ab4012ad67085ed3571f03'],
+      nodemaileremail:['ari.hartmann@ethereal.email'],
+      nodemailerpassword:['mEgbgUtBfUpZkZVbmd'],
+      stripepublickey:['pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou'],
+      stripesecretkey:['sk_test_51NObn2BQlJgbeIPVzCyHaca669BS3YrGmlGoSQNFIahLk6xyFc1pH5utU9GO9a78duDiyPxiCD95SneKT1Utj5oD006hxweLrL']
+
+
+
     });
   }
 
@@ -46,9 +55,16 @@ export class SettingsComponent implements OnInit {
     );
   }
   submitForm() {
+
     const updatedSettings = {
       requesttime: this.rideForm.value.requesttime,
       maxstops: this.rideForm.value.maxstops,
+      twilioacoountsid: this.rideForm.value.twilioacoountsid,
+      twilioauthtoken: this.rideForm.value.twilioauthtoken,
+      nodemaileremail: this.rideForm.value.nodemaileremail,
+      nodemailerpassword: this.rideForm.value.nodemailerpassword,
+      stripepublickey: this.rideForm.value.stripepublickey,
+      stripesecretkey: this.rideForm.value.stripesecretkey
     };
   
     if (this._id) {

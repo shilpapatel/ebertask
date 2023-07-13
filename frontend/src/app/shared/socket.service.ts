@@ -33,11 +33,11 @@ export class SocketService {
     });
   }
 
-updateType(driverId: string, driverType: string): void {
+  updateType(driverId: string, driverType: string): void {
   this.socket.emit('updateDriverType', { driverId, driverType });
-}
+  }
 
-subscribeToListenDriverTypeUpdate(): Observable<any> {
+  subscribeToListenDriverTypeUpdate(): Observable<any> {
   return new Observable<any>(observer => {
     this.socket.on('driverTypeUpdated', updatedDriverType => {
       observer.next(updatedDriverType);
@@ -47,7 +47,7 @@ subscribeToListenDriverTypeUpdate(): Observable<any> {
       this.socket.off('driverTypeUpdated');
     };
   });
-}
+  }
 
   updateStatus(driverId: string, driverStatus: string): void {
     this.socket.emit('updateDriverStatus', { driverId, driverStatus });
@@ -65,8 +65,6 @@ subscribeToListenDriverTypeUpdate(): Observable<any> {
     });
   }
 
-
-
   getDriversWithoutPage(): Observable<any> {
     return new Observable<any>((observer) => {
       this.socket.emit('getDriversWithoutPage');
@@ -80,7 +78,6 @@ subscribeToListenDriverTypeUpdate(): Observable<any> {
       };
     });
   }
-
 
   addDriverRide(driverrideData: any): Observable<any> {
     return new Observable<any>(observer => {
@@ -101,13 +98,25 @@ subscribeToListenDriverTypeUpdate(): Observable<any> {
       };
     });
   }
-  getDriverRideData(): Observable<any> {
-
+  getDriverRideData(page: number, pageSize: number, searchQuery: string, sortField: string, sortOrder: string,paymentFilter: string,vehicleTypeFilter: string,fromFilter: string,toFilter: string,startDateFilter:string,endDateFilter:string): Observable<any> {
+    const params = {
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+      searchQuery: searchQuery,
+      sortField: sortField,
+      sortOrder: sortOrder,
+      paymentFilter:paymentFilter,
+      vehicleTypeFilter:vehicleTypeFilter,
+      fromFilter:fromFilter,
+      toFilter:toFilter,
+      startDateFilter:startDateFilter,
+      endDateFilter:endDateFilter
+    };
     return new Observable<any>((observer) => {
-      this.socket.emit('getDriverRide');
+      this.socket.emit('getDriverRide',params);
 
-      this.socket.on('driverRideData', (driverridedata) => {
-        observer.next(driverridedata);
+      this.socket.on('driverRideData', (driverridedata, totalPages, currentPage) => {
+        observer.next({ driverridedata, totalPages, currentPage });
       });
 
       return () => {
@@ -116,17 +125,40 @@ subscribeToListenDriverTypeUpdate(): Observable<any> {
     });
   }
 
-  getDriverRideHistoryData(page: number, pageSize: number, searchQuery: string, sortField: string, sortOrder: string): Observable<any> {
+  getDriverRideRunningData(): Observable<any> {
+
+    return new Observable<any>((observer) => {
+      this.socket.emit('getDriverRideRunning');
+
+      this.socket.on('driverRideRunningData', (driverridedata) => {
+        console.log(driverridedata);
+        
+        observer.next(driverridedata);
+      });
+
+      return () => {
+        this.socket.off('driverRideRunningData');
+      };
+    });
+  }
+
+  getDriverRideHistoryData(page: number, pageSize: number, searchQuery: string, sortField: string, sortOrder: string,paymentFilter: string,vehicleTypeFilter: string,fromFilter: string,toFilter: string,startDateFilter:string,endDateFilter:string): Observable<any> {
     const params = {
       page: page.toString(),
       pageSize: pageSize.toString(),
       searchQuery: searchQuery,
       sortField: sortField,
-      sortOrder: sortOrder
+      sortOrder: sortOrder,
+      paymentFilter:paymentFilter,
+      vehicleTypeFilter:vehicleTypeFilter,
+      fromFilter:fromFilter,
+      toFilter:toFilter,
+      startDateFilter:startDateFilter,
+      endDateFilter:endDateFilter
     };
     return new Observable<any>((observer) => {
       this.socket.emit('getDriverRideHistory', params);
-      console.log(params);
+      // console.log(params);
       
   
       this.socket.on('driverRideHistoryData', (driverridedata, totalPages, currentPage) => {
@@ -139,29 +171,7 @@ subscribeToListenDriverTypeUpdate(): Observable<any> {
       };
     });
   }
-  // getDriverRideData(page: number, pageSize: number, searchQuery: string, sortField: string, sortOrder: string): Observable<any> {
-  //   const params = {
-  //     page: page.toString(),
-  //     pageSize: pageSize.toString(),
-  //     searchQuery: searchQuery,
-  //     sortField: sortField,
-  //     sortOrder: sortOrder
-  //   };
-  //   return new Observable<any>((observer) => {
-  //     this.socket.emit('getDriverRide', params);
-  
-  //     this.socket.on('driverRideData', (driverridedata, totalPages, currentPage) => {
-  //       observer.next({ driverridedata, totalPages, currentPage });
-  //     });
-  
-  //     return () => {
-  //       this.socket.off('driverRideData');
-  //     };
-  //   });
-  // }
-  // updateDriverRide(driverrideId: string, driverId: string,assignedvalue:string): void {
-  //   this.socket.emit('updatedriverride', {driverrideId, driverId ,assignedvalue});
-  // }
+
   updateDriverRide(driverrideId: string, driverId: string,assignedvalue:string,created:string): void {
     this.socket.emit('updatedriverride', {driverrideId, driverId ,assignedvalue,created});
   }

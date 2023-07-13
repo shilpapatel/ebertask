@@ -3,6 +3,24 @@ const router = express.Router();
 const multer = require('multer')
 const mongoose = require('mongoose');
 const stripe = require('stripe')('sk_test_51NObn2BQlJgbeIPVzCyHaca669BS3YrGmlGoSQNFIahLk6xyFc1pH5utU9GO9a78duDiyPxiCD95SneKT1Utj5oD006hxweLrL');
+const accountSid = 'ACb44d005c170946735f2e9a3280b96aab';
+const authToken = 'db965c28b6ab4012ad67085ed3571f03';
+const client = require('twilio')(accountSid, authToken);
+
+
+
+async function sendmessage() {
+  try {
+    const message = await client.messages.create({
+      body: 'ride created',
+      from: '+18145262612',
+      to: '+918733930293'
+    });
+    console.log(message.sid, 'message');
+  } catch (error) {
+    console.log('Error sending message:', error);
+  }
+}
 
 // router.post('/cards', async (req, res) => {
 //   try {
@@ -214,7 +232,7 @@ router.get('/get-users', async (req, res, next) => {
       {
         $facet: {
           metadata: [
-            { $count: 'total' },
+            { $count: 'total' }
           ],
           users: [
             { $sort: sortOptions },
@@ -237,6 +255,7 @@ router.get('/get-users', async (req, res, next) => {
       currentPage: page,
       totalDocuments: totalDocuments
     });
+    // sendmessage();
   } catch (error) {
     next(error);
   }

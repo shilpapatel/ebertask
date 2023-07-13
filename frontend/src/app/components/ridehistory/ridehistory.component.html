@@ -1,67 +1,39 @@
-<!-- <div class="flex-container">
-    <div>
-      <form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
-        <label for="vehicle">Vehicle Type :</label>
-        <select id="vehicle" #vehicle (change)="onSelectedvehicle(vehicle.value)" formControlName="vehicle_id">
-          <option value ="">Select vehicle</option>
-          <option [value]="vehicle._id" *ngFor="let vehicle of vehicledata">
-            {{ vehicle.vehiclename }}
-          </option>
-        </select>
-  
-        <label for="cashCard" style="padding-left: 20px;">Payment options :</label>
-        <select id="cashCard" formControlName="cashCard">
-          <option value="">Select option</option>
-          <option value="cash">Cash</option>
-          <option value="card">Card</option>
-        </select>
-  
-        <label for="dateRange"  style="padding-left: 20px;" >From Date  : </label>
-        <input type="date" id="dateRange" formControlName="fromdate" />
-  
-        <label for="dateRange"  style="padding-left: 20px;" > To Date  :</label>
-        <input type="date" id="dateRange" formControlName="todate" />
-  
-  
-        <label for="pickupLocation"  style="padding-left: 20px;" >Pickup Location  :</label>
-        <input type="text" id="pickupLocation" formControlName="pickupLocation" />
-  
-        <label for="dropoffLocation"  style="padding-left: 20px;" >Drop-off Location:</label>
-        <input type="text" id="dropoffLocation" formControlName="dropoffLocation" />
-  
-        <button mat-raised-button type="submit"  style="margin-left: 20px;" >Filter</button>
-      </form>
-    </div>
-  </div> -->
-  <div class="container">
+<div class="container my-3">
     <div class="form-group row m-2 d-flex justify-content-center">
-        <div class="col-sm-1 m-1">
-            <select class="form-control bg-secondary text-white text-center" >
+        <div class="col-sm-1">
+            <select class="form-control bg-secondary text-white text-center" [(ngModel)]="paymentFilter">
+                <!-- <option value =  -->
                 <option value="asc">Cash</option>
                 <option value="desc">Card</option>
             </select>
         </div>
-        <div class="col-sm-1 m-1">
-            <select class="form-control bg-secondary text-white text-center">
-                <!-- <option value="">Select option</option> -->
-                <!-- <ng-container *ngFor="let vehicleType of getUniqueVehicleTypes(createridedata)"> -->
-                    <option *ngFor="let vehicleType of getUniqueVehicleTypes(createridedata)" [value]="vehicleType">{{ vehicleType }}</option>
-                <!-- </ng-container> -->
+        <div class="col-sm-1">
+            <select class="form-control bg-secondary text-white text-center" [(ngModel)]="vehicleTypeFilter">
+            <option *ngFor="let vehicleType of getUniqueVehicleTypes(createridedata)" [value]="vehicleType">{{ vehicleType }}</option>
             </select>
         </div>
-        <div class="col-sm-2 m-1">
-            <input type="date" class="form-control" [(ngModel)]="startDate">
+        <div class="col-sm-2">
+            <input type="date" class="form-control" [(ngModel)]="startDateFilter">
           </div>
-        <div class="col-sm-2 m-1">
-            <input type="date" class="form-control" [(ngModel)]="endDate">
+        <div class="col-sm-2">
+            <input type="date" class="form-control" [(ngModel)]="endDateFilter">
         </div>
-        <div class="col-sm-1 m-1">
-            <input type="text" class="form-control" [(ngModel)]="fromFilter">
+        <div class="col-sm-2">
+            <input type="text" class="form-control" [(ngModel)]="fromFilter" placeholder="From Filter">
+        </div>
+        <div class="col-sm-2">
+            <input type="text" class="form-control" [(ngModel)]="toFilter" placeholder="To Filter">
+        </div>
+        <div class="col-sm-1">
+            <button class="btn btn-secondary" (click)="applyFilter()">Filter</button>
+        </div>
+        <div class="col-sm-1">
+            <button class="btn btn-secondary" (click)="clearFilter()">Clear</button>
         </div>
     </div>
   </div>
 
-<div class="container">
+<div class="container my-5">
     <div class="form-group row m-2 d-flex justify-content-center">
         <div class="col-sm-1 m-1">
             <select class="form-control bg-secondary text-white text-center" [(ngModel)]="sortOrder" (ngModelChange)="onSort()">
@@ -107,6 +79,7 @@
                             <th>TotalDistance</th>
                             <th>TotalTime</th>
                             <th>EstimatePrice</th>
+                            <th>PaymentOption</th>
                             <th>Ride Status</th>
                             <th>Request</th>
                             <!-- <th>Action</th> -->
@@ -126,6 +99,7 @@
                             <td>{{ confirmride.totalDistance }}</td>
                             <td>{{ confirmride.totalTime }}</td>
                             <td>{{ confirmride.estimatePrice }}</td>
+                            <td>{{ confirmride.paymentOption }}</td>
                             <td>{{ confirmride.assigned}}</td>
                             <td>
                                 <button type="button"

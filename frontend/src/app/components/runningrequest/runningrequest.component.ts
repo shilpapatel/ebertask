@@ -22,10 +22,10 @@ export class RunningrequestComponent {
      this.subscribeToListenDriverRideUpdate()
   }
 getDriverRideData(): void {
-    this.socketService.getDriverRideData().subscribe(
+    this.socketService.getDriverRideRunningData().subscribe(
       (driverridedata: any) => {
-        // this.createridedata = driverridedata;
-        this.createridedata =driverridedata.filter(createride => createride.assigned === 'assigning');
+        this.createridedata = driverridedata;
+        // this.createridedata =driverridedata.filter(createride => createride.assigned === 'assigning');
          console.log(this.createridedata,"driverridedata");  
       },
       (error: any) => {
@@ -48,16 +48,18 @@ getDriverRideData(): void {
   subscribeToListenDriverRideUpdate() {
     this.socketService.subscribeToListenDriverRideUpdate().subscribe(updatedDriverRide => {
       console.log(updatedDriverRide);
-        const index = this.createridedata.findIndex(d => d._id === updatedDriverRide._id);
-        if (index !== -1) {
+        // const index = this.createridedata.findIndex(d => d._id === updatedDriverRide._id);
+        // console.log(index);
+        
+        // if (index !== -1) {
           this.createridedata= updatedDriverRide
-          this.createridedata[index].driverId = updatedDriverRide.driverId;
-          this.createridedata[index].assigned = updatedDriverRide.assigned;
+          // this.createridedata[index].driverId = updatedDriverRide.driverId;
+          // this.createridedata[index].assigned = updatedDriverRide.assigned;
            console.log(this.createridedata);
-           this.getDriverRideData()
+          //  this.getDriverRideData()
           // this.onAssignBtnClick(this.selectedRide)
-        }
-
+        // }
+        this.getDriverRideData()
       // this.toastr.success('Driver Ride Updated');
     });
   }

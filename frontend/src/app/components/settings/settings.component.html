@@ -26,6 +26,33 @@
             <option value="5">5</option>
           </select>
         </div>
+
+        <div class="form-group m-3">
+          <label for="twilioacoountsid">Twilio AccountSid:</label>
+          <input type="text" formControlName="twilioacoountsid" class="form-control" id="twilioacoountsid">
+        </div>
+        <div class="form-group m-3">
+          <label for="twilioauthtoken">Twilio AuthToken:</label>
+          <input type="text" formControlName="twilioauthtoken" class="form-control" id="twilioauthtoken">
+        </div>
+
+        <div class="form-group m-3">
+          <label for="nodemaileremail">Nodemailer Email:</label>
+          <input type="text" formControlName="nodemaileremail" class="form-control" id="nodemaileremail">
+        </div>
+        <div class="form-group m-3">
+          <label for="nodemailerpassword">Nodemailer Password:</label>
+          <input type="text" formControlName="nodemailerpassword" class="form-control" id="nodemailerpassword">
+        </div>
+
+        <div class="form-group m-3">
+          <label for="stripepublickey">Strip PublicKey:</label>
+          <input type="text" formControlName="stripepublickey" class="form-control" id="stripepublickey">
+        </div>
+        <div class="form-group m-3">
+          <label for="stripesecretkey">Strip SecretKey:</label>
+          <input type="text" formControlName="stripesecretkey" class="form-control" id="stripesecretkey">
+        </div>
   
         <div class="form-group m-3">
           <button type="button" class="btn btn-secondary" (click)="submitForm()">Submit</button>

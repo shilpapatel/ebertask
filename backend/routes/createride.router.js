@@ -22,87 +22,87 @@ async function sendmessage() {
     console.log('Error sending message:', error);
   }
 }
-router.post('/add-ride', async (req, res, next) => {
-  try {
-    const rideData = req.body;
-    // console.log(rideData);
-    const newRide = new CreateRide(rideData);
-    const rideCreated = await newRide.save();
+// router.post('/add-ride', async (req, res, next) => {
+//   try {
+//     const rideData = req.body;
+//     // console.log(rideData);
+//     const newRide = new CreateRide(rideData);
+//     const rideCreated = await newRide.save();
     
-    res.status(201).json({
-      message: 'Ride created successfully!',
-      rideCreated,
-  });
-  // sendmessage();
-  } catch (err) {
-      console.log(err);
-      res.status(400).json({
-          error: err,
-      });
-  }
-});
+//     res.status(201).json({
+//       message: 'Ride created successfully!',
+//       rideCreated,
+//   });
+//   // sendmessage();
+//   } catch (err) {
+//       console.log(err);
+//       res.status(400).json({
+//           error: err,
+//       });
+//   }
+// });
 
-router.get('/get-createride', async (req, res, next) => {
-  try {
-    const data = await CreateRide.aggregate([
+// router.get('/get-createride', async (req, res, next) => {
+//   try {
+//     const data = await CreateRide.aggregate([
       
-      {
-        $lookup: {
-          from: 'cities',
-          foreignField: '_id',
-          localField: 'cityId',
-          as: 'citydata'
-        }
-      },
-      {
-        $unwind: '$citydata'
-      },
-      {
-        $lookup: {
-          from: 'vehicletypes',
-          foreignField: '_id',
-          localField: 'vehicleTypeId',
-          as: 'vehicletypedata'
-        }
-      },
-      {
-        $unwind: '$vehicletypedata'
-      },
-      {
-        $lookup: {
-          from: 'users',
-          foreignField: '_id',
-          localField: 'userId',
-          as: 'userdata'
-        }
-      },
-      {
-        $unwind: '$userdata'
-      }, 
-      {
-        $lookup: {
-          from: 'driverlists',
-          foreignField: '_id',
-          localField: 'driverId',
-          as: 'driverdata'
-        }
-      },
-      {
-        $unwind: '$driverdata'
-      }
-    ])
+//       {
+//         $lookup: {
+//           from: 'cities',
+//           foreignField: '_id',
+//           localField: 'cityId',
+//           as: 'citydata'
+//         }
+//       },
+//       {
+//         $unwind: '$citydata'
+//       },
+//       {
+//         $lookup: {
+//           from: 'vehicletypes',
+//           foreignField: '_id',
+//           localField: 'vehicleTypeId',
+//           as: 'vehicletypedata'
+//         }
+//       },
+//       {
+//         $unwind: '$vehicletypedata'
+//       },
+//       {
+//         $lookup: {
+//           from: 'users',
+//           foreignField: '_id',
+//           localField: 'userId',
+//           as: 'userdata'
+//         }
+//       },
+//       {
+//         $unwind: '$userdata'
+//       }, 
+//       {
+//         $lookup: {
+//           from: 'driverlists',
+//           foreignField: '_id',
+//           localField: 'driverId',
+//           as: 'driverdata'
+//         }
+//       },
+//       {
+//         $unwind: '$driverdata'
+//       }
+//     ])
    
-    // console.log(data);
-    // const data = await CreateRide.find();
-    res.status(200).json({
-      message: 'CreateRide retrieved successfully!',
-      createridedata: data,
-    });
-    // sendmessage();
-  } catch (error) {
-    next(error);
-  }
-});
+//     // console.log(data);
+//     // const data = await CreateRide.find();
+//     res.status(200).json({
+//       message: 'CreateRide retrieved successfully!',
+//       createridedata: data,
+//     });
+//     //  sendmessage();
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 module.exports = router;
 
 // const vapidKeys = {

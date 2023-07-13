@@ -589,6 +589,19 @@ export class CreaterideComponent {
     this.socketService.addDriverRide(rideData ).subscribe(
       response => {
         this.toastr.success("Ride created successfully")
+        this.userphoneForm.reset();
+        this.usersForm.reset();
+        this.bookrideForm.reset();
+        this.stops = [];
+        this.totalDistanceInput.value = '';
+        this.totalTimeInput.value = '';
+        this.usersForm.get('name').setValue('');
+        this.usersForm.get('email').setValue('');
+        this.usersForm.get('phone').setValue('');
+        fromInput.value = '';
+        toInput.value = '';
+        this.vehicleTypesService =[];
+        this.initMap();
       },
       error => {
         console.log(error);

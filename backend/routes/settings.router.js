@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 
 const DIR = './public/'
 const Settings = require('../model/settings.model');
+const fs = require('fs');
+const dotenv = require('dotenv');
 
 
 async function createDefaultSettings() {
@@ -37,9 +39,24 @@ router.get('/get-settings', async (req, res, next) => {
   router.put('/update-settings/:id', async (req, res, next) => {
     try {
       const settingsId = req.params.id;
+      dotenv.config(); // Load the current .env file
+      process.env.TWILIOACCOUNTSID = req.body.twilioacoountsid;
+      process.env.TWILIOAUTHTOKEN = req.body.twilioauthtoken;
+      process.env.NODEMAILEREMAIL = req.body.nodemaileremail;
+      process.env.NODEMAILERPASSWORD = req.body.nodemailerpassword;
+      process.env.STRIPEPUBLICKEY = req.body.stripepublickey;
+      process.env.STRIPESECRETEKEY = req.body.stripesecretkey;
+      const envData = `TWILIOAUTHTOKEN=${process.env.TWILIOAUTHTOKEN}\nTWILIOACCOUNTSID=${process.env.TWILIOACCOUNTSID}\nNODEMAILEREMAIL=${process.env.NODEMAILEREMAIL}\nNODEMAILERPASSWORD=${process.env.NODEMAILERPASSWORD}\nSTRIPEPUBLICKEY=${process.env.STRIPEPUBLICKEY}\nSTRIPESECRETEKEY=${process.env.STRIPESECRETEKEY}`;
+      fs.writeFileSync('.env', envData, 'utf8');
       const updatedSettings = {
         requesttime: req.body.requesttime,
         maxstops: req.body.maxstops,
+        twilioacoountsid: req.body.twilioacoountsid,
+        twilioauthtoken:req.body.twilioauthtoken,
+        nodemaileremail: req.body.nodemaileremail,
+        nodemailerpassword:req.body.nodemailerpassword,
+        stripepublickey: req.body.stripepublickey,
+        stripesecretkey:req.body.stripesecretkey
       };
       const result = await Settings.findByIdAndUpdate(settingsId, updatedSettings, { new: true });
       res.status(200).json({
