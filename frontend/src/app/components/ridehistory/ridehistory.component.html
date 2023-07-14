@@ -16,10 +16,15 @@
         </div>
         <div class="col-sm-1">
             <select class="form-control bg-secondary text-white text-center" [(ngModel)]="vehicleTypeFilter">
-                <option value="" selected disabled>Service</option>
-            <option *ngFor="let vehicleType of getUniqueVehicleTypes(createridedata)" [value]="vehicleType">{{ vehicleType }}</option>
+              <option value="" selected disabled>Service</option>
+              <option *ngFor="let vehicle of vehicles" [value]="vehicle.vehicletype">
+                {{vehicle.vehicletype}}
+              </option>
             </select>
-        </div>
+              <!-- <select class="form-control bg-secondary text-white text-center" [(ngModel)]="vehicleTypeFilter">
+              <option *ngFor="let vehicleType of getUniqueVehicleTypes(createridedata)" [value]="vehicleType">{{ vehicleType }}</option>
+              </select> -->
+          </div>
         <div class="col-sm-2">
             <input type="date" class="form-control" [(ngModel)]="startDateFilter">
           </div>

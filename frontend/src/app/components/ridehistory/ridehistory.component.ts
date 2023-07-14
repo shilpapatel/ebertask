@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CsvExportService } from 'src/app/shared/csv-export.service';
 import { SocketService } from 'src/app/shared/socket.service';
+import { VehicletypeService } from 'src/app/shared/vehicletype.service';
 declare const google: any;
 
 @Component({
@@ -26,32 +27,38 @@ export class RidehistoryComponent {
   endDateFilter: string = '';
   fromFilter:string = '';
   toFilter:string = '';
+  vehicles: any[] = [];
   
 
-  constructor(private socketService: SocketService, private csvExportService: CsvExportService) { }
+  constructor(private socketService: SocketService, private csvExportService: CsvExportService,private vehicletypeService: VehicletypeService) { }
   ngOnInit(): void {
+    this.getVehicleType()
     this.getDriverRideData()
      this.subscribeToListenDriverRideUpdate()
      this.initMap()
   }
 
-
+  getVehicleType() {
+    this.vehicletypeService.getVehicleType().subscribe((res) => {
+      this.vehicles = res['vehicletype'];
+    });
+  }
   downloadDataAsCsv(): void {
      this.csvExportService.exportToCsv(this.createridedata, 'ridehistory.csv');
   }
 
 
-getUniqueVehicleTypes(createridedata: any[]): string[] {
-  console.log(createridedata);
+// getUniqueVehicleTypes(createridedata: any[]): string[] {
+//   console.log(createridedata);
   
-  const uniqueTypes = new Set<string>();
-  for (const confirmride of createridedata) {
-      uniqueTypes.add(confirmride.vehicleType);
-      // console.log(confirmride.vehicleType);
+//   const uniqueTypes = new Set<string>();
+//   for (const confirmride of createridedata) {
+//       uniqueTypes.add(confirmride.vehicleType);
+//       // console.log(confirmride.vehicleType);
       
-  }
-  return Array.from(uniqueTypes);
-}
+//   }
+//   return Array.from(uniqueTypes);
+// }
 
   getDriverRideData(): void {
     this.socketService.getDriverRideHistoryData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder,this.paymentFilter,this.statusFilter, this.vehicleTypeFilter, this.fromFilter, this.toFilter,this.startDateFilter,

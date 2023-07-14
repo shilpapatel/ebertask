@@ -196,11 +196,11 @@ const configureSocket = (io) => {
     });
 
     socket.on('getDriverRide', async (params) => {
-      console.log(params);
+      // console.log(params);
       try {
 
         const page = parseInt(params.page) || 1;
-        const limit = parseInt(params.pageSize) || 3;
+        const limit = parseInt(params.pageSize) || 10;
         const searchQuery = params.searchQuery || '';
         const sortField = params.sortField || 'datetime'; // Default sort field is 'name'
         const sortOrder = params.sortOrder || 'asc';
@@ -225,7 +225,10 @@ const configureSocket = (io) => {
             { estimatePrice: searchRegex }
           ],
           datetime: startDateTime && endDateTime ? { $gte: startDateTime, $lte: endDateTime } : { $exists: true },
-          assigned:{ $in:[0,1,2,3]}
+          assigned:{ $in:[0,1,2,3]},
+          vehicleType: { $regex: vehicleTypeFilter, $options: 'i' },
+          from: { $regex: fromFilter, $options: 'i' },
+          to: { $regex: toFilter, $options: 'i' }
         };
     
         if (statusFilter !== '') {
@@ -422,7 +425,10 @@ const configureSocket = (io) => {
             { estimatePrice: searchRegex }
           ],
           datetime: startDateTime && endDateTime ? { $gte: startDateTime, $lte: endDateTime } : { $exists: true },
-          assigned:{$in:[7,8]}
+          assigned:{$in:[7,8]},
+          vehicleType: { $regex: vehicleTypeFilter, $options: 'i' },
+          from: { $regex: fromFilter, $options: 'i' },
+          to: { $regex: toFilter, $options: 'i' }
 
         };
     
