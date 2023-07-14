@@ -1,14 +1,22 @@
 <div class="container my-3">
     <div class="form-group row m-2 d-flex justify-content-center">
+        <div class="col-sm-2">
+            <select class="form-control bg-secondary text-white text-center" [(ngModel)]="statusFilter">
+            <option value="" selected disabled>Status</option>
+              <option value="7">Completed</option>
+              <option value="8">Cancelled</option>
+          </select>
+        </div>
         <div class="col-sm-1">
             <select class="form-control bg-secondary text-white text-center" [(ngModel)]="paymentFilter">
-                <!-- <option value =  -->
-                <option value="asc">Cash</option>
-                <option value="desc">Card</option>
+                <option value="" selected disabled>Mode</option>
+                <option value="cash">Cash</option>
+                <option value="card">Card</option>
             </select>
         </div>
         <div class="col-sm-1">
             <select class="form-control bg-secondary text-white text-center" [(ngModel)]="vehicleTypeFilter">
+                <option value="" selected disabled>Service</option>
             <option *ngFor="let vehicleType of getUniqueVehicleTypes(createridedata)" [value]="vehicleType">{{ vehicleType }}</option>
             </select>
         </div>
@@ -25,10 +33,10 @@
             <input type="text" class="form-control" [(ngModel)]="toFilter" placeholder="To Filter">
         </div>
         <div class="col-sm-1">
-            <button class="btn btn-secondary" (click)="applyFilter()">Filter</button>
+            <button class="btn btn-secondary mt-2" (click)="applyFilter()">Filter</button>
         </div>
         <div class="col-sm-1">
-            <button class="btn btn-secondary" (click)="clearFilter()">Clear</button>
+            <button class="btn btn-secondary mt-2" (click)="clearFilter()">Clear</button>
         </div>
     </div>
   </div>
@@ -100,7 +108,11 @@
                             <td>{{ confirmride.totalTime }}</td>
                             <td>{{ confirmride.estimatePrice }}</td>
                             <td>{{ confirmride.paymentOption }}</td>
-                            <td>{{ confirmride.assigned}}</td>
+                            <!-- <td>{{ confirmride.assigned}}</td> -->
+                            <td>
+                                <ng-container *ngIf="confirmride.assigned === 7">Completed</ng-container>
+                                <ng-container *ngIf="confirmride.assigned === 8">Cancelled</ng-container>
+                            </td>
                             <td>
                                 <button type="button"
                                     class="btn btn-secondary btn-sm"><mat-icon>info</mat-icon></button>

@@ -10,12 +10,12 @@
                             <th>Driver Name</th>
                             <th>From</th>
                             <th>To</th>
-                            <th>Stops</th>
+                            <!-- <th>Stops</th> -->
                             <th>VehicleType</th>
                             <th>TotalDistance</th>
                             <th>TotalTime</th>
                             <th>EstimatePrice</th>
-                            <th>Request</th>
+                            <th>Ride Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -26,17 +26,28 @@
                             <td>{{confirmride.driverdata?.name ?confirmride.driverdata.name:'null'}}</td>
                             <td>{{ confirmride.from }}</td>
                             <td>{{ confirmride.to }}</td>
-                            <td>{{ confirmride.stops.join(', ') }}</td>
+                            <!-- <td>{{ confirmride.stops.join(', ') }}</td> -->
                             <td>{{ confirmride.vehicleType}}</td>
                             <td>{{ confirmride.totalDistance }}</td>
                             <td>{{ confirmride.totalTime }}</td>
                             <td>{{ confirmride.estimatePrice }}</td>
+                            <!-- <td>{{ confirmride.assigned }}</td> -->
                             <td>
-                                <button type="button" class="btn btn-secondary btn-sm" (click)="onAcceptRequest(confirmride._id)">Accept Request</button>
+                                <ng-container *ngIf="confirmride.assigned === 1">Assigning</ng-container>
+                                <ng-container *ngIf="confirmride.assigned === 4">Accepted</ng-container>
+                              <ng-container *ngIf="confirmride.assigned === 5">Arrived</ng-container>
+                              <ng-container *ngIf="confirmride.assigned === 6">Started</ng-container>
                             </td>
+                            <!-- <td>
+                                <button type="button" class="btn btn-secondary btn-sm" (click)="onAcceptRequest(confirmride._id)">Accept Request</button>
+                            </td> -->
                             <td>
-                                <button type="button" class="btn btn-secondary btn-sm"
-                                    (click)="onDeleteDriver(confirmride._id)">Reject</button>
+                                <button type="button" class="btn btn-secondary btn-sm m-1" (click)="onAcceptRequest(confirmride._id)" *ngIf="confirmride.assigned === 1">Accept</button>
+                                <button type="button" class="btn btn-secondary btn-sm m-1" (click)="onArriveRequest(confirmride._id)" *ngIf="confirmride.assigned === 4">Arrive</button>
+                                <button type="button" class="btn btn-secondary btn-sm m-1" (click)="onStartRequest(confirmride._id)" *ngIf="confirmride.assigned === 5">Start</button>
+                                <button type="button" class="btn btn-secondary btn-sm m-1" (click)="onCompleteRequest(confirmride._id)" *ngIf="confirmride.assigned === 6">Complete</button>
+                                <!-- <button type="button" class="btn btn-secondary btn-sm m-1" (click)="onAcceptRequest(confirmride._id)">Accept</button> -->
+                                <button type="button" class="btn btn-secondary btn-sm m-1" (click)="onDeleteDriver(confirmride._id)">Reject</button>
                             </td>
                         </tr>
                     </tbody>

@@ -1,16 +1,29 @@
 <div class="container my-3">
   <div class="form-group row m-2 d-flex justify-content-center">
-      <div class="col-sm-1">
-          <select class="form-control bg-secondary text-white text-center" [(ngModel)]="paymentFilter">
-              <!-- <option value =  -->
+      <div class="col-sm-2">
+          <!-- <select class="form-control bg-secondary text-white text-center" [(ngModel)]="paymentFilter">
               <option value="asc">Cash</option>
               <option value="desc">Card</option>
-          </select>
+          </select> -->
+
+          <select class="form-control bg-secondary text-white text-center" [(ngModel)]="statusFilter">
+            <option value="" selected disabled>Status</option>
+            <option value="0">Pending</option>
+            <option value="1">Assigning</option>
+            <option value="2">Timeout</option>
+            <option value="3">Rejected</option>
+        </select>
       </div>
       <div class="col-sm-1">
-          <select class="form-control bg-secondary text-white text-center" [(ngModel)]="vehicleTypeFilter">
+        <select class="form-control bg-secondary text-white text-center" [(ngModel)]="vehicleTypeFilter">
+          <option value="" selected disabled>Service</option>
+          <option *ngFor="let vehicle of vehicles" [value]="vehicle.vehicletype">
+            {{vehicle.vehicletype}}
+          </option>
+        </select>
+          <!-- <select class="form-control bg-secondary text-white text-center" [(ngModel)]="vehicleTypeFilter">
           <option *ngFor="let vehicleType of getUniqueVehicleTypes(createridedata)" [value]="vehicleType">{{ vehicleType }}</option>
-          </select>
+          </select> -->
       </div>
       <div class="col-sm-2">
           <input type="date" class="form-control" [(ngModel)]="startDateFilter">
@@ -24,11 +37,11 @@
       <div class="col-sm-2">
           <input type="text" class="form-control" [(ngModel)]="toFilter" placeholder="To Filter">
       </div>
-      <div class="col-sm-1">
-          <button class="btn btn-secondary" (click)="applyFilter()">Filter</button>
+      <div class="col-sm-1 ms-1">
+          <button class="btn btn-secondary mt-2" (click)="applyFilter()">Filter</button>
       </div>
-      <div class="col-sm-1">
-          <button class="btn btn-secondary" (click)="clearFilter()">Clear</button>
+      <div class="col-sm-1 me-1">
+          <button class="btn btn-secondary mt-2" (click)="clearFilter()">Clear</button>
       </div>
   </div>
 </div>
@@ -104,11 +117,18 @@
                             <!-- <td>{{createride.totalDistance}}</td>
                             <td>{{createride.totalTime}}</td>
                             <td>{{createride. estimatePrice}}</td> -->
-                            <td>{{createride. assigned}}</td>
+                            <!-- <td>{{createride. assigned}}</td> -->
+                            <td>
+                              <ng-container *ngIf="createride.assigned === 0">Pending</ng-container>
+                              <ng-container *ngIf="createride.assigned === 1">Assigning</ng-container>
+                              <ng-container *ngIf="createride.assigned === 2">Timeout</ng-container>
+                              <ng-container *ngIf="createride.assigned === 3">Rejected</ng-container>
+                            </td>
                             <td>
                                 <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#assignDriverModal" 
-                                [disabled]="createride.assigned == 'assigning'" (click)="onAssignBtnClick(createride)">
-                                {{createride.assigned == 'assigning'? createride.driverdata?.name :'Assign Driver' }}
+                                [disabled]="createride.assigned == 1" (click)="onAssignBtnClick(createride)">
+                                
+                                {{createride.assigned == 1? createride.driverdata?.name :'Assign Driver' }}
                                   <!-- {{createride.assigned == 'assigning'? createride.driverdata?.name : (createride.assigned == 'timeout' ? 'ReAssign Driver':'Assign Driver') }} -->
                                   <!-- {{assignedDriverName}} -->
                                   <!-- createride.driverdata?.name  -->

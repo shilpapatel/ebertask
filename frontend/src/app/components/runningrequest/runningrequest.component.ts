@@ -48,17 +48,17 @@ getDriverRideData(): void {
   subscribeToListenDriverRideUpdate() {
     this.socketService.subscribeToListenDriverRideUpdate().subscribe(updatedDriverRide => {
       console.log(updatedDriverRide);
-        // const index = this.createridedata.findIndex(d => d._id === updatedDriverRide._id);
-        // console.log(index);
+        const index = this.createridedata.findIndex(d => d._id === updatedDriverRide._id);
+        console.log(index);
         
-        // if (index !== -1) {
-          this.createridedata= updatedDriverRide
-          // this.createridedata[index].driverId = updatedDriverRide.driverId;
-          // this.createridedata[index].assigned = updatedDriverRide.assigned;
+        if (index !== -1) {
+          // this.createridedata= updatedDriverRide
+          this.createridedata[index].driverId = updatedDriverRide.driverId;
+          this.createridedata[index].assigned = updatedDriverRide.assigned;
            console.log(this.createridedata);
           //  this.getDriverRideData()
           // this.onAssignBtnClick(this.selectedRide)
-        // }
+        }
         this.getDriverRideData()
       // this.toastr.success('Driver Ride Updated');
     });
@@ -66,10 +66,20 @@ getDriverRideData(): void {
 
   onAcceptRequest(driverrideId: string){
     // console.log(driverrideId);
-    this.socketService.acceptDriverRide(driverrideId);
-    
+    this.socketService.acceptDriverRide(driverrideId); 
   }
 
+  onArriveRequest(driverrideId: string) {
+    this.socketService.arriveDriverRide(driverrideId);
+  }
+  
+  onStartRequest(driverrideId: string) {
+    this.socketService.startDriverRide(driverrideId);
+  }
+  
+  onCompleteRequest(driverrideId: string) {
+    this.socketService.completeDriverRide(driverrideId);
+  }
 
    onDeleteDriver(driverrideId: string) {
     if (confirm('Are you sure you want to delete this user?')) {

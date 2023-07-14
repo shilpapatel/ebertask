@@ -24,6 +24,8 @@ export class SocketService {
   subscribeToListenDriverUpdate(): Observable<any> {
     return new Observable<any>(observer => {
       this.socket.on('driverUpdated', updatedDriver => {
+        console.log(updatedDriver);
+        
         observer.next(updatedDriver);
       });
   
@@ -98,14 +100,14 @@ export class SocketService {
       };
     });
   }
-  getDriverRideData(page: number, pageSize: number, searchQuery: string, sortField: string, sortOrder: string,paymentFilter: string,vehicleTypeFilter: string,fromFilter: string,toFilter: string,startDateFilter:string,endDateFilter:string): Observable<any> {
+  getDriverRideData(page: number, pageSize: number, searchQuery: string, sortField: string, sortOrder: string,statusFilter: string,vehicleTypeFilter: string,fromFilter: string,toFilter: string,startDateFilter:string,endDateFilter:string): Observable<any> {
     const params = {
       page: page.toString(),
       pageSize: pageSize.toString(),
       searchQuery: searchQuery,
       sortField: sortField,
       sortOrder: sortOrder,
-      paymentFilter:paymentFilter,
+      statusFilter:statusFilter,
       vehicleTypeFilter:vehicleTypeFilter,
       fromFilter:fromFilter,
       toFilter:toFilter,
@@ -142,7 +144,7 @@ export class SocketService {
     });
   }
 
-  getDriverRideHistoryData(page: number, pageSize: number, searchQuery: string, sortField: string, sortOrder: string,paymentFilter: string,vehicleTypeFilter: string,fromFilter: string,toFilter: string,startDateFilter:string,endDateFilter:string): Observable<any> {
+  getDriverRideHistoryData(page: number, pageSize: number, searchQuery: string, sortField: string, sortOrder: string,paymentFilter: string,statusFilter: string,vehicleTypeFilter: string,fromFilter: string,toFilter: string,startDateFilter:string,endDateFilter:string): Observable<any> {
     const params = {
       page: page.toString(),
       pageSize: pageSize.toString(),
@@ -150,6 +152,7 @@ export class SocketService {
       sortField: sortField,
       sortOrder: sortOrder,
       paymentFilter:paymentFilter,
+      statusFilter:statusFilter,
       vehicleTypeFilter:vehicleTypeFilter,
       fromFilter:fromFilter,
       toFilter:toFilter,
@@ -194,6 +197,17 @@ export class SocketService {
   acceptDriverRide(driverrideId: string):void {
     this.socket.emit('acceptDriverRide', driverrideId);
   } 
+  arriveDriverRide(driverrideId: string) :void{
+    this.socket.emit('arriveDriverRide', driverrideId);
+  }
+  
+  startDriverRide(driverrideId: string) :void{
+    this.socket.emit('startDriverRide', driverrideId);
+  }
+  
+  completeDriverRide(driverrideId: string) :void{
+    this.socket.emit('completeDriverRide', driverrideId);
+  }
 
   deleteDriverRide(driverrideId: string): Observable<any> {
     return new Observable<any>(observer => {

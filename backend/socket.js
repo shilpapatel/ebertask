@@ -1,7 +1,6 @@
 // const cron = require('node-cron');
 const cron = require('cron');
 const moment = require('moment');
-// const timeformat = require('ng-time-format');
 let DriverList = require('./model/list.model')
 let RunningRequest = require('./model/runningrequest.model')
 let CreateRide = require('./model/createride.model')
@@ -68,35 +67,6 @@ const configureSocket = (io) => {
       }
     });
 
-    // socket.on('updateDriver', async (data) => {
-    //   console.log(data,"dfghjkjhggfggf");
-    //   try {
-    //     const url = socket.request.headers.origin;
-    //     let profileUrl = data.profile ? url + '/public/' + data.profile : url + '/public/'+  'profile1.png';
-    //     const driverId = data.id;
-    //     const updatedDriver = {
-    //       name: data.name,
-    //       email: data.email,
-    //       phone: data.code + data.phone,
-    //       profile: profileUrl,
-    //       country_id: data.country_id,
-    //       city_id: data.city_id,
-    //     };
-    //     const result = await DriverList.findByIdAndUpdate(driverId, updatedDriver, { new: true });
-    //     socket.emit('driverUpdated', result);
-
-    //     // socket.emit(200).json({
-    //     //   message: 'Driver updated successfully!',
-    //     //   driverUpdated: result,
-    //     // });
-    //   } catch (err) {
-    //     console.log(err);
-    //     socket.emit(500).json({
-    //       error: err,
-    //     });
-    //   }
-    // });
-
     socket.on('getDriversWithoutPage', async () => {
       try {
         const driversData = await DriverList.aggregate([
@@ -159,12 +129,11 @@ const configureSocket = (io) => {
       try {
 
         const driverrideData = data;
-        // console.log(driverrideData);
         const newDriverRide = new CreateRide(driverrideData);
         newDriverRide.driverId = null
-        newDriverRide.assigned = "pending"
+        // newDriverRide.assigned = "pending"
+        newDriverRide.assigned = 0
         const driverrideCreated = await newDriverRide.save();
-        // console.log(driverrideCreated, "sadfghjklljhgfdszcxvbnm");
         io.emit('driverRideCreated', {
           message: 'DriverRide created successfully!',
           driverrideCreated,
@@ -227,7 +196,7 @@ const configureSocket = (io) => {
     });
 
     socket.on('getDriverRide', async (params) => {
-      console.log(params,"paramsssssssss");
+      console.log(params);
       try {
 
         const page = parseInt(params.page) || 1;
@@ -235,7 +204,7 @@ const configureSocket = (io) => {
         const searchQuery = params.searchQuery || '';
         const sortField = params.sortField || 'datetime'; // Default sort field is 'name'
         const sortOrder = params.sortOrder || 'asc';
-        const paymentFilter = params.paymentFilter || '';
+        const statusFilter = params.statusFilter || '';
         const vehicleTypeFilter = params.vehicleTypeFilter || '';
         const fromFilter = params.fromFilter || '';
         const toFilter = params.toFilter || '';
@@ -243,22 +212,32 @@ const configureSocket = (io) => {
         const endDateFilter= params.endDateFilter || '';
         const startDateTime = startDateFilter ? moment(startDateFilter).format('DD-MMM-YYYY hh:mm A') : null;
         const endDateTime = endDateFilter ? moment(endDateFilter).format('DD-MMM-YYYY hh:mm A') : null;
-        console.log(startDateTime);
-        console.log(endDateTime);
 
         let sortOptions = {};
         sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1; 
         const searchRegex = new RegExp(searchQuery, 'i');
         const skip = (page - 1) * limit;
 
+        const matchStage = {
+          $or: [
+            { from: searchRegex },
+            { to: searchRegex },
+            { estimatePrice: searchRegex }
+          ],
+          datetime: startDateTime && endDateTime ? { $gte: startDateTime, $lte: endDateTime } : { $exists: true },
+          assigned:{ $in:[0,1,2,3]}
+        };
+    
+        if (statusFilter !== '') {
+          const assignedFilter = parseInt(statusFilter);
+          matchStage.assigned = assignedFilter;
+        }
+    
+        if (searchQuery !== '') {
+          matchStage.$or.push({ assigned: searchRegex });
+        }
+
         const data = await CreateRide.aggregate([
-          // {
-          //   $match: {
-          //     assigned: {
-          //       $in: ["pending", "timeout", "rejected", "accepted", "assigning"]
-          //     }
-          //   }
-          // },
           {
             $lookup: {
               from: 'cities',
@@ -307,25 +286,21 @@ const configureSocket = (io) => {
           }
           },
           {
-            $match: {
-              $or: [
-                    { from: searchRegex },
-                    { to: searchRegex },
-                    { assigned: searchRegex },
-                    { estimatePrice: searchRegex }
-                  ],
-              datetime: startDateTime && endDateTime ? { $gte: startDateTime, $lte: endDateTime } : { $exists: true },  
-              // $and: [
-              //       { datetime: { $gte: startDateTime } },
-              //       { datetime: { $lte: endDateTime } }
-              //     ],
-              // datetime: { $gte: startDateTime, $lte: endDateTime},
-              assigned:{$in:["pending", "timeout", "rejected", "accepted", "assigning"]},
-              paymentOption: { $regex: paymentFilter, $options: 'i' },
-              vehicleType: { $regex: vehicleTypeFilter, $options: 'i' },
-              from: { $regex: fromFilter, $options: 'i' },
-              to: { $regex: toFilter, $options: 'i' }
-            }
+            $match: matchStage
+            // $match: {
+            //   $or: [
+            //         { from: searchRegex },
+            //         { to: searchRegex },
+            //         { assigned: searchRegex },
+            //         { estimatePrice: searchRegex }
+            //       ],
+            //   datetime: startDateTime && endDateTime ? { $gte: startDateTime, $lte: endDateTime } : { $exists: true }, 
+            //   assigned:{$in:[0,1,2,3],$regex: statusFilter, $options: 'i'},
+            //   // assigned:{$in:["pending", "timeout", "rejected", "assigning"],$regex: statusFilter, $options: 'i'},
+            //   vehicleType: { $regex: vehicleTypeFilter, $options: 'i' },
+            //   from: { $regex: fromFilter, $options: 'i' },
+            //   to: { $regex: toFilter, $options: 'i' }
+            // }
           },
           {
             $facet: {
@@ -346,11 +321,6 @@ const configureSocket = (io) => {
     const totalPages = Math.ceil(totalDocuments / limit);
     const driverridedata = data[0].paginatedResults;
     io.emit('driverRideData', driverridedata,totalPages,page);
-    // console.log('Data:', driverridedata);
-    // console.log('Total Count:', totalDocuments);
-    // console.log('Total Pages:', totalPages);
-    // console.log(driverridedata,"confirmmmmmmmmmmmmmmmmmmm");
-
       } catch (error) {
         console.log(error);
         socket.emit('getDriverRideError', { error });
@@ -362,7 +332,8 @@ const configureSocket = (io) => {
         const driverridedata = await CreateRide.aggregate([
           {
             $match: {
-              assigned:"assigning"
+              assigned:{ $in:[1,4,5,6]}
+              // assigned:"assigning"
             }
           },
           {
@@ -413,7 +384,7 @@ const configureSocket = (io) => {
           }
           } 
         ])
-        console.log(driverridedata,"running");
+        // console.log(driverridedata,"running");
         io.emit('driverRideRunningData', driverridedata);
 
       } catch (error) {
@@ -422,72 +393,7 @@ const configureSocket = (io) => {
       }
     });
 
-    // socket.on('getDriverRideHistory', async () => {
-    //   try {
-    //     const driverridedata = await CreateRide.aggregate([
-    //       {
-    //         $match: {
-    //                assigned:{$in:["cancelled","completed"]}
-    //               }
-    //       },
-    //       {
-    //         $lookup: {
-    //           from: 'cities',
-    //           foreignField: '_id',
-    //           localField: 'cityId',
-    //           as: 'citydata'
-    //         }
-    //       },
-    //       {
-    //         $unwind: '$citydata'
-    //       },
-    //       {
-    //         $lookup: {
-    //           from: 'vehicletypes',
-    //           foreignField: '_id',
-    //           localField: 'vehicleTypeId',
-    //           as: 'vehicletypedata'
-    //         }
-    //       },
-    //       {
-    //         $unwind: '$vehicletypedata'
-    //       },
-    //       {
-    //         $lookup: {
-    //           from: 'users',
-    //           foreignField: '_id',
-    //           localField: 'userId',
-    //           as: 'userdata'
-    //         }
-    //       },
-    //       {
-    //         $unwind: '$userdata'
-    //       },
-    //       {
-    //         $lookup: {
-    //           from: 'driverlists',
-    //           foreignField: '_id',
-    //           localField: 'driverId',
-    //           as: 'driverdata'
-    //         }
-    //       },
-    //       {
-    //         $unwind: {
-    //         path: '$driverdata',
-    //         preserveNullAndEmptyArrays:true
-    //       }
-    //       } 
-    //     ])
-    //     io.emit('driverRideHistoryData', driverridedata);
-
-    //   } catch (error) {
-    //     console.log(error);
-    //     socket.emit('getDriverRideHistoryError', { error });
-    //   }
-    // });
-
     socket.on('getDriverRideHistory', async (params) => {
-      
       try {
         const page = parseInt(params.page) || 1;
         const limit = parseInt(params.pageSize) || 3;
@@ -495,6 +401,7 @@ const configureSocket = (io) => {
         const sortField = params.sortField || 'datetime'; // Default sort field is 'name'
         const sortOrder = params.sortOrder || 'asc';
         const paymentFilter = params.paymentFilter || '';
+        const statusFilter = params.statusFilter || '';
         const vehicleTypeFilter = params.vehicleTypeFilter || '';
         const fromFilter = params.fromFilter || '';
         const toFilter = params.toFilter || '';
@@ -502,19 +409,32 @@ const configureSocket = (io) => {
         const endDateFilter= params.endDateFilter || '';
         const startDateTime = startDateFilter ? moment(startDateFilter).format('DD-MMM-YYYY hh:mm A') : null;
         const endDateTime = endDateFilter ? moment(endDateFilter).format('DD-MMM-YYYY hh:mm A') : null;
-        console.log(startDateTime);
-        console.log(endDateTime);
 
         let sortOptions = {};
         sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1; 
         const searchRegex = new RegExp(searchQuery, 'i');
         const skip = (page - 1) * limit;
+
+        const matchStage = {
+          $or: [
+            { from: searchRegex },
+            { to: searchRegex },
+            { estimatePrice: searchRegex }
+          ],
+          datetime: startDateTime && endDateTime ? { $gte: startDateTime, $lte: endDateTime } : { $exists: true },
+          assigned:{$in:[7,8]}
+
+        };
+    
+        if (statusFilter !== '') {
+          const assignedFilter = parseInt(statusFilter);
+          matchStage.assigned = assignedFilter;
+        }
+    
+        if (searchQuery !== '') {
+          matchStage.$or.push({ assigned: searchRegex });
+        }
         const data = await CreateRide.aggregate([
-          // {
-          //   $match: {
-          //          assigned:{$in:["cancelled","completed"]}
-          //         }
-          // },
           {
             $lookup: {
               from: 'cities',
@@ -564,25 +484,23 @@ const configureSocket = (io) => {
           }
           ,
       {
-        $match: {
-          $or: [
-                { from: searchRegex },
-                { to: searchRegex },
-                { assigned: searchRegex },
-                { estimatePrice: searchRegex }
-              ],
-          datetime: startDateTime && endDateTime ? { $gte: startDateTime, $lte: endDateTime } : { $exists: true },  
-          // $and: [
-          //       { datetime: { $gte: startDateTime } },
-          //       { datetime: { $lte: endDateTime } }
-          //     ],
-          // datetime: { $gte: startDateTime, $lte: endDateTime},
-          assigned:{$in:["cancelled","completed"]},
-          paymentOption: { $regex: paymentFilter, $options: 'i' },
-          vehicleType: { $regex: vehicleTypeFilter, $options: 'i' },
-          from: { $regex: fromFilter, $options: 'i' },
-          to: { $regex: toFilter, $options: 'i' }
-        }
+        $match: matchStage
+        // $match: {
+        //   $or: [
+        //         { from: searchRegex },
+        //         { to: searchRegex },
+        //         { assigned: searchRegex },
+        //         { estimatePrice: searchRegex }
+        //       ],
+        //   datetime: startDateTime && endDateTime ? { $gte: startDateTime, $lte: endDateTime } : { $exists: true },  
+        //   assigned:{$in:["cancelled","completed"],$regex: statusFilter, $options: 'i'},
+        //   // assigned:{$in:["pending", "timeout", "rejected", "accepted", "assigning"],$regex: statusFilter, $options: 'i'},
+        //   // assigned:{$in:["cancelled","completed"]},
+        //   paymentOption: { $regex: paymentFilter, $options: 'i' },
+        //   vehicleType: { $regex: vehicleTypeFilter, $options: 'i' },
+        //   from: { $regex: fromFilter, $options: 'i' },
+        //   to: { $regex: toFilter, $options: 'i' }
+        // }
       },
       {
         $facet: {
@@ -596,398 +514,50 @@ const configureSocket = (io) => {
           ]
         }
       } 
-        ])
+    ])
 
     const metadata = data[0].totalCount[0];
     const totalDocuments = metadata ? metadata.count : 0;
     const totalPages = Math.ceil(totalDocuments / limit);
     const driverridedata = data[0].paginatedResults;
-    // console.log('Data:', driverridedata);
-    console.log('Total Count:', totalDocuments);
-    console.log('Total Pages:', totalPages);
-        io.emit('driverRideHistoryData', driverridedata,totalPages,page);
-
-      } catch (error) {
+    io.emit('driverRideHistoryData', driverridedata,totalPages,page);
+  } catch (error) {
         console.log(error);
         socket.emit('getDriverRideHistoryError', { error });
       }
     });
 
-
- //     try {
-  //       const page = parseInt(params.page) || 1;
-  //       const limit = parseInt(params.pageSize) || 3;
-  //       const searchQuery = params.searchQuery || '';
-  //       const sortField = params.sortField || 'datetime'; // Default sort field is 'name'
-  //       const sortOrder = params.sortOrder || 'asc';
-
-  //       const paymentFilter = params.paymentFilter || '';
-  //       const vehicleTypeFilter = params.vehicleTypeFilter || '';
-  //       const fromFilter = params.fromFilter || '';
-  //       const toFilter = params.toFilter || '';
-  //       // const startDate = params.startDate || '';
-  //       // const endDate= params.endDate || '';
-  //       // const startDateTime = startDate ? new Date(startDate) : null;
-  //       // const endDateTime = endDate ? new Date(endDate) : null;
-  //       // console.log(startDateTime);
-  //       // console.log(endDateTime);
-  //   let sortOptions = {};
-  //   sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
-
-  //   const searchRegex = new RegExp(searchQuery, 'i');
-  //   const countPipeline = [
-  //     {
-  //       $match: {
-  //         // $and: [
-  //         //   { datetime: { $gte: startDateTime } },
-  //         //   { datetime: { $lte: endDateTime } }
-  //         // ],
-  //         $or: [
-  //           { from: searchRegex },
-  //           { to: searchRegex },
-  //           { assigned: searchRegex },
-  //           { estimatePrice: searchRegex }
-  //         ],
-  //         assigned:{$in:["cancelled","completed"]},
-  //         paymentOption: { $regex: paymentFilter, $options: 'i' },
-  //         vehicleType: { $regex: vehicleTypeFilter, $options: 'i' },
-  //         from: { $regex: fromFilter, $options: 'i' },
-  //         to: { $regex: toFilter, $options: 'i' }
-  //       }
-  //     }
-  //     // ,
-  //     // {
-  //     //   $count: 'total'
-  //     // }
-  //   ];
-
-  //   const countResult = await CreateRide.aggregate(countPipeline);
-  //   const count = countResult.length > 0 ? countResult[0].total : 0;
-  //   //  const count = await DriverList.countDocuments({ $or: [{ from: searchRegex }, { to: searchRegex }, {assigned: searchRegex }],assigned:{$in:["cancelled","completed"]},paymentOption: { $regex: paymentFilter, $options: 'i' },
-  //         //  vehicleType: { $regex: vehicleTypeFilter, $options: 'i' },
-  //         //  from: { $regex: fromFilter, $options: 'i' },
-  //         //  to: { $regex: toFilter, $options: 'i' }});
-  //   console.log(count);
-  //   const totalPages = Math.ceil(count / limit);
-  //   const skip = (page - 1) * limit;
-  //   const pipeline = [
-  //     {
-  //     $lookup: {
-  //       from: 'cities',
-  //       foreignField: '_id',
-  //       localField: 'cityId',
-  //       as: 'citydata'
-  //     }
-  //   },
-  //   {
-  //     $unwind: '$citydata'
-  //   },
-  //   {
-  //     $lookup: {
-  //       from: 'vehicletypes',
-  //       foreignField: '_id',
-  //       localField: 'vehicleTypeId',
-  //       as: 'vehicletypedata'
-  //     }
-  //   },
-  //   {
-  //     $unwind: '$vehicletypedata'
-  //   },
-  //   {
-  //     $lookup: {
-  //       from: 'users',
-  //       foreignField: '_id',
-  //       localField: 'userId',
-  //       as: 'userdata'
-  //     }
-  //   },
-  //   {
-  //     $unwind: '$userdata'
-  //   },
-  //   {
-  //     $lookup: {
-  //       from: 'driverlists',
-  //       foreignField: '_id',
-  //       localField: 'driverId',
-  //       as: 'driverdata'
-  //     }
-  //   },
-  //   {
-  //     $unwind: {
-  //     path: '$driverdata',
-  //     preserveNullAndEmptyArrays:true
-  //   }
-  //   },
-  //   {
-  //     $match: {
-  //       $or: [
-  //         { from: searchRegex },
-  //         { to: searchRegex },
-  //         { assigned: searchRegex },
-  //         { estimatePrice: searchRegex },
-  //       ],
-  //       assigned:{$in:["cancelled","completed"]},
-  //       paymentOption: { $regex: paymentFilter, $options: 'i' },
-  //         vehicleType: { $regex: vehicleTypeFilter, $options: 'i' },
-  //         from: { $regex: fromFilter, $options: 'i' },
-  //         to: { $regex: toFilter, $options: 'i' }
-  //     }
-  //   },
-  //   {
-  //     $sort: sortOptions
-  //   },
-  //   {
-  //     $skip: skip
-  //   },
-  //   {
-  //     $limit: limit
-  //   }, 
-  // ]
-  // const driverridedata = await CreateRide.aggregate(pipeline);
-  // // console.log(driverridedata);
-       
-  //       io.emit('driverRideHistoryData', driverridedata,totalPages,page);
-
-
-
     const job = new cron.CronJob('* * * * * *', async () => {
       // console.log('Cron job start');
-      const pendingRides = await CreateRide.find({ assigned: 'assigning' }).exec();
-      // console.log(pendingRides, "pendingrides");
+      const pendingRides = await CreateRide.find({ assigned: 1 }).exec();
       const currentTime = Date.now();
-      // console.log(currentTime);
       const timeoutDuration = 20000; // 20 seconds
-    
-      // await Promise.all(pendingRides.map(async (ride) => {
+
         for (const ride of pendingRides) {
         const rideTime = ride.created;
-        // console.log(rideTime);
         const elapsedTime = currentTime - rideTime;
-        // console.log(elapsedTime, "elapsedtime");
-    
+
         if (elapsedTime >= timeoutDuration) {
-          // console.log("sdfdhgjerrt");
           const updatedDriverId = {
             driverId: null,
-            assigned: 'timeout'
+            assigned: 2
           };
           const result1 = await DriverList.findOneAndUpdate({ assign: '1' }, { assign: '0' }, { new: true });
           io.emit('driverUpdated', result1);
+          
           const result = await CreateRide.findOneAndUpdate({ _id: ride._id }, updatedDriverId, { new: true });
-          // console.log(result);
           io.emit('driverrideupdated', result);
         }
       };
-    
-      socket.on('getDriverRide', async (params) => {
-        console.log(params,"paramsssssssss");
-        try {
-  
-          const page = parseInt(params.page) || 1;
-          const limit = parseInt(params.pageSize) || 3;
-          const searchQuery = params.searchQuery || '';
-          const sortField = params.sortField || 'datetime'; // Default sort field is 'name'
-          const sortOrder = params.sortOrder || 'asc';
-          const paymentFilter = params.paymentFilter || '';
-          const vehicleTypeFilter = params.vehicleTypeFilter || '';
-          const fromFilter = params.fromFilter || '';
-          const toFilter = params.toFilter || '';
-          const startDateFilter = params.startDateFilter || '';
-          const endDateFilter= params.endDateFilter || '';
-          const startDateTime = startDateFilter ? moment(startDateFilter).format('DD-MMM-YYYY hh:mm A') : null;
-          const endDateTime = endDateFilter ? moment(endDateFilter).format('DD-MMM-YYYY hh:mm A') : null;
-          console.log(startDateTime);
-          console.log(endDateTime);
-  
-          let sortOptions = {};
-          sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1; 
-          const searchRegex = new RegExp(searchQuery, 'i');
-          const skip = (page - 1) * limit;
-  
-          const data = await CreateRide.aggregate([
-            // {
-            //   $match: {
-            //     assigned: {
-            //       $in: ["pending", "timeout", "rejected", "accepted", "assigning"]
-            //     }
-            //   }
-            // },
-            {
-              $lookup: {
-                from: 'cities',
-                foreignField: '_id',
-                localField: 'cityId',
-                as: 'citydata'
-              }
-            },
-            {
-              $unwind: '$citydata'
-            },
-            {
-              $lookup: {
-                from: 'vehicletypes',
-                foreignField: '_id',
-                localField: 'vehicleTypeId',
-                as: 'vehicletypedata'
-              }
-            },
-            {
-              $unwind: '$vehicletypedata'
-            },
-            {
-              $lookup: {
-                from: 'users',
-                foreignField: '_id',
-                localField: 'userId',
-                as: 'userdata'
-              }
-            },
-            {
-              $unwind: '$userdata'
-            },
-            {
-              $lookup: {
-                from: 'driverlists',
-                foreignField: '_id',
-                localField: 'driverId',
-                as: 'driverdata'
-              }
-            },
-            {
-              $unwind: {
-              path: '$driverdata',
-              preserveNullAndEmptyArrays:true
-            }
-            },
-            {
-              $match: {
-                $or: [
-                      { from: searchRegex },
-                      { to: searchRegex },
-                      { assigned: searchRegex },
-                      { estimatePrice: searchRegex }
-                    ],
-                datetime: startDateTime && endDateTime ? { $gte: startDateTime, $lte: endDateTime } : { $exists: true },  
-                // $and: [
-                //       { datetime: { $gte: startDateTime } },
-                //       { datetime: { $lte: endDateTime } }
-                //     ],
-                // datetime: { $gte: startDateTime, $lte: endDateTime},
-                assigned:{$in:["pending", "timeout", "rejected", "accepted", "assigning"]},
-                paymentOption: { $regex: paymentFilter, $options: 'i' },
-                vehicleType: { $regex: vehicleTypeFilter, $options: 'i' },
-                from: { $regex: fromFilter, $options: 'i' },
-                to: { $regex: toFilter, $options: 'i' }
-              }
-            },
-            {
-              $facet: {
-                paginatedResults: [
-                  { $sort: sortOptions },
-                  { $skip: skip },
-                  { $limit: limit }
-                ],
-                totalCount: [
-                  { $count: 'count' }
-                ]
-              }
-            } 
-          ])
-  
-          const metadata = data[0].totalCount[0];
-      const totalDocuments = metadata ? metadata.count : 0;
-      const totalPages = Math.ceil(totalDocuments / limit);
-      const driverridedata = data[0].paginatedResults;
-      io.emit('driverRideData', driverridedata,totalPages,page);
-      // console.log('Data:', driverridedata);
-      // console.log('Total Count:', totalDocuments);
-      // console.log('Total Pages:', totalPages);
-      // console.log(driverridedata,"confirmmmmmmmmmmmmmmmmmmm");
-  
-        } catch (error) {
-          console.log(error);
-          socket.emit('getDriverRideError', { error });
-        }
-      });
-      // const driverridedata = await CreateRide.aggregate([
-      //   {
-      //     $match: {
-      //       assigned: {
-      //         $in: ["pending", "timeout", "rejected", "accepted", "assigning"]
-      //       }
-      //     }
-      //   },
-      //   {
-      //     $lookup: {
-      //       from: 'cities',
-      //       foreignField: '_id',
-      //       localField: 'cityId',
-      //       as: 'citydata'
-      //     }
-      //   },
-      //   {
-      //     $unwind: '$citydata'
-      //   },
-      //   {
-      //     $lookup: {
-      //       from: 'vehicletypes',
-      //       foreignField: '_id',
-      //       localField: 'vehicleTypeId',
-      //       as: 'vehicletypedata'
-      //     }
-      //   },
-      //   {
-      //     $unwind: '$vehicletypedata'
-      //   },
-      //   {
-      //     $lookup: {
-      //       from: 'users',
-      //       foreignField: '_id',
-      //       localField: 'userId',
-      //       as: 'userdata'
-      //     }
-      //   },
-      //   {
-      //     $unwind: '$userdata'
-      //   },
-      //   {
-      //     $lookup: {
-      //       from: 'driverlists',
-      //       foreignField: '_id',
-      //       localField: 'driverId',
-      //       as: 'driverdata'
-      //     }
-      //   },
-      //   {
-      //     $unwind: {
-      //       path: '$driverdata',
-      //       preserveNullAndEmptyArrays: true
-      //     }
-      //   }
-      // ]);
-      // io.emit('driverRideData', driverridedata);
+
     });
     job.start()
-    
-    // const timeoutPromise = new Promise((resolve, reject) => {
-    //   setTimeout(() => {
-    //     reject(new Error('Timeout'));
-    //   }, 20000);
-    // });
-    
-    // Promise.race([job.start(), timeoutPromise])
-    //   .catch((error) => {
-    //     console.log('Job execution timed out:', error);
-    //   });
-    
+
     socket.on('updatenearestdriverride', async (data) => {
       try {
         const driverrideId = data.driverrideId;
         const driverdata = data.driverdata;
         let currentDriverIndex = 0;
-        // console.log(driverdata);
-        // const driverId = data.driverId;
-    
         const assignDriverWithDelay = async (driver) => {
           const driverId = driver._id;
           const updatedDriverId = {
@@ -1032,66 +602,6 @@ const configureSocket = (io) => {
     
           // Rest of your code for time difference calculation
     
-          const driverridedata = await CreateRide.aggregate([
-            {
-              $match: {
-                assigned: {
-                  $in: ["pending", "timeout", "rejected", "accepted", "assigning"]
-                }
-              }
-            },
-            {
-              $lookup: {
-                from: 'cities',
-                foreignField: '_id',
-                localField: 'cityId',
-                as: 'citydata'
-              }
-            },
-            {
-              $unwind: '$citydata'
-            },
-            {
-              $lookup: {
-                from: 'vehicletypes',
-                foreignField: '_id',
-                localField: 'vehicleTypeId',
-                as: 'vehicletypedata'
-              }
-            },
-            {
-              $unwind: '$vehicletypedata'
-            },
-            {
-              $lookup: {
-                from: 'users',
-                foreignField: '_id',
-                localField: 'userId',
-                as: 'userdata'
-              }
-            },
-            {
-              $unwind: '$userdata'
-            },
-            {
-              $lookup: {
-                from: 'driverlists',
-                foreignField: '_id',
-                localField: 'driverId',
-                as: 'driverdata'
-              }
-            },
-            {
-              $unwind: {
-              path: '$driverdata',
-              preserveNullAndEmptyArrays:true
-            }
-          } 
-          ]);
-          io.emit('driverRideData', driverridedata);
-    
-          
-      
       } catch (err) {
         console.log(err);
         io.emit('updatenearestdriverrideError', { error: err });
@@ -1099,7 +609,6 @@ const configureSocket = (io) => {
     });
     
     socket.on('updatedriverride', async (data) => {
-      //  console.log(data);
       try {
         const driverrideId = data.driverrideId;
         const driverId = data.driverId;
@@ -1109,80 +618,10 @@ const configureSocket = (io) => {
           created: data.created,
         }
         const result1 = await DriverList.findByIdAndUpdate(driverId, {assign: "1"}, { new: true });
-
         io.emit('driverUpdated', result1);
         const result = await CreateRide.findByIdAndUpdate(driverrideId, updatedDriverId, { new: true });
-        
-        // console.log(result);
         io.emit('driverrideupdated', result);
 
-        const createdTime = new Date(data.created); // Convert created time to Date object
-        const currentTime = new Date(); // Get current time
-        const timeDifference = currentTime - createdTime; // Calculate time difference in milliseconds
-        const timeDifferenceInSec= timeDifference / 1000; 
-        
-
-    // console.log('Time difference (in milliseconds):', timeDifferenceInSec);
-
-        // if(data.driverId != null){
-        const driverridedata = await CreateRide.aggregate([
-          {
-            $match: {
-              assigned: {
-                $in: ["pending", "timeout", "rejected", "accepted", "assigning"]
-              }
-            }
-          },
-          {
-            $lookup: {
-              from: 'cities',
-              foreignField: '_id',
-              localField: 'cityId',
-              as: 'citydata'
-            }
-          },
-          {
-            $unwind: '$citydata'
-          },
-          {
-            $lookup: {
-              from: 'vehicletypes',
-              foreignField: '_id',
-              localField: 'vehicleTypeId',
-              as: 'vehicletypedata'
-            }
-          },
-          {
-            $unwind: '$vehicletypedata'
-          },
-          {
-            $lookup: {
-              from: 'users',
-              foreignField: '_id',
-              localField: 'userId',
-              as: 'userdata'
-            }
-          },
-          {
-            $unwind: '$userdata'
-          },
-          {
-            $lookup: {
-              from: 'driverlists',
-              foreignField: '_id',
-              localField: 'driverId',
-              as: 'driverdata'
-            }
-          },
-          {
-            $unwind: {
-            path: '$driverdata',
-            preserveNullAndEmptyArrays:true
-          }
-        } 
-        ])
-        io.emit('driverRideData', driverridedata);
-      // }
       } catch (err) {
         console.log(err);
         io.emit('updatedriverrideError', { error: err });
@@ -1190,86 +629,46 @@ const configureSocket = (io) => {
     });
 
     socket.on('acceptDriverRide', async (data) => {
-        console.log(data);
       try {
-        const driverrideId = data;
-        console.log(driverrideId);
-        // const driverId = data.driverId;
-        // const updatedDriverId = {
-        //   driverId: data.driverId,
-        //   assigned: data.assignedvalue,
-        //   created: data.created,
-        // }
-        // const result1 = await DriverList.findByIdAndUpdate(driverId, {assign: "1"}, { new: true });
-
-        // io.emit('driverUpdated', result1);
-        const result = await CreateRide.findByIdAndUpdate(driverrideId, {assigned:"Accepted"}, { new: true });
-        
-         console.log(result);
+        const driverrideId = data;   
+        const result = await CreateRide.findByIdAndUpdate(driverrideId, {assigned:4}, { new: true });
         io.emit('driverrideupdated', result);
-
-        // if(data.driverId != null){
-        const driverridedata = await CreateRide.aggregate([
-          {
-            $match: {
-              assigned: {
-                $in: ["pending", "timeout", "rejected", "accepted", "assigning"]
-              }
-            }
-          },
-          {
-            $lookup: {
-              from: 'cities',
-              foreignField: '_id',
-              localField: 'cityId',
-              as: 'citydata'
-            }
-          },
-          {
-            $unwind: '$citydata'
-          },
-          {
-            $lookup: {
-              from: 'vehicletypes',
-              foreignField: '_id',
-              localField: 'vehicleTypeId',
-              as: 'vehicletypedata'
-            }
-          },
-          {
-            $unwind: '$vehicletypedata'
-          },
-          {
-            $lookup: {
-              from: 'users',
-              foreignField: '_id',
-              localField: 'userId',
-              as: 'userdata'
-            }
-          },
-          {
-            $unwind: '$userdata'
-          },
-          {
-            $lookup: {
-              from: 'driverlists',
-              foreignField: '_id',
-              localField: 'driverId',
-              as: 'driverdata'
-            }
-          },
-          {
-            $unwind: {
-            path: '$driverdata',
-            preserveNullAndEmptyArrays:true
-          }
-        } 
-        ])
-        io.emit('driverRideData', driverridedata);
-      // }
       } catch (err) {
         console.log(err);
         io.emit('acceptDriverRideError', { error: err });
+      }
+    });
+
+    socket.on('arriveDriverRide', async (data) => {
+      try {
+        const driverrideId = data;
+        const result = await CreateRide.findByIdAndUpdate(driverrideId, { assigned: 5}, { new: true });
+        io.emit('driverrideupdated', result);
+      } catch (err) {
+        console.log(err);
+        io.emit('arriveDriverRideError', { error: err });
+      }
+    });
+    
+    socket.on('startDriverRide', async (data) => {
+      try {
+        const driverrideId = data;
+        const result = await CreateRide.findByIdAndUpdate(driverrideId, { assigned: 6 }, { new: true });
+        io.emit('driverrideupdated', result);
+      } catch (err) {
+        console.log(err);
+        io.emit('startDriverRideError', { error: err });
+      }
+    });
+    
+    socket.on('completeDriverRide', async (data) => {
+      try {
+        const driverrideId = data;
+        const result = await CreateRide.findByIdAndUpdate(driverrideId, { assigned: 7 }, { new: true });
+        io.emit('driverrideupdated', result);
+      } catch (err) {
+        console.log(err);
+        io.emit('completeDriverRideError', { error: err });
       }
     });
 
@@ -1277,80 +676,13 @@ const configureSocket = (io) => {
       try {
         const updatedDriverId = {
           driverId: null,
-          assigned: 'rejected'
+          assigned: 3
         };
-    
         const result1 = await DriverList.findOneAndUpdate({ assign: '1' }, { assign: '0' }, { new: true });
           io.emit('driverUpdated', result1);
-          console.log(result1);
-          // const result = await CreateRide.findByIdAndUpdate(driverrideId, updatedDriverId, { new: true });
-         const result = await CreateRide.findOneAndUpdate({ assigned: 'assigning' }, updatedDriverId, { new: true });
+
+         const result = await CreateRide.findOneAndUpdate({ assigned: 1 }, updatedDriverId, { new: true });
         io.emit('driverrideupdated', result);
-        // console.log(result, "updated result");
-        // console.log(result._id, "updated id");
-    
-        // if (!result) {
-        //   io.emit('deleteDriverRideError', { message: 'Driver not found' });
-        // } else {
-        //   io.emit('driverRideDeleted', { message: 'Driver ride updated successfully' });
-      // }
-          const driverridedata = await CreateRide.aggregate([
-            {
-              $match: {
-                assigned: {
-                  $in: ["pending", "timeout", "rejected", "accepted", "assigning"]
-                }
-              }
-            },
-            {
-              $lookup: {
-                from: 'cities',
-                foreignField: '_id',
-                localField: 'cityId',
-                as: 'citydata'
-              }
-            },
-            {
-              $unwind: '$citydata'
-            },
-            {
-              $lookup: {
-                from: 'vehicletypes',
-                foreignField: '_id',
-                localField: 'vehicleTypeId',
-                as: 'vehicletypedata'
-              }
-            },
-            {
-              $unwind: '$vehicletypedata'
-            },
-            {
-              $lookup: {
-                from: 'users',
-                foreignField: '_id',
-                localField: 'userId',
-                as: 'userdata'
-              }
-            },
-            {
-              $unwind: '$userdata'
-            },
-            {
-              $lookup: {
-                from: 'driverlists',
-                foreignField: '_id',
-                localField: 'driverId',
-                as: 'driverdata'
-              }
-            },
-            {
-              $unwind: {
-              path: '$driverdata',
-              preserveNullAndEmptyArrays:true
-            }
-          } 
-          ])
-          io.emit('driverRideData', driverridedata);
       } catch (err) {
         console.log(err);
         io.emit('deleteDriverRideError', { error: err });
@@ -1361,7 +693,7 @@ const configureSocket = (io) => {
       try {
         const updatedDriverId = {
           // driverId: null,
-          assigned: 'cancelled'
+          assigned: 8
         };
     
         // const result1 = await DriverList.findOneAndUpdate({ assign: '1' }, { assign: '0' }, { new: true });
@@ -1370,87 +702,84 @@ const configureSocket = (io) => {
           const result = await CreateRide.findByIdAndUpdate(driverrideId, updatedDriverId, { new: true });
         //  const result = await CreateRide.findOneAndUpdate({ assigned: 'assigning' }, updatedDriverId, { new: true });
         io.emit('driverrideupdated', result);
-        // console.log(result, "updated result");
-        // console.log(result._id, "updated id");
-    
         // if (!result) {
         //   io.emit('deleteDriverRideError', { message: 'Driver not found' });
         // } else {
         //   io.emit('driverRideDeleted', { message: 'Driver ride updated successfully' });
       // }
-          const driverridedata = await CreateRide.aggregate([
-            {
-              $match: {
-                assigned: {
-                  $in: ["pending", "timeout", "rejected", "accepted", "assigning"]
-                }
-              }
-            },
-            {
-              $lookup: {
-                from: 'cities',
-                foreignField: '_id',
-                localField: 'cityId',
-                as: 'citydata'
-              }
-            },
-            {
-              $unwind: '$citydata'
-            },
-            {
-              $lookup: {
-                from: 'vehicletypes',
-                foreignField: '_id',
-                localField: 'vehicleTypeId',
-                as: 'vehicletypedata'
-              }
-            },
-            {
-              $unwind: '$vehicletypedata'
-            },
-            {
-              $lookup: {
-                from: 'users',
-                foreignField: '_id',
-                localField: 'userId',
-                as: 'userdata'
-              }
-            },
-            {
-              $unwind: '$userdata'
-            },
-            {
-              $lookup: {
-                from: 'driverlists',
-                foreignField: '_id',
-                localField: 'driverId',
-                as: 'driverdata'
-              }
-            },
-            {
-              $unwind: {
-              path: '$driverdata',
-              preserveNullAndEmptyArrays:true
-            }
-          } 
-          ])
-          io.emit('driverRideData', driverridedata);
+      
       } catch (err) {
         console.log(err);
         io.emit('deleteConfirmRideError', { error: err });
       }
     });
 
-  
     socket.on('disconnect', () => {
       console.log('Client disconnected');
     });
   });
 
-
-
 };
 module.exports = configureSocket;
+
+
+          // const driverridedata = await CreateRide.aggregate([
+          //   {
+          //     $match: {
+          //       assigned: {
+          //         $in: ["pending", "timeout", "rejected", "accepted", "assigning"]
+          //       }
+          //     }
+          //   },
+          //   {
+          //     $lookup: {
+          //       from: 'cities',
+          //       foreignField: '_id',
+          //       localField: 'cityId',
+          //       as: 'citydata'
+          //     }
+          //   },
+          //   {
+          //     $unwind: '$citydata'
+          //   },
+          //   {
+          //     $lookup: {
+          //       from: 'vehicletypes',
+          //       foreignField: '_id',
+          //       localField: 'vehicleTypeId',
+          //       as: 'vehicletypedata'
+          //     }
+          //   },
+          //   {
+          //     $unwind: '$vehicletypedata'
+          //   },
+          //   {
+          //     $lookup: {
+          //       from: 'users',
+          //       foreignField: '_id',
+          //       localField: 'userId',
+          //       as: 'userdata'
+          //     }
+          //   },
+          //   {
+          //     $unwind: '$userdata'
+          //   },
+          //   {
+          //     $lookup: {
+          //       from: 'driverlists',
+          //       foreignField: '_id',
+          //       localField: 'driverId',
+          //       as: 'driverdata'
+          //     }
+          //   },
+          //   {
+          //     $unwind: {
+          //     path: '$driverdata',
+          //     preserveNullAndEmptyArrays:true
+          //   }
+          // } 
+          // ])
+          // io.emit('driverRideData', driverridedata);
 
  // const job = new cron.CronJob('*/20 * * * * *', async () => {
 

@@ -9,6 +9,7 @@ import { ListService } from 'src/app/shared/list.service';
 import { UsersService } from 'src/app/shared/users.service';
 import { SocketService } from 'src/app/shared/socket.service';
 import { NotificationService } from 'src/app/shared/notification.service';
+import { VehicletypeService } from 'src/app/shared/vehicletype.service';
 
 @Component({
   selector: 'app-confirmrides',
@@ -47,22 +48,25 @@ export class ConfirmridesComponent {
   sortOrder: string = 'asc'; 
   sortField: string = 'datetime';
   // filterField: string = 'from';
-  paymentFilter: string = '';
+  // paymentFilter: string = '';
+  statusFilter:string='';
   vehicleTypeFilter: string = '';
   startDateFilter: string = '';
   endDateFilter: string = '';
   fromFilter:string = '';
   toFilter:string = '';
+  vehicles: any[] = [];
   
 
   constructor(private http: HttpClient, private formBuilder: FormBuilder, public router: Router, private toastr: ToastrService,
     private createrideService: CreaterideService, public usersservice: UsersService,
-    public listService: ListService, private socketService: SocketService, private notificationService: NotificationService) { }
+    public listService: ListService, private socketService: SocketService, private notificationService: NotificationService,private vehicletypeService: VehicletypeService) { }
 
   ngOnInit(): void {
+    this.getVehicleType()
     this.getDriversAllData()
     this.getDriverRideData()
-    // this.subscribeToListenDriverRideUpdate()
+    this.subscribeToListenDriverRideUpdate()
     this.subscribeToListenDriverStatusUpdate()
     this.subscribeToListenDriverTypeUpdate()
     this.subscribeToListenDriverUpdate()
@@ -79,33 +83,15 @@ export class ConfirmridesComponent {
     // });
 
   }
-  getUniqueVehicleTypes(createridedata: any[]): string[] {
-    console.log(createridedata);
-    
-    const uniqueTypes = new Set<string>();
-    for (const confirmride of createridedata) {
-        uniqueTypes.add(confirmride.vehicleType);
-        // console.log(confirmride.vehicleType);
-        
-    }
-    return Array.from(uniqueTypes);
+
+  getVehicleType() {
+    this.vehicletypeService.getVehicleType().subscribe((res) => {
+      this.vehicles = res['vehicletype'];
+    });
   }
-  // getDriverRideData(): void {
-  //   this.socketService.getDriverRideData().subscribe(
-  //     (driverridedata: any) => {
-  //       this.createridedata = driverridedata;
-  //       console.log(this.createridedata);
-        
-  //       //  this.createridedata =driverridedata.filter(createride => createride.assigned === 'pending' || createride.assigned === 'timeout' || createride.assigned === 'rejected' || createride.assigned === 'accepted'|| createride.assigned === 'assigning');
-  //       //  console.log(this.createridedata,"driverridedata");  
-  //     },
-  //     (error: any) => {
-  //       console.error(error);
-  //     }
-  //   );
-  // }
+
   getDriverRideData(): void {
-    this.socketService.getDriverRideData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder,this.paymentFilter, this.vehicleTypeFilter, this.fromFilter, this.toFilter,this.startDateFilter,
+    this.socketService.getDriverRideData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder,this.statusFilter, this.vehicleTypeFilter, this.fromFilter, this.toFilter,this.startDateFilter,
       this.endDateFilter).subscribe(
       (data: any) => {
         console.log(data);
@@ -126,7 +112,7 @@ export class ConfirmridesComponent {
     this.getDriverRideData();
   }
   clearFilter(): void {
-    this.paymentFilter = '';
+    this.statusFilter = '';
     this.vehicleTypeFilter = '';
     this.fromFilter = '';
     this.toFilter = '';
@@ -135,21 +121,6 @@ export class ConfirmridesComponent {
     this.currentPage = 1; // Reset to the first page when clearing filters
     this.getDriverRideData();
   }
-  // applyFilters(): void {
-  //   this.socketService.getDriverRideHistoryData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder,this.paymentFilter, this.vehicleTypeFilter, this.fromFilter, this.toFilter).subscribe(
-  //     (data: any) => {
-  //       console.log(data.driverridedata);
-        
-  //       this.createridedata = data.driverridedata;
-  //       // this.createridedata = data.driverridedata.filter(createride => createride.assigned === 'cancelled');
-  //       this.totalPages = data.totalPages;
-  //       this.currentPage = data.currentPage
-  //     },
-  //     (error: any) => {
-  //       console.error(error);
-  //     }
-  //   );
-  // }
 
   generatePageArray(): number[] {
     return Array(this.totalPages).fill(0).map((_, index) => index + 1);
@@ -188,34 +159,19 @@ export class ConfirmridesComponent {
     this.onSearch();
   }
 
-  // subscribeToListenDriverRideUpdate() {
-  //   this.socketService.subscribeToListenDriverRideUpdate().subscribe(updatedDriverRide => {
-  //     console.log(updatedDriverRide);
-  //       // const index = this.createridedata.findIndex(d => d._id === updatedDriverRide._id);
-  //       // if (index !== -1) {
-  //         this.createridedata= updatedDriverRide
-  //       //   // this.createridedata[index].driverId = updatedDriverRide.driverId;
-  //       //   this.createridedata[index].assigned = updatedDriverRide.assigned;
-  //         //  console.log(this.createridedata);
-  //          this.getDriverRideData()
-  //         // this.onAssignBtnClick(this.selectedRide)
-  //       // }
-
-  //     // this.toastr.success('Driver Ride Updated');
-  //   });
-  // }
-
-  // getDriverRideData(): void {
-  //   this.socketService.getDriverRideData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder).subscribe(
-  //     (data: any) => {
-  //       this.createridedata = data.driverridedata.filter(createride => createride.assigned === 'pending' || createride.assigned === 'timeout' || createride.assigned === 'rejected' || createride.assigned === 'accepted');;
-  //       this.totalPages = data.totalPages;
-  //     },
-  //     (error: any) => {
-  //       console.error(error);
-  //     }
-  //   );
-  // }
+  subscribeToListenDriverRideUpdate() {
+    this.socketService.subscribeToListenDriverRideUpdate().subscribe(updatedDriverRide => {
+        const index = this.createridedata.findIndex(d => d._id === updatedDriverRide._id);
+        if (index !== -1) {
+          // this.createridedata= updatedDriverRide
+          this.createridedata[index].driverId = updatedDriverRide.driverId;
+          this.createridedata[index].assigned = updatedDriverRide.assigned;
+        }
+        //  console.log(this.createridedata);
+           this.getDriverRideData()
+        // }
+    });
+  }
 
   subscribeToListenDriverUpdate() {
     this.socketService.subscribeToListenDriverUpdate().subscribe(updatedDriver => {
@@ -226,9 +182,9 @@ export class ConfirmridesComponent {
         this.driverdata[index].assign = updatedDriver.assign;
         console.log(this.driverdata);
         this.onAssignBtnClick(this.selectedcreateride)
-        // this.getDriversAllData();
+        //  this.getDriversAllData();
       }
-      // this.getDriversAllData();
+      this.getDriversAllData();
       // this.toastr.success('Driver Status Updated');
     });
   }
@@ -244,6 +200,7 @@ export class ConfirmridesComponent {
         this.onAssignBtnClick(this.selectedcreateride)
         // this.getDriversAllData();
       }
+      this.getDriversAllData();
       // this.toastr.success('Driver Status Updated');
     });
   }
@@ -258,6 +215,7 @@ export class ConfirmridesComponent {
          this.onAssignBtnClick(this.selectedcreateride)
         //  this.toastr.success('Driver VehicleType Updated');
        }
+       this.getDriversAllData();
      });
     }
 
@@ -281,10 +239,6 @@ export class ConfirmridesComponent {
     this.selectedcreateride = createride;
     console.log(this.selectedcreateride);
     this.assignedDriverName = 'Assign Driver';
-    // this.selectedcreateride.assigned = "assigning";
-     
-    // console.log(this.selectedcreateride.created);
-    
 
     if (this.selectedcreateride) {
       const selectedCityId = this.selectedcreateride.cityId;
@@ -317,21 +271,21 @@ export class ConfirmridesComponent {
       });
     }
   }
-
   onAssignDriver(driver: any) {
     this.selectedDriver = driver;
     // this.selectedDriver.rideStatus = "Hold";
-    this.selectedcreateride.assigned = "assigning";
+    this.selectedcreateride.assigned = 1 ;
     this.selectedcreateride.created = Date.now()
     this.socketService.updateDriverRide(this.selectedcreateride._id, this.selectedDriver._id,this.selectedcreateride.assigned,this.selectedcreateride.created);
 }
 
  onAssignNearestDriver() {
   console.log(this.driverdatafiltered);
-  this.selectedcreateride.assigned = "assigning";
+  this.selectedcreateride.assigned = 1;
   this.selectedcreateride.created = Date.now()
   this.socketService.updateNearestDriverRide(this.selectedcreateride._id, this.driverdatafiltered,this.selectedcreateride.assigned,this.selectedcreateride.created);
- }
+  // this.subscribeToListenDriverRideUpdate() 
+}
 
  onDeleteConfirmRide(createrideId:any){
   // const rideId = createrideId;
@@ -353,6 +307,45 @@ export class ConfirmridesComponent {
 }
 
 
+
+  // getDriverRideData(): void {
+  //   this.socketService.getDriverRideData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder).subscribe(
+  //     (data: any) => {
+  //       this.createridedata = data.driverridedata.filter(createride => createride.assigned === 'pending' || createride.assigned === 'timeout' || createride.assigned === 'rejected' || createride.assigned === 'accepted');;
+  //       this.totalPages = data.totalPages;
+  //     },
+  //     (error: any) => {
+  //       console.error(error);
+  //     }
+  //   );
+  // }
+
+
+  // getUniqueVehicleTypes(createridedata: any[]): string[] {
+  //   console.log(createridedata);
+    
+  //   const uniqueTypes = new Set<string>();
+  //   for (const confirmride of createridedata) {
+  //       uniqueTypes.add(confirmride.vehicleType);
+  //       // console.log(confirmride.vehicleType);
+        
+  //   }
+  //   return Array.from(uniqueTypes);
+  // }
+  // getDriverRideData(): void {
+  //   this.socketService.getDriverRideData().subscribe(
+  //     (driverridedata: any) => {
+  //       this.createridedata = driverridedata;
+  //       console.log(this.createridedata);
+        
+  //       //  console.log(this.createridedata,"driverridedata");  
+  //     },
+  //     (error: any) => {
+  //       console.error(error);
+  //     }
+  //   );
+  // }
+
  // if (this.driverdatafiltered.length === 0) {
     //   // Send a request to the backend to trigger the push notification
     //   this.http.post('/api/send-notification', { rideId: this.selectedcreateride.id }).subscribe(
@@ -372,7 +365,6 @@ export class ConfirmridesComponent {
   //     const driver = this.driverdatafiltered[index];
   //     this.selectedDriver = driver;
   //     this.selectedDriver.isAvailable = false;
-  //     this.selectedcreateride.assigned = "assigning";
   //     this.selectedcreateride.created = Date.now();
 
   //     await this.socketService.updateDriverRide(
@@ -398,7 +390,6 @@ export class ConfirmridesComponent {
   //       const driver = this.driverdatafiltered[index];
   //       this.selectedDriver = driver;
   //       this.selectedDriver.isAvailable = false;
-  //       this.selectedcreateride.assigned = "assigning";
   //       this.selectedcreateride.created = Date.now()
 
 

@@ -20,6 +20,7 @@ export class RidehistoryComponent {
   sortField: string = 'datetime';
   // filterField: string = 'from';
   paymentFilter: string = '';
+  statusFilter:string= '';
   vehicleTypeFilter: string = '';
   startDateFilter: string = '';
   endDateFilter: string = '';
@@ -39,20 +40,7 @@ export class RidehistoryComponent {
      this.csvExportService.exportToCsv(this.createridedata, 'ridehistory.csv');
   }
 
-// getDriverRideData(): void {
-//     this.socketService.getDriverRideData().subscribe(
-//       (driverridedata: any) => {
-//         console.log(driverridedata);
-        
-//         // this.createridedata = driverridedata;
-//         this.createridedata =driverridedata.filter(createride => createride.assigned === 'cancelled');
-//         //  console.log(this.createridedata,"driverridedata");  
-//       },
-//       (error: any) => {
-//         console.error(error);
-//       }
-//     );
-//   }
+
 getUniqueVehicleTypes(createridedata: any[]): string[] {
   console.log(createridedata);
   
@@ -65,9 +53,8 @@ getUniqueVehicleTypes(createridedata: any[]): string[] {
   return Array.from(uniqueTypes);
 }
 
-
   getDriverRideData(): void {
-    this.socketService.getDriverRideHistoryData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder,this.paymentFilter, this.vehicleTypeFilter, this.fromFilter, this.toFilter,this.startDateFilter,
+    this.socketService.getDriverRideHistoryData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder,this.paymentFilter,this.statusFilter, this.vehicleTypeFilter, this.fromFilter, this.toFilter,this.startDateFilter,
       this.endDateFilter).subscribe(
       (data: any) => {
         console.log(data);
@@ -89,6 +76,7 @@ getUniqueVehicleTypes(createridedata: any[]): string[] {
   }
   clearFilter(): void {
     this.paymentFilter = '';
+    this.statusFilter = '';
     this.vehicleTypeFilter = '';
     this.fromFilter = '';
     this.toFilter = '';
@@ -97,21 +85,6 @@ getUniqueVehicleTypes(createridedata: any[]): string[] {
     this.currentPage = 1; // Reset to the first page when clearing filters
     this.getDriverRideData();
   }
-  // applyFilters(): void {
-  //   this.socketService.getDriverRideHistoryData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder,this.paymentFilter, this.vehicleTypeFilter, this.fromFilter, this.toFilter).subscribe(
-  //     (data: any) => {
-  //       console.log(data.driverridedata);
-        
-  //       this.createridedata = data.driverridedata;
-  //       // this.createridedata = data.driverridedata.filter(createride => createride.assigned === 'cancelled');
-  //       this.totalPages = data.totalPages;
-  //       this.currentPage = data.currentPage
-  //     },
-  //     (error: any) => {
-  //       console.error(error);
-  //     }
-  //   );
-  // }
 
   generatePageArray(): number[] {
     return Array(this.totalPages).fill(0).map((_, index) => index + 1);
@@ -157,11 +130,8 @@ getUniqueVehicleTypes(createridedata: any[]): string[] {
           this.createridedata= updatedDriverRide
           // this.createridedata[index].driverId = updatedDriverRide.driverId;
           this.createridedata[index].assigned = updatedDriverRide.assigned;
-          //  console.log(this.createridedata);
-           this.getDriverRideData()
-          // this.onAssignBtnClick(this.selectedRide)
         }
-
+        this.getDriverRideData()
       // this.toastr.success('Driver Ride Updated');
     });
   }
@@ -234,3 +204,20 @@ getUniqueVehicleTypes(createridedata: any[]): string[] {
   }
 
 }
+
+
+// getDriverRideData(): void {
+//     this.socketService.getDriverRideData().subscribe(
+//       (driverridedata: any) => {
+//         console.log(driverridedata);
+        
+//         // this.createridedata = driverridedata;
+//         this.createridedata =driverridedata.filter(createride => createride.assigned === 'cancelled');
+//         //  console.log(this.createridedata,"driverridedata");  
+//       },
+//       (error: any) => {
+//         console.error(error);
+//       }
+//     );
+//   }
+
