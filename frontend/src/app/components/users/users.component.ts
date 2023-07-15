@@ -47,7 +47,8 @@ export class UsersComponent {
   handleError: any;
   AddCardUser: any = false;
   addcard: any = false;
-  cardList: any;
+  cardLists: { [userId: string]: any[] } = {};
+  // cardList: any;
   id: any;
   cardlist: any = true;
   result: any;
@@ -399,10 +400,14 @@ onCancelBtnList() {
   getCard(userId: string) {
     this.http.get(`http://localhost:5000/api/get-card/${this.id}`)
       .subscribe(
-        (response) => {
+        (response:any) => {
           console.log(response);
           // Handle the retrieved data
-           this.cardList = response;
+          //  this.cardList = response;
+          this.cardLists[userId] = response;
+          console.log( this.cardLists[userId]);
+          
+             this.defaultcardid = this.cardLists[userId][0].id;
           // Process the paymentMethods array as needed
         },
         (error) => {
@@ -430,41 +435,24 @@ onCancelBtnList() {
       }
     }
   }
-  // async deleteCard(cardId: any) {
-  //   const deletecard = confirm("Are You Want To Delete Card????");
-  //   if (deletecard) {
-  //     this.http
-  //       .get(`http://localhost:5000/userslist/delete-card/${cardId}`)
-  //       .subscribe(
-  //         (data) => {
-  //           // Handle the retrieved data
-  //           this.getCard(this.id)
-  //           this.toastr.error("Deleted Succesfully!!", "");
-  //         },
-  //         (error) => {
-  //           console.error("Error:", error);
-  //           // Handle the error
-  //         }
-  //       );
-  //   }
-  // }
-  // async SetDefault(val: any, cardid: any) {
-  //   console.log(val);
-  //   console.log(cardid);
-  //   this.http
-  //     .patch(`http://localhost:5000/userslist/default-card/${val}`, { cardid })
-  //     .subscribe(
-  //       (data) => {
-  //         console.log(data);
-  //         // Handle the retrieved data
-  //         this.getcard();
-  //       },
-  //       (error) => {
-  //         console.error("Error:", error);
-  //         // Handle the error
-  //       }
-  //     );
-  // }
+
+  async SetDefault(customerId: any,cardId: any) {
+    console.log(customerId);
+    console.log(cardId);
+    this.http
+      .patch(`http://localhost:5000/api/default-card/${customerId}`, { cardId })
+      .subscribe(
+        (data) => {
+          console.log(data);
+          // Handle the retrieved data
+          this.getCard(this.id)
+        },
+        (error) => {
+          console.error("Error:", error);
+          // Handle the error
+        }
+      );
+  }
 }
 
 

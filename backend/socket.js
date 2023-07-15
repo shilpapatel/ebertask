@@ -568,7 +568,8 @@ const configureSocket = (io) => {
           const driverId = driver._id;
           const updatedDriverId = {
             driverId: driverId,
-            assigned: data.assignedvalue,
+            assigned: 1,
+            // assigned: data.assignedvalue,
             created: data.created,
           };
     
@@ -620,7 +621,8 @@ const configureSocket = (io) => {
         const driverId = data.driverId;
         const updatedDriverId = {
           driverId: data.driverId,
-          assigned: data.assignedvalue,
+          assigned: 1,
+          // assigned: data.assignedvalue,
           created: data.created,
         }
         const result1 = await DriverList.findByIdAndUpdate(driverId, {assign: "1"}, { new: true });

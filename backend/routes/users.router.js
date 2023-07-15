@@ -127,12 +127,12 @@ router.post('/create-intent/:userId', async (req, res) => {
     }
 
     const customer = await stripe.customers.retrieve(user.stripeCustomerId);
-    console.log(customer,"custtttttttttt");
+    // console.log(customer,"custtttttttttt");
     const paymentMethods = await stripe.paymentMethods.list({
       customer: customer.id,
       type: 'card',
     });
-    console.log(paymentMethods,"paymentMethods");
+    // console.log(paymentMethods,"paymentMethods");
     res.json(paymentMethods.data );
   } catch (error) {
     console.error(error);
@@ -154,7 +154,28 @@ router.delete('/delete-card/:cardId', async (req, res) => {
   }
 });
 
+router.patch('/default-card/:customerId', async (req, res) => {
+  try {
+    const cardId = req.body.cardId;
+    const customerId = req.params.customerId;
+    console.log(cardId,"cardidddddddddd");
+  
+     // Retrieve the customer from Stripe
+    //  const customer = await stripe.customers.retrieve(customerId);
 
+     // Set the default payment method for the customer
+     await stripe.customers.update(customerId, {
+       invoice_settings: {
+         default_payment_method: cardId
+       }
+     });
+ 
+     res.status(200).json({ message: 'Default card set successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: 'Failed to set default card' });
+  }
+});
 
 router.post('/add-user', upload.single('profile'), async (req, res, next) => {
   try {

@@ -175,12 +175,12 @@ export class SocketService {
     });
   }
 
-  updateDriverRide(driverrideId: string, driverId: string,assignedvalue:string,created:string): void {
-    this.socket.emit('updatedriverride', {driverrideId, driverId ,assignedvalue,created});
+  updateDriverRide(driverrideId: string, driverId: string,created:string): void {
+    this.socket.emit('updatedriverride', {driverrideId, driverId,created});
   }
 
-  updateNearestDriverRide(driverrideId: string,driverdata:any,assignedvalue:string,created:string): void {
-    this.socket.emit('updatenearestdriverride', {driverrideId,driverdata ,assignedvalue,created});
+  updateNearestDriverRide(driverrideId: string,driverdata:any,created:string): void {
+    this.socket.emit('updatenearestdriverride', {driverrideId,driverdata ,created});
   }
   subscribeToListenDriverRideUpdate(): Observable<any> {
     return new Observable<any>(observer => {

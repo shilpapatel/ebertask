@@ -274,16 +274,16 @@ export class ConfirmridesComponent {
   onAssignDriver(driver: any) {
     this.selectedDriver = driver;
     // this.selectedDriver.rideStatus = "Hold";
-    this.selectedcreateride.assigned = 1 ;
+    // this.selectedcreateride.assigned = 1 ;
     this.selectedcreateride.created = Date.now()
-    this.socketService.updateDriverRide(this.selectedcreateride._id, this.selectedDriver._id,this.selectedcreateride.assigned,this.selectedcreateride.created);
+    this.socketService.updateDriverRide(this.selectedcreateride._id, this.selectedDriver._id,this.selectedcreateride.created);
 }
 
  onAssignNearestDriver() {
   console.log(this.driverdatafiltered);
-  this.selectedcreateride.assigned = 1;
+  // this.selectedcreateride.assigned = 1;
   this.selectedcreateride.created = Date.now()
-  this.socketService.updateNearestDriverRide(this.selectedcreateride._id, this.driverdatafiltered,this.selectedcreateride.assigned,this.selectedcreateride.created);
+  this.socketService.updateNearestDriverRide(this.selectedcreateride._id, this.driverdatafiltered,this.selectedcreateride.created);
   // this.subscribeToListenDriverRideUpdate() 
 }
 
