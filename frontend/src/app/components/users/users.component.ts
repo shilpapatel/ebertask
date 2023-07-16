@@ -47,12 +47,13 @@ export class UsersComponent {
   handleError: any;
   AddCardUser: any = false;
   addcard: any = false;
-  cardLists: { [userId: string]: any[] } = {};
+  cardLists: { [userId: string]: any } = {};
+  defaultcardid: any;
   // cardList: any;
   id: any;
   cardlist: any = true;
   result: any;
-  defaultcardid: any;
+  // defaultcardid: any;
   customersdata: any;
 
   @ViewChild('cardModal') cardModal!: ElementRef;
@@ -320,7 +321,7 @@ onCancelBtnList() {
 //   console.error('An error occurred:', error);
 //   // Perform any additional error handling actions
 // }
-
+selectddefaultid:any;
   onCardClick(userId: string){
     this.id = userId
     // this.AddCardDetails(this.id) 
@@ -405,9 +406,15 @@ onCancelBtnList() {
           // Handle the retrieved data
           //  this.cardList = response;
           this.cardLists[userId] = response;
+          // this.cardLists[userId] = response.id;
           console.log( this.cardLists[userId]);
-          
-             this.defaultcardid = this.cardLists[userId][0].id;
+          for (const paymentMethod of this.cardLists[userId]) {
+            // if (this.selectddefaultid === paymentMethod.id) {
+              this.defaultcardid =paymentMethod.id;
+              // console.log(this.defaultcardid);
+              // break; // Exit the loop if a matching ID is found
+            // }
+          }
           // Process the paymentMethods array as needed
         },
         (error) => {
@@ -444,8 +451,11 @@ onCancelBtnList() {
       .subscribe(
         (data) => {
           console.log(data);
+          this.selectddefaultid = cardId;
+          // this.defaultcardid = cardId;
+          //  console.log(this.defaultcardid);
           // Handle the retrieved data
-          this.getCard(this.id)
+           this.getCard(this.id)
         },
         (error) => {
           console.error("Error:", error);

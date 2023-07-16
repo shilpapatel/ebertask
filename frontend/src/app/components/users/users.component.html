@@ -200,11 +200,11 @@
               <div class="ms-5">{{card.card.exp_month}} / {{card.card.exp_year}}</div>
               <div class=" ms-3"><a class="text-danger" (click)="deleteCard(card.id)"><i
                     class="fas fa-trash fa-lg mx-1"></i></a></div>
-
-              <!-- <div class="text-center" *ngIf="card.id != defaultcardid">
-                <input type="radio" name="setDefaultCard" [value]="card.id"
-                  (change)="SetDefault(card.customer, card.id)">
-              </div> -->
+               
+                <!-- <div class="form-check ms-3">
+                      <input class="form-check-input" type="radio" name="setDefaultCard" [value]="card.id" [checked]="card.id == defaultcardid" (change)="SetDefault(card.customer, card.id)">
+                </div>      -->
+             
               <div class="form-check ms-3" *ngIf="card.id != defaultcardid">
                 <input class="form-check-input" type="radio" name="notsetDefaultCard" [value]="card.id"
                 (change)="SetDefault(card.customer, card.id)">
@@ -213,6 +213,11 @@
               <div class="form-check ms-3" *ngIf="card.id == defaultcardid">
                 <input class="form-check-input" type="radio" name="setDefaultCard" [value]="card.id" checked>
               </div>
+
+               <!-- <div class="text-center" *ngIf="card.id != defaultcardid">
+                <input type="radio" name="setDefaultCard" [value]="card.id"
+                  (change)="SetDefault(card.customer, card.id)">
+              </div> -->
 
               <!-- <div class="text-center" *ngIf="card.id != defaultcardid">
                 <button class="btn btn-secondary btn-rounded m-2" (click)="SetDefault(card.customer, card.id)">
