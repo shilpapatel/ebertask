@@ -194,19 +194,19 @@ export class SocketService {
     });
   }
 
-  acceptDriverRide(driverrideId: string):void {
-    this.socket.emit('acceptDriverRide', driverrideId);
+  acceptDriverRide(driverrideId: string,driverId: string):void {
+    this.socket.emit('acceptDriverRide', {driverrideId,driverId});
   } 
-  arriveDriverRide(driverrideId: string) :void{
-    this.socket.emit('arriveDriverRide', driverrideId);
+  arriveDriverRide(driverrideId: string,driverId: string) :void{
+    this.socket.emit('arriveDriverRide', {driverrideId,driverId});
   }
   
-  startDriverRide(driverrideId: string) :void{
-    this.socket.emit('startDriverRide', driverrideId);
+  startDriverRide(driverrideId: string,driverId: string) :void{
+    this.socket.emit('startDriverRide', {driverrideId,driverId});
   }
   
-  completeDriverRide(driverrideId: string) :void{
-    this.socket.emit('completeDriverRide', driverrideId);
+  completeDriverRide(driverrideId: string,driverId: string) :void{
+    this.socket.emit('completeDriverRide', {driverrideId,driverId});
   }
 
   deleteDriverRide(driverrideId: string): Observable<any> {

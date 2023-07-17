@@ -128,6 +128,9 @@ export class UsersComponent {
   }
   
   ngOnInit(): void {
+    // this.getCard(this.id)
+    // console.log(this.id);
+    
     // this.countryService.getCountries().subscribe((countries) => {
     //   this.countries = countries;
     //   // console.log(this.countries);
@@ -326,6 +329,8 @@ selectddefaultid:any;
     this.id = userId
     // this.AddCardDetails(this.id) 
     // this.AddCard(this.id)
+    // console.log();
+    
      this.getCard(this.id)
    }
   async AddCard( id:any) {
@@ -398,7 +403,7 @@ selectddefaultid:any;
 
   }
 
-  getCard(userId: string) {
+  getCard(userId: any) {
     this.http.get(`http://localhost:5000/api/get-card/${this.id}`)
       .subscribe(
         (response:any) => {
@@ -407,14 +412,23 @@ selectddefaultid:any;
           //  this.cardList = response;
           this.cardLists[userId] = response;
           // this.cardLists[userId] = response.id;
-          console.log( this.cardLists[userId]);
-          for (const paymentMethod of this.cardLists[userId]) {
-            // if (this.selectddefaultid === paymentMethod.id) {
-              this.defaultcardid =paymentMethod.id;
-              // console.log(this.defaultcardid);
-              // break; // Exit the loop if a matching ID is found
-            // }
-          }
+          console.log(this.cardLists[userId]);
+          
+          // console.log( this.cardLists[userId].isDefault);
+          
+          // if(this.cardLists[userId].isDefault == true){
+          //   this.defaultcardid =this.cardLists[userId].id;
+          //   console.log(this.defaultcardid);
+            
+          // }
+           for (const paymentMethod of this.cardLists[userId]) {
+             if (paymentMethod.isDefault == true) {
+            // console.log(paymentMethod);
+               this.defaultcardid =paymentMethod.id;
+          //     // console.log(this.defaultcardid);
+                 break; // Exit the loop if a matching ID is found
+             }
+           }
           // Process the paymentMethods array as needed
         },
         (error) => {

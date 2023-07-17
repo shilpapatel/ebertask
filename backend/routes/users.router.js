@@ -121,19 +121,29 @@ router.post('/create-intent/:userId', async (req, res) => {
   router.get('/get-card/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
+    // console.log(userId,"useriddddddddddddddddddddd");
+
     const user = await User.findById(userId);
     if (!user.stripeCustomerId) {
       return res.status(400).json({ error: 'User does not have a Stripe customer ID' });
     }
 
     const customer = await stripe.customers.retrieve(user.stripeCustomerId);
-    // console.log(customer,"custtttttttttt");
+
+    const defaultCardId = customer.invoice_settings.default_payment_method;
+    //  console.log(defaultCardId,"custtttttttttt");
     const paymentMethods = await stripe.paymentMethods.list({
       customer: customer.id,
       type: 'card',
     });
+    const paymentMethodsData = paymentMethods.data.map((card) => ({
+      ...card,
+      isDefault: card.id === defaultCardId,
+    }));
+
+    res.json(paymentMethodsData);
     // console.log(paymentMethods,"paymentMethods");
-    res.json(paymentMethods.data );
+    // res.json(paymentMethods.data );
   } catch (error) {
     console.error(error);
     res.status(400).json({ error: 'Failed to retrieve card details' });

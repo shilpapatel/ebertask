@@ -44,7 +44,10 @@ const createrideSchema = new mongoose.Schema({
     // assigned:{ type:String, default:"pending"},
     // assigned: { type: Number}
     assigned: { type: Number, enum:[0,1,2,3,4,5,6,7,8]},
-    created:{type:String,default:Date.now()}
+    created:{type:String,default:Date.now()},
+    nearest:{type:Boolean},
+    assigneddrivers:{type:Array}
+
 })
 
 //collection name always singular forn and first letter always capital

@@ -64,21 +64,21 @@ getDriverRideData(): void {
     });
   }
 
-  onAcceptRequest(driverrideId: string){
+  onAcceptRequest(driverrideId: string,driverId:string){
     // console.log(driverrideId);
-    this.socketService.acceptDriverRide(driverrideId); 
+    this.socketService.acceptDriverRide(driverrideId,driverId); 
   }
 
-  onArriveRequest(driverrideId: string) {
-    this.socketService.arriveDriverRide(driverrideId);
+  onArriveRequest(driverrideId: string,driverId:string) {
+    this.socketService.arriveDriverRide(driverrideId,driverId);
   }
   
-  onStartRequest(driverrideId: string) {
-    this.socketService.startDriverRide(driverrideId);
+  onStartRequest(driverrideId: string,driverId:string) {
+    this.socketService.startDriverRide(driverrideId,driverId);
   }
   
-  onCompleteRequest(driverrideId: string) {
-    this.socketService.completeDriverRide(driverrideId);
+  onCompleteRequest(driverrideId: string,driverId:string) {
+    this.socketService.completeDriverRide(driverrideId,driverId);
   }
 
    onDeleteDriver(driverrideId: string) {

@@ -43,7 +43,7 @@ export class ConfirmridesComponent {
 
   currentPage: number = 1;
   totalPages: number = 0;
-  pageSize: number = 10;
+  pageSize: number = 5;
   searchQuery: string
   sortOrder: string = 'asc'; 
   sortField: string = 'datetime';
