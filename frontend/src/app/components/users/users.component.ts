@@ -319,18 +319,9 @@ onCancelBtnList() {
   // this.isShow = false; // Hide the form container
 }
 
-// handleError(error: any) {
-//   // Handle the error according to your application's needs
-//   console.error('An error occurred:', error);
-//   // Perform any additional error handling actions
-// }
 selectddefaultid:any;
   onCardClick(userId: string){
     this.id = userId
-    // this.AddCardDetails(this.id) 
-    // this.AddCard(this.id)
-    // console.log();
-    
      this.getCard(this.id)
    }
   async AddCard( id:any) {
@@ -407,33 +398,16 @@ selectddefaultid:any;
     this.http.get(`http://localhost:5000/api/get-card/${this.id}`)
       .subscribe(
         (response:any) => {
-          console.log(response);
-          // Handle the retrieved data
-          //  this.cardList = response;
           this.cardLists[userId] = response;
-          // this.cardLists[userId] = response.id;
-          console.log(this.cardLists[userId]);
-          
-          // console.log( this.cardLists[userId].isDefault);
-          
-          // if(this.cardLists[userId].isDefault == true){
-          //   this.defaultcardid =this.cardLists[userId].id;
-          //   console.log(this.defaultcardid);
-            
-          // }
            for (const paymentMethod of this.cardLists[userId]) {
              if (paymentMethod.isDefault == true) {
-            // console.log(paymentMethod);
                this.defaultcardid =paymentMethod.id;
-          //     // console.log(this.defaultcardid);
-                 break; // Exit the loop if a matching ID is found
+                 break; 
              }
            }
-          // Process the paymentMethods array as needed
         },
         (error) => {
           console.error('Error:', error);
-          // Handle the error
         }
       );
   }
@@ -443,7 +417,6 @@ selectddefaultid:any;
     if (confirmDelete) {
       try {
         const response = await this.http.delete(`http://localhost:5000/api/delete-card/${cardId}`).toPromise();
-  
         if (response && response['message'] === 'Card deleted successfully') {
           this.getCard(this.id);
           this.toastr.success("Card deleted successfully!");
@@ -466,14 +439,10 @@ selectddefaultid:any;
         (data) => {
           console.log(data);
           this.selectddefaultid = cardId;
-          // this.defaultcardid = cardId;
-          //  console.log(this.defaultcardid);
-          // Handle the retrieved data
            this.getCard(this.id)
         },
         (error) => {
           console.error("Error:", error);
-          // Handle the error
         }
       );
   }

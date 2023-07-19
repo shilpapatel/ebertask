@@ -5,6 +5,8 @@ let DriverList = require('./model/list.model')
 let RunningRequest = require('./model/runningrequest.model')
 let CreateRide = require('./model/createride.model')
 const { mongoose } = require('mongoose')
+let User = require('./model/users.model')
+const stripe = require('stripe')('sk_test_51NObn2BQlJgbeIPVzCyHaca669BS3YrGmlGoSQNFIahLk6xyFc1pH5utU9GO9a78duDiyPxiCD95SneKT1Utj5oD006hxweLrL');
 
     // cron.schedule('*/20 * * * * *', () => {
     //   console.log("cron start");
@@ -620,12 +622,13 @@ const configureSocket = (io) => {
       // console.log('Cron job start');
       const pendingRides = await CreateRide.find({ assigned: 1 });
       //  console.log(pendingRides,"pendingggggggggggggggg");
-      let currentTime = Date.now();
+      let currentTime;
       const timeoutDuration = 7000; // 20 seconds
 
         for (const ride of pendingRides) {
 
           if(ride.nearest == false){
+            currentTime = Date.now();
             const rideTime = ride.created;
             const elapsedTime = currentTime - rideTime;
     
@@ -638,17 +641,14 @@ const configureSocket = (io) => {
               io.emit('driverUpdated', result1);
               const result = await CreateRide.findOneAndUpdate({ _id: ride._id }, updatedDriverId, { new: true });
               io.emit('driverrideupdated', result);
+            
             }
           }
           else{
-            // currentTime = Date.now()
+            currentTime = Date.now();
             const rideTime = ride.created;
             const elapsedTime = currentTime - rideTime;
             if (elapsedTime >= timeoutDuration) {
-              // console.log(elapsedTime, rideTime);
-              console.log('yes------------');
-                  // console.log(rideTime);
-                  // console.log(currentTime);
                   const city_id = new mongoose.Types.ObjectId(ride.cityId);
                   const assignService = new mongoose.Types.ObjectId(ride.vehicleTypeId);
                   // const assigneddrivers = ride.assigneddrivers
@@ -705,10 +705,8 @@ const configureSocket = (io) => {
                     io.emit('driverUpdated', result2);
                     const result = await CreateRide.findByIdAndUpdate(ride._id ,{ $addToSet: { assigneddrivers: randomDriver._id }, $set: updatedDriverId }, { new: true });
                     io.emit('driverrideupdated', result);
-                  }
-                  
-                }
-              
+                  } 
+                }  
           }
         
       };
@@ -868,6 +866,7 @@ const configureSocket = (io) => {
       try {
         const driverrideId = data.driverrideId;
         const driverId = data.driverId;
+        
         // const driverrideId = data;   
         const result1 = await DriverList.findByIdAndUpdate(driverId, {assign: "0"}, { new: true });
         io.emit('driverUpdated', result1);
@@ -875,6 +874,36 @@ const configureSocket = (io) => {
         // io.emit('driverUpdated', result1);
         const result = await CreateRide.findByIdAndUpdate(driverrideId, { assigned: 7,driverId: null }, { new: true });
         io.emit('driverrideupdated', result);
+        // console.log(result,"rideresult");
+
+        const exchangeRate = 75;
+        const user = await User.findById(result.userId);
+        if (!user.stripeCustomerId) {
+          return res.status(400).json({ error: 'User does not have a Stripe customer ID' });
+        }
+        const customer = await stripe.customers.retrieve(user.stripeCustomerId);
+        const defaultCardId = customer.invoice_settings.default_payment_method;
+        
+        const estimatePriceUSD = result.estimatePrice / exchangeRate;
+        const amountInCents = Math.round(estimatePriceUSD * 100);
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: amountInCents,
+          currency: 'usd', 
+          customer: user.stripeCustomerId,
+          payment_method: defaultCardId,
+          off_session: true,
+          confirm: true
+        });
+
+        //  const charge = await stripe.charges.create({
+        //   amount: estimatePriceUSD,
+        //   currency: 'usd', 
+        //   customer: user.stripeCustomerId,
+        //   payment_method: defaultCardId,
+        //   off_session: true, 
+        //   confirm: true, 
+        // });
+
       } catch (err) {
         console.log(err);
         io.emit('completeDriverRideError', { error: err });

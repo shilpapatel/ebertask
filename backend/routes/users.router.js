@@ -22,34 +22,6 @@ async function sendmessage() {
   }
 }
 
-// router.post('/cards', async (req, res) => {
-//   try {
-//     const { paymentMethod } = req.body;
-
-//     // Create a customer in Stripe
-//     const customer = await stripe.customers.create();
-
-//     // Attach the payment method to the customer
-//     await stripe.paymentMethods.attach(paymentMethod.id, { customer: customer.id });
-
-//     // Save the payment method details to your database
-//     const card = {
-//       cardName: paymentMethod.card.brand,
-//       cardLastFour: paymentMethod.card.last4,
-//       customerId: customer.id,
-//     };
-
-//     // Save the card details to your database
-//     const savedCard = await Card.create(card);
-
-//     // Return the saved card details
-//     res.status(201).json(savedCard);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Failed to save card' });
-//   }
-// });
-
 const DIR = './public/'
 
 const storage = multer.diskStorage({
@@ -129,8 +101,15 @@ router.post('/create-intent/:userId', async (req, res) => {
     }
 
     const customer = await stripe.customers.retrieve(user.stripeCustomerId);
+    // console.log(customer,"customersssssssss");
 
     const defaultCardId = customer.invoice_settings.default_payment_method;
+    // if (!defaultCardId) {
+    //       const firstCardId = customer.sources.data[0].id;
+    //       await stripe.customers.update(user.stripeCustomerId, {
+    //       invoice_settings: {default_payment_method: firstCardId,},
+    //       });
+    //     }
     //  console.log(defaultCardId,"custtttttttttt");
     const paymentMethods = await stripe.paymentMethods.list({
       customer: customer.id,
@@ -142,8 +121,6 @@ router.post('/create-intent/:userId', async (req, res) => {
     }));
 
     res.json(paymentMethodsData);
-    // console.log(paymentMethods,"paymentMethods");
-    // res.json(paymentMethods.data );
   } catch (error) {
     console.error(error);
     res.status(400).json({ error: 'Failed to retrieve card details' });
@@ -186,6 +163,53 @@ router.patch('/default-card/:customerId', async (req, res) => {
     res.status(400).json({ error: 'Failed to set default card' });
   }
 });
+
+router.post('/cut-payment/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const amount = req.body.amount; // Amount to charge in the smallest currency unit (e.g., cents for USD)
+
+    // Retrieve the user from the database
+    const user = await User.findById(userId);
+
+    if (!user.stripeCustomerId) {
+      return res.status(400).json({ error: 'User does not have a Stripe customer ID' });
+    }
+
+    // Retrieve the customer from Stripe
+    const customer = await stripe.customers.retrieve(user.stripeCustomerId);
+
+    // Get the default payment method (card) ID from the customer's invoice settings
+    const defaultCardId = customer.invoice_settings.default_payment_method;
+
+    if (!defaultCardId) {
+      return res.status(400).json({ error: 'User does not have a default payment method' });
+    }
+
+     // Create a charge using the default payment method (default card)
+     const charge = await stripe.charges.create({
+      amount: amount,
+      currency: 'usd', // Change to your desired currency
+      customer: user.stripeCustomerId,
+      payment_method: defaultCardId,
+      off_session: true, // Set to true for off-session payments
+      confirm: true, // Confirm the charge immediately
+    });
+
+    // const paymentIntent = await stripe.paymentIntents.create({
+    //   amount: amount,
+    //   currency: 'usd', // Change to your desired currency
+    //   payment_method: defaultCardId,
+    //   confirm: true, // Confirm the payment intent immediately
+    // });
+
+    res.json({ message: 'Payment cut successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: 'Failed to cut payment' });
+  }
+});
+
 
 router.post('/add-user', upload.single('profile'), async (req, res, next) => {
   try {
@@ -292,7 +316,33 @@ router.get('/get-users', async (req, res, next) => {
   }
 });
 
+// router.post('/cards', async (req, res) => {
+//   try {
+//     const { paymentMethod } = req.body;
 
+//     // Create a customer in Stripe
+//     const customer = await stripe.customers.create();
+
+//     // Attach the payment method to the customer
+//     await stripe.paymentMethods.attach(paymentMethod.id, { customer: customer.id });
+
+//     // Save the payment method details to your database
+//     const card = {
+//       cardName: paymentMethod.card.brand,
+//       cardLastFour: paymentMethod.card.last4,
+//       customerId: customer.id,
+//     };
+
+//     // Save the card details to your database
+//     const savedCard = await Card.create(card);
+
+//     // Return the saved card details
+//     res.status(201).json(savedCard);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Failed to save card' });
+//   }
+// });
 
 // router.get('/get-users', async (req, res, next) => {
 //   try {
