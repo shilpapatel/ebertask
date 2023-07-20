@@ -179,8 +179,12 @@ export class SocketService {
     this.socket.emit('updatedriverride', {driverrideId, driverId,created});
   }
 
-  updateNearestDriverRide(driverrideId: string,driverdata:any,created:string): void {
-    this.socket.emit('updatenearestdriverride', {driverrideId,driverdata ,created});
+  // updateNearestDriverRide(driverrideId: string,driverdata:any,created:string): void {
+  //   this.socket.emit('updatenearestdriverride', {driverrideId,driverdata ,created});
+  // }
+
+  updateNearestDriverRide(driverrideData: any,): void {
+    this.socket.emit('updatenearestdriverride', {driverrideData});
   }
   subscribeToListenDriverRideUpdate(): Observable<any> {
     return new Observable<any>(observer => {

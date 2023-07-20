@@ -278,12 +278,14 @@ export class ConfirmridesComponent {
     this.selectedcreateride.created = Date.now()
     this.socketService.updateDriverRide(this.selectedcreateride._id, this.selectedDriver._id,this.selectedcreateride.created);
 }
-
- onAssignNearestDriver() {
-  console.log(this.driverdatafiltered);
+ onAssignNearestDriver(selectedcreateride:any) {
+  // console.log(this.driverdatafiltered);
+  console.log(selectedcreateride);
+  
   // this.selectedcreateride.assigned = 1;
   this.selectedcreateride.created = Date.now()
-  this.socketService.updateNearestDriverRide(this.selectedcreateride._id, this.driverdatafiltered,this.selectedcreateride.created);
+  this.socketService.updateNearestDriverRide(this.selectedcreateride);
+  // this.socketService.updateNearestDriverRide(this.selectedcreateride._id, this.driverdatafiltered,this.selectedcreateride.created);
   // this.subscribeToListenDriverRideUpdate() 
 }
 

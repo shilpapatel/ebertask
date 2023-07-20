@@ -1,5 +1,5 @@
-// const cron = require('node-cron');
-const cron = require('cron');
+ const cron = require('node-cron');
+// const cron = require('cron');
 const moment = require('moment');
 let DriverList = require('./model/list.model')
 let RunningRequest = require('./model/runningrequest.model')
@@ -486,14 +486,184 @@ const configureSocket = (io) => {
       }
     });
 
+
+    const job = cron.schedule('* * * * * *', async () => {
+      // console.log();
+      const ride = await CreateRide.find({ assigned: 1 ,  nearest: false });
+      const ridenearestdata = await CreateRide.find({ assigned: 1 , nearest: true });
+      // console.log(ridenearestdata);
+
+      if (ride.length > 0) {
+        // console.log("hellodfvgbhnjmkmn");
+        for (const data of ride) {
+          if (data.created) {
+            job.start();
+            // console.log('Cron job started.');
+            const currentTime = new Date();
+            // console.log(currentTime.getTime());
+            const elapsedTimeInSeconds = Math.floor((currentTime.getTime() - data.created) / 1000);
+            // console.log(elapsedTimeInSeconds);
+            if (elapsedTimeInSeconds >= 20) {
+              const result1 = await DriverList.findByIdAndUpdate(data.driverId, { assign: "0" }, { new: true });
+              io.emit('driverUpdated', result1);
+
+
+              const result = await CreateRide.findByIdAndUpdate(data._id, { driverId: null, assigned: 2}, { new: true });
+              io.emit('driverrideupdated', result);
+              // console.log('Cron job ended.');
+
+            } else {
+              // console.log("hello");
+            }
+          }
+        }
+      }
+
+      if (ridenearestdata.length > 0) {
+        // console.log('hellooooooooo');
+        for (const data of ridenearestdata) {
+          const currentTime = new Date();
+          const elapsedTimeInSeconds = Math.floor((currentTime.getTime() - data.created) / 1000);
+          if (elapsedTimeInSeconds >= 20) {
+            const city_id = new mongoose.Types.ObjectId(data.cityId);
+            const vehicle_id = new mongoose.Types.ObjectId(data.vehicleTypeId);
+            const assigneddrivers = [...new Set(data.assigneddrivers)];
+            let alldrivers = DriverList.aggregate([
+              {
+                $match: {
+                  status: "Approved",
+                  city_id: city_id,
+                  vehicletype_id: vehicle_id,
+                  assign: "0",
+                  _id: { $nin: assigneddrivers }
+                },
+              },
+            ]);
+
+            const pendingdriver = await alldrivers.exec();
+            if (pendingdriver.length > 0) {
+              const randomIndex = Math.floor(Math.random() * pendingdriver.length);
+              const randomObject = pendingdriver[randomIndex];
+              const driver = await DriverList.findByIdAndUpdate(randomObject._id, { assign: "1" }, { new: true });
+              const driverdata = await DriverList.findByIdAndUpdate(data.driverId, { assign: "0" }, { new: true });
+
+              const result = await CreateRide.findByIdAndUpdate(data._id, { $addToSet: { assigneddrivers: randomObject._id }, created: Date.now(), driverId: randomObject._id }, { new: true });
+              // console.log(result);
+              io.emit('driverUpdated', driver );
+              io.emit('driverUpdated', driverdata );
+              io.emit('driverrideupdated', result);
+            }
+            else {
+
+              const driverdata = await DriverList.findByIdAndUpdate(data.driverId, { assign: "0" }, { new: true });
+              const result = await CreateRide.findByIdAndUpdate(data._id, { created: Date.now(), assigneddrivers: [], nearest: false, assigned: 2 ,  driverId: null }, { new: true });
+              io.emit('driverUpdated', driverdata );
+              io.emit('driverrideupdated', result);
+            }
+          }
+
+
+        }
+      }
+    })
+
+
+    socket.on('updatedriverride', async (data) => {
+      // console.log(data);
+      const _id = data.driverrideId;
+      const driver_id = data.driverId;
+      try {
+        const driver = await DriverList.findByIdAndUpdate(driver_id, { assign: "1" }, { new: true });
+        await driver.save();
+        // console.log(driver);
+        const ride = await CreateRide.findByIdAndUpdate(_id, { driverId: driver_id, assigned: 1,nearest: false, created: Date.now() }, { new: true })
+        await ride.save()
+        // console.log(ride);
+        io.emit('driverUpdated', driver);
+        io.emit('driverrideupdated', ride);
+   
+      } catch (error) {
+        // console.log(error);
+        socket.emit('updatedriverrideError', { error: err })
+      }
+
+    })
+
+ // socket.on("updatenearestdriverride", async (data) => {
+    //   console.log(data);
+    //   try {
+    //     const driverrideId = data.driverrideId;
+    //      const driverdata = data.driverdata;
+
+    //     // console.log(driverdata);
+    //     const firstdriver = new mongoose.Types.ObjectId(driverdata[0]._id);
+    //     // console.log(firstdriver._id);
+
+    //     const driver = await DriverList.findByIdAndUpdate(firstdriver._id, { assign: "1" }, { new: true });
+    //     await driver.save();
+    //     io.emit('driverUpdated', driver);
+    //     // console.log(driver);
+    //     const ride = await CreateRide.findByIdAndUpdate(driverrideId, { driverId: firstdriver._id, assigned: 1  ,  nearest: true, assigneddrivers: firstdriver._id, created: Date.now() }, { new: true })
+    //     await ride.save()
+    //     // Emit the 'assigndriverdatadata' event with the driver data to the client
+    //     io.emit('driverrideupdated', ride);
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // });
+
+    // assign nearest driver 
+
+    socket.on("updatenearestdriverride", async (data) => {
+ 
+      try {
+
+        const city_id = new mongoose.Types.ObjectId(data.driverrideData.cityId);
+        const assignService = new mongoose.Types.ObjectId(data.driverrideData.vehicleTypeId);
+
+        let assignnearestdriverdata = DriverList.aggregate([
+          {
+            $match: {
+              status: "Approved",
+              city_id: city_id,
+              vehicletype_id: assignService,
+              assign: "0",
+            },
+          },
+        ]);
+
+        const driverdata = await assignnearestdriverdata.exec();
+        
+        // console.log(driverdata,"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        const firstdriver = new mongoose.Types.ObjectId(driverdata[0]._id);
+        // console.log(firstdriver._id);
+
+        const driver = await DriverList.findByIdAndUpdate(firstdriver._id, { assign: "1" }, { new: true });
+        await driver.save();
+        io.emit('driverUpdated', driver);
+        // console.log(driver);
+        const ride = await CreateRide.findByIdAndUpdate(data.driverrideData._id, { driverId: firstdriver._id, assigned: 1  ,  nearest: true, assigneddrivers: firstdriver._id, created: Date.now() }, { new: true })
+        await ride.save()
+        // Emit the 'assigndriverdatadata' event with the driver data to the client
+        io.emit('driverrideupdated', ride);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+   
+
+        
+
     // const job = new cron.CronJob('* * * * * *', async () => {
     //   // console.log('Cron job start');
-    //   const pendingRides = await CreateRide.find({ assigned: 1 }).exec();
-    //   // console.log(pendingRides,"pendingggggggggggggggg");
-    //   const currentTime = Date.now();
-    //   const timeoutDuration = 20000; // 20 seconds
-
-    //     for (const ride of pendingRides) {
+    //   const simplePendingRides = await CreateRide.find({ assigned: 1,nearest:false });
+    //   const nearestPendingRides = await CreateRide.find({ assigned: 1,nearest:true });
+    //   if(simplePendingRides.length>0)
+    //   {
+    //     let currentTime = Date.now();
+    //     const timeoutDuration = 15000;
+    //     for (const ride of simplePendingRides) {
     //     const rideTime = ride.created;
     //     const elapsedTime = currentTime - rideTime;
 
@@ -504,309 +674,209 @@ const configureSocket = (io) => {
     //       };
     //       const result1 = await DriverList.findOneAndUpdate({ assign: '1' }, { assign: '0' }, { new: true });
     //       io.emit('driverUpdated', result1);
-          
     //       const result = await CreateRide.findOneAndUpdate({ _id: ride._id }, updatedDriverId, { new: true });
     //       io.emit('driverrideupdated', result);
+    //   }
+    // }
+    // }
+    //   if(nearestPendingRides.length>0)
+    //   {
+    //     let currentTime = new Date();
+    //     // let currentTime = Date.now();
+    //     // const timeoutDuration = 15000;
+        
+    //     for(const ride of nearestPendingRides) {
+    //       // console.log(nearestPendingRides.length , "length");
+
+    //       //  ride = await CreateRide.findById(ride._id)
+    //       const rideTime = ride.created;
+    //       const elapsedTime = Math.floor((currentTime.getTime() - rideTime)/1000);
+    //       console.log(elapsedTime);
+    //       if (elapsedTime >=15) {
+    //         console.log('----------------------');
+    //         const city_id = new mongoose.Types.ObjectId(ride.cityId);
+    //         const assignService = new mongoose.Types.ObjectId(ride.vehicleTypeId);
+    //               // const assigneddrivers = ride.assigneddrivers
+    //               const assigneddrivers = [...new Set(ride.assigneddrivers)];
+
+    //               //---------------------------------------------------------------------------
+
+    //               DriverList.aggregate([{
+    //                 $match: {
+    //                   status: "Approved",
+    //                   city_id: city_id,
+    //                   vehicletype_id: assignService,
+    //                   assign: "0",
+    //                   _id: {$nin: assigneddrivers}
+    //                 },
+    //               }]).then(async (matchDrivers) => {
+    //                 if (matchDrivers.length > 0){
+    //                   // console.log("false==============");
+    //                   const randomIndex = Math.floor(Math.random() * matchDrivers.length);
+    //                   const randomDriver = matchDrivers[randomIndex];
+    //                   // const updatedDriverId = {
+    //                   //   driverId: randomDriver._id,
+    //                   //   assigned: 1,
+    //                   //   // nearest:true,
+    //                   //   created: Date.now(),
+    //                   //   // $push: { assigneddrivers: randomDriver._id }
+    //                   // };
+    //                   DriverList.findByIdAndUpdate(randomDriver._id, { assign: "1" }, { new: true }).then((result1) => {
+    //                     io.emit('driverUpdated', result1);
+    //                     DriverList.findByIdAndUpdate(ride.driverId, { assign: "0" }, { new: true }).then((result2) => {
+    //                       io.emit('driverUpdated', result2);
+    //                       console.log("aaaaaaaaaaaaaaaaaaaaaaaa");
+    //                       CreateRide.findByIdAndUpdate(ride._id ,{ $addToSet: { assigneddrivers: randomDriver._id }, driverId: randomDriver._id,created: Date.now()}, { new: true }).then((result) => {
+    //                         io.emit('driverrideupdated', result);
+    //                       }).catch((error) => {
+    //                         console.log(error);
+    //                       })
+    //                     }).catch((error) => {
+    //                       console.log(error);
+    //                     })
+
+    //                   }).catch((error) => {
+    //                     console.log(error);
+    //                   })
+                   
+    //               }
+    //               else{
+    //                 // const updatedDriverId = {
+    //                 //   driverId: null,
+    //                 //   assigned: 2,
+    //                 //   assigneddrivers: [],
+    //                 //   nearest: false
+    //                 //   // created:Date.now()
+      
+    //                 // };
+    //                 // const query = { assign: { $in: ride.assigneddrivers } };
+    //                 // const result1 = await DriverList.find(query, { assign: '0' }, { new: true });
+    //                 const result2 =  await DriverList.findByIdAndUpdate(ride.driverId, { assign: "0" }, { new: true });
+    //                 io.emit('driverUpdated', result2);
+    //                 // const result1 = await DriverList.updateMany({ _id: { $in: ride.assigneddrivers } },{ assign: "0" }, { new: true });
+    //                 // io.emit('driverUpdated', result1);
+    //                 const result = await CreateRide.findByIdAndUpdate( ride._id ,{created:Date.now(),assigneddrivers:[],nearest: false , assigned: 2 ,driverId: null,}, { new: true });
+    //                 io.emit('driverrideupdated', result);
+    //               } 
+    //               }).catch((error) => {
+    //                 console.log(error);
+    //               })
+
+    //               //---------------------------------------------------------------------------
+
+    //               // let matchDrivers = await DriverList.aggregate([
+    //               //   {
+    //               //     $match: {
+    //               //       status: "Approved",
+    //               //       city_id: city_id,
+    //               //       vehicletype_id: assignService,
+    //               //       assign: "0",
+    //               //       _id: {$nin: assigneddrivers}
+    //               //     },
+    //               //   }
+    //               // ]).exec();
+                  
+
+    //             // if (matchDrivers.length > 0){
+    //             //     // console.log("false==============");
+    //             //     const randomIndex = Math.floor(Math.random() * matchDrivers.length);
+    //             //     const randomDriver = matchDrivers[randomIndex];
+    //             //     // const updatedDriverId = {
+    //             //     //   driverId: randomDriver._id,
+    //             //     //   assigned: 1,
+    //             //     //   // nearest:true,
+    //             //     //   created: Date.now(),
+    //             //     //   // $push: { assigneddrivers: randomDriver._id }
+    //             //     // };
+    //             //     const result1 = await DriverList.findByIdAndUpdate(randomDriver._id, { assign: "1" }, { new: true });
+    //             //     io.emit('driverUpdated', result1);
+    //             //     // console.log('ppppppppppppppppppppp');
+    //             //     const result2 =  await DriverList.findByIdAndUpdate(ride.driverId, { assign: "0" }, { new: true });
+    //             //     io.emit('driverUpdated', result2);
+    //             //     const result = await CreateRide.findByIdAndUpdate(ride._id ,{ $addToSet: { assigneddrivers: randomDriver._id }, driverId: randomDriver._id,created: Date.now()}, { new: true });
+    //             //     io.emit('driverrideupdated', result);
+                 
+    //             // }
+    //             // else{
+    //             //   // const updatedDriverId = {
+    //             //   //   driverId: null,
+    //             //   //   assigned: 2,
+    //             //   //   assigneddrivers: [],
+    //             //   //   nearest: false
+    //             //   //   // created:Date.now()
+    
+    //             //   // };
+    //             //   // const query = { assign: { $in: ride.assigneddrivers } };
+    //             //   // const result1 = await DriverList.find(query, { assign: '0' }, { new: true });
+    //             //   const result2 =  await DriverList.findByIdAndUpdate(ride.driverId, { assign: "0" }, { new: true });
+    //             //   io.emit('driverUpdated', result2);
+    //             //   // const result1 = await DriverList.updateMany({ _id: { $in: ride.assigneddrivers } },{ assign: "0" }, { new: true });
+    //             //   // io.emit('driverUpdated', result1);
+    //             //   const result = await CreateRide.findByIdAndUpdate( ride._id ,{created:Date.now(),assigneddrivers:[],nearest: false , assigned: 2 ,driverId: null,}, { new: true });
+    //             //   io.emit('driverrideupdated', result);
+    //             // } 
+    //       }
+
     //     }
-    //   };
+
+        
+    //   }
 
     // });
     // job.start()
 
-    // const job = cron.schedule('     ', async () => {
 
-
-    //   const ride = await createrideModel.find({ assigned: "assigning", nearest: false });
-    //   const ridenearestdata = await createrideModel.find({ assigned: "assigning", nearest: true });
-    //   if (ride.length > 0) {
-    //     console.log("hellodfvgbhnjmkmn");
-    //     for (const data of ride) {
-    //       if (data.created) {
-    //         job.start();
-    //         console.log('Cron job started.');
-    //         const currentTime = new Date();
-    //         // console.log(currentTime.getTime());
-    //         const elapsedTimeInSeconds = Math.floor((currentTime.getTime() - data.created) / 1000);
-    //         console.log(elapsedTimeInSeconds);
-    //         if (elapsedTimeInSeconds >= 10) {
-    //           const result1 = await driverModel.findByIdAndUpdate(data.driver_id, { assign: "0" }, { new: true });
-    //           io.emit('riderejected', result1);
-
-
-    //           const result = await createrideModel.findByIdAndUpdate(data._id, { driver_id: null, assigned: "pending" }, { new: true });
-    //           io.emit('riderejected', result);
-    //           console.log('Cron job ended.');
-
-    //         } else {
-    //           console.log("hello");
-    //         }
-    //       }
-    //     }
-    //   }
-    //   if (ridenearestdata.length > 0) {
-    //     console.log("nearestdata");
-    //     for (const data of ridenearestdata) {
-    //       const currentTime = new Date();
-    //       // console.log(data.created);
-    //       // console.log(currentTime.getTime());
-    //       const elapsedTimeInSeconds = Math.floor((currentTime.getTime() - data.created) / 1000);
-    //       console.log(elapsedTimeInSeconds);
-    //       if (elapsedTimeInSeconds >= 10) {
-    //         console.log("hello");
-    //         const city_id = new mongoose.Types.ObjectId(data.city_id);
-    //         const vehicle_id = new mongoose.Types.ObjectId(data.vehicle_id);
-    //         const assigneddrivers = [...new Set(data.assigndriverarray)];
-    //         let alldrivers = driverModel.aggregate([
-    //           {
-    //             $match: {
-    //               status: true,
-    //               city_id: city_id,
-    //               assignService: vehicle_id,
-    //               assign: "0",
-    //               _id: { $nin: assigneddrivers }
-    //             },
-    //           },
-    //         ]);
-
-    //         const pendingdriver = await alldrivers.exec();
-    //         // console.log(pendingdriver.length);
-    //         // const array = pendingdriver
-
-    //         if (pendingdriver.length > 0) {
-    //           const randomIndex = Math.floor(Math.random() * pendingdriver.length);
-    //           const randomObject = pendingdriver[randomIndex];
-
-    //           console.log(randomObject._id);
-    //           const driver = await driverModel.findByIdAndUpdate(randomObject._id, { assign: "1" }, { new: true });
-
-    //           const ride = await createrideModel.findByIdAndUpdate(data._id, { $addToSet: { assigndriverarray: randomObject._id }, created: Date.now() }, { new: true });
-    //           // console.log(ride);
-    //           io.emit('afterselectdriver' ,driver ,ride  )
-    //         }
-    //         else {
-    //           console.log("pendingdrivers updatesssssssssssssssssssssssssssssssss ");
-    //           const city_id = new mongoose.Types.ObjectId(data.city_id);
-    //           const vehicle_id = new mongoose.Types.ObjectId(data.vehicle_id);
-    //           const assigneddrivers = [...new Set(data.assigndriverarray)];
-    //           let alldriversdatasdfghjkmnjhg = driverModel.aggregate([
-    //             {
-    //               $match: {
-    //                 status: true,
-    //                 city_id: city_id,
-    //                 assignService: vehicle_id,
-    //                 assign: "1",
-    //               },
-    //             },
-    //           ]);
-
-    //           const pendingdriverdfghjksdfghj = await alldriversdatasdfghjkmnjhg.exec();
-    //           // console.log(pendingdriverdfghjksdfghj);
-    //           for (const data of pendingdriverdfghjksdfghj) 
-    //           { 
-    //             const afterarraynulldriver = await driverModel.findByIdAndUpdate(data._id, { assign: "0" }, { new: true });
-    //            }
-
-
-    //           const afterarraynullride = await createrideModel.findByIdAndUpdate(data._id, { created: Date.now(), assigndriverarray: [], nearest: false, assigned: "pending", driver_id: null }, { new: true });
-
-    //           io.emit('afternulldriverdata',  afterarraynulldriver ,  afterarraynullride )
-    //         }
-    //       }
-
-
-    //     }
-    //   }
-    // })
-
-    const job = new cron.CronJob('* * * * * *', async () => {
-      // console.log('Cron job start');
-      const pendingRides = await CreateRide.find({ assigned: 1 });
-      //  console.log(pendingRides,"pendingggggggggggggggg");
-      let currentTime;
-      const timeoutDuration = 7000; // 20 seconds
-
-        for (const ride of pendingRides) {
-
-          if(ride.nearest == false){
-            currentTime = Date.now();
-            const rideTime = ride.created;
-            const elapsedTime = currentTime - rideTime;
+    // socket.on('updatenearestdriverride', async (data) => {
+    //   try {
+    //     const driverrideId = data.driverrideId;
+    //     const driverdata = data.driverdata;
+    //     const driverId = new mongoose.Types.ObjectId(driverdata[0]._id);
+    //     // const updatedDriverId = {
+    //     //     driverId: driverId,
+    //     //     assigned: 1,
+    //     //     nearest:true,
+    //     //     created: Date.now(),
+    //     //     // $push: { assigneddrivers: driverId}
+    //     //   };
     
-            if (elapsedTime >= timeoutDuration) {
-              const updatedDriverId = {
-                driverId: null,
-                assigned: 2
-              };
-              const result1 = await DriverList.findOneAndUpdate({ assign: '1' }, { assign: '0' }, { new: true });
-              io.emit('driverUpdated', result1);
-              const result = await CreateRide.findOneAndUpdate({ _id: ride._id }, updatedDriverId, { new: true });
-              io.emit('driverrideupdated', result);
-            
-            }
-          }
-          else{
-            currentTime = Date.now();
-            const rideTime = ride.created;
-            const elapsedTime = currentTime - rideTime;
-            if (elapsedTime >= timeoutDuration) {
-                  const city_id = new mongoose.Types.ObjectId(ride.cityId);
-                  const assignService = new mongoose.Types.ObjectId(ride.vehicleTypeId);
-                  // const assigneddrivers = ride.assigneddrivers
-                  const assigneddrivers = [...new Set(ride.assigneddrivers)];
-                  let matchDrivers = await DriverList.aggregate([
-                    {
-                      $match: {
-                        status: "Approved",
-                        city_id: city_id,
-                        vehicletype_id: assignService,
-                        assign: "0",
-                        _id: {$nin: assigneddrivers}
-                      },
-                    }
-                  ]).exec();
-                 
-                  if (matchDrivers.length === 0){
-                    console.log("true==============");
-                    const updatedDriverId = {
-                      driverId: null,
-                      assigned: 2,
-                      assigneddrivers: [],
-                      nearest: false
-                      // created:Date.now()
-      
-                    };
-                    // const query = { assign: { $in: ride.assigneddrivers } };
-                    // const result1 = await DriverList.find(query, { assign: '0' }, { new: true });
-                    const result2 =  await DriverList.findByIdAndUpdate(ride.driverId, { assign: "0" }, { new: true });
-                    io.emit('driverUpdated', result2);
-                    // const result1 = await DriverList.updateMany({ _id: { $in: ride.assigneddrivers } },{ assign: "0" }, { new: true });
-                    // io.emit('driverUpdated', result1);
-                    
-                    const result = await CreateRide.findOneAndUpdate({ _id: ride._id },updatedDriverId, { new: true });
-                    io.emit('driverrideupdated', result);
-                  }
-                  else{
-                    // console.log("false==============");
-                    const randomIndex = Math.floor(Math.random() * matchDrivers.length);
-                    // console.log(randomIndex);
-                    const randomDriver = matchDrivers[randomIndex];
-                    // console.log(randomDriver,"randomDriverrrrrrrrrr");
-                    const updatedDriverId = {
-                      driverId: randomDriver._id,
-                      assigned: 1,
-                      // nearest:true,
-                      created: Date.now(),
-                      // $push: { assigneddrivers: randomDriver._id }
-                    };
-                    const result1 = await DriverList.findByIdAndUpdate(randomDriver._id, { assign: "1" }, { new: true });
-                    io.emit('driverUpdated', result1);
-                    // console.log('ppppppppppppppppppppp');
-                    const result2 =  await DriverList.findByIdAndUpdate(ride.driverId, { assign: "0" }, { new: true });
-                    io.emit('driverUpdated', result2);
-                    const result = await CreateRide.findByIdAndUpdate(ride._id ,{ $addToSet: { assigneddrivers: randomDriver._id }, $set: updatedDriverId }, { new: true });
-                    io.emit('driverrideupdated', result);
-                  } 
-                }  
-          }
-        
-      };
-
-    });
-    job.start()
-
-
-    socket.on('updatenearestdriverride', async (data) => {
-      try {
-        const driverrideId = data.driverrideId;
-        const driverdata = data.driverdata;
-        const driverId = new mongoose.Types.ObjectId(driverdata[0]._id);
-        // console.log(driverdata,"driverdataaaaaaaaa");
-        // let currentDriverIndex = 0;
-        // const assignDriverWithDelay = async (driver) => {
-        // const driverId = driver._id;
-        const updatedDriverId = {
-            driverId: driverId,
-            assigned: 1,
-            nearest:true,
-            created: Date.now(),
-            // $push: { assigneddrivers: driverId}
-          };
+    //       const result1 = await DriverList.findByIdAndUpdate(driverId, { assign: "1" }, { new: true });
+    //       io.emit('driverUpdated', result1);
+    //       // const result2 =  await DriverList.findByIdAndUpdate(ride.driverId, { assign: "0" }, { new: true });
+    //       // io.emit('driverUpdated', result2);
     
-          const result1 = await DriverList.findByIdAndUpdate(driverId, { assign: "1" }, { new: true });
-          io.emit('driverUpdated', result1);
-          // const result2 =  await DriverList.findByIdAndUpdate(ride.driverId, { assign: "0" }, { new: true });
-          // io.emit('driverUpdated', result2);
-    
-          const result = await CreateRide.findByIdAndUpdate(driverrideId, { $addToSet: { assigneddrivers: driverId }, $set: updatedDriverId }, { new: true });
-         console.log(driverId,"iddddddddddddddd");
-          io.emit('driverrideupdated', result);
+    //       const result = await CreateRide.findByIdAndUpdate(driverrideId, { assigneddrivers: driverId , driverId: driverId,assigned: 1,nearest:true,created: Date.now() }, { new: true });
+    //     //  console.log(driverId,"iddddddddddddddd");
+    //       io.emit('driverrideupdated', result);
           
 
-      } catch (err) {
-        console.log(err);
-        io.emit('updatenearestdriverrideError', { error: err });
-      }
-    });
-
-    // socket.on("assignnearestdriverdata", async (data) => {
-    //   console.log(data);
-    //   try {
-    //     const city_id = new mongoose.Types.ObjectId(data.cityId);
-    //     const assignService = new mongoose.Types.ObjectId(data.assignService);
-
-    //     let assignnearestdriverdata = driverModel.aggregate([
-    //       {
-    //         $match: {
-    //           status: true,
-    //           city_id: city_id,
-    //           assignService: assignService,
-    //           assign: "0"
-
-    //         },
-    //       },
-    //     ]);
-
-    //     const driverdata = await assignnearestdriverdata.exec();
-
-    //     // console.log(driverdata);
-    //     const firstdriver = driverdata[0]
-    //     console.log(firstdriver._id);
-
-    //     const driver = await driverModel.findByIdAndUpdate(firstdriver._id, { assign: "1" }, { new: true });
-    //     await driver.save();
-    //     // // console.log(driver);
-    //     const ride = await createrideModel.findByIdAndUpdate(data._id, { driver_id: firstdriver._id, assigned: "assigning", nearest: true, assigndriverarray: firstdriver._id, created: Date.now() }, { new: true })
-    //     await ride.save()
-
-
-    //     // Emit the 'assigndriverdatadata' event with the driver data to the client
-    //     io.emit("afterassignnearestdriverdata", { driverdata });
-    //   } catch (error) {
-    //     console.error(error);
+    //   } catch (err) {
+    //     console.log(err);
+    //     io.emit('updatenearestdriverrideError', { error: err });
     //   }
     // });
 
-    socket.on('updatedriverride', async (data) => {
-      try {
-        const driverrideId = data.driverrideId;
-        const driverId = data.driverId;
-        const updatedDriverId = {
-          driverId: data.driverId,
-          assigned: 1,
-          nearest:false,
-          // assigned: data.assignedvalue,
-          created: data.created,
-        }
-        const result1 = await DriverList.findByIdAndUpdate(driverId, {assign: "1"}, { new: true });
-        io.emit('driverUpdated', result1);
-        const result = await CreateRide.findByIdAndUpdate(driverrideId, updatedDriverId, { new: true });
-        io.emit('driverrideupdated', result);
+  
+    // socket.on('updatedriverride', async (data) => {
+    //   try {
+    //     const driverrideId = data.driverrideId;
+    //     const driverId = data.driverId;
+    //     const updatedDriverId = {
+    //       driverId: data.driverId,
+    //       assigned: 1,
+    //       nearest:false,
+    //       // assigned: data.assignedvalue,
+    //       created: data.created,
+    //     }
+    //     const result1 = await DriverList.findByIdAndUpdate(driverId, {assign: "1"}, { new: true });
+    //     io.emit('driverUpdated', result1);
+    //     const result = await CreateRide.findByIdAndUpdate(driverrideId, updatedDriverId, { new: true });
+    //     io.emit('driverrideupdated', result);
 
-      } catch (err) {
-        console.log(err);
-        io.emit('updatedriverrideError', { error: err });
-      }
-    });
+    //   } catch (err) {
+    //     console.log(err);
+    //     io.emit('updatedriverrideError', { error: err });
+    //   }
+    // });
 
     socket.on('acceptDriverRide', async (data) => {
       try {
@@ -960,6 +1030,138 @@ const configureSocket = (io) => {
 };
 module.exports = configureSocket;
 
+
+    // const job = new cron.CronJob('* * * * * *', async () => {
+    //   // console.log('Cron job start');
+    //   const pendingRides = await CreateRide.find({ assigned: 1 }).exec();
+    //   // console.log(pendingRides,"pendingggggggggggggggg");
+    //   const currentTime = Date.now();
+    //   const timeoutDuration = 20000; // 20 seconds
+
+    //     for (const ride of pendingRides) {
+    //     const rideTime = ride.created;
+    //     const elapsedTime = currentTime - rideTime;
+
+    //     if (elapsedTime >= timeoutDuration) {
+    //       const updatedDriverId = {
+    //         driverId: null,
+    //         assigned: 2
+    //       };
+    //       const result1 = await DriverList.findOneAndUpdate({ assign: '1' }, { assign: '0' }, { new: true });
+    //       io.emit('driverUpdated', result1);
+          
+    //       const result = await CreateRide.findOneAndUpdate({ _id: ride._id }, updatedDriverId, { new: true });
+    //       io.emit('driverrideupdated', result);
+    //     }
+    //   };
+
+    // });
+    // job.start()
+
+    // const job = cron.schedule('     ', async () => {
+
+
+    //   const ride = await createrideModel.find({ assigned: "assigning", nearest: false });
+    //   const ridenearestdata = await createrideModel.find({ assigned: "assigning", nearest: true });
+    //   if (ride.length > 0) {
+    //     console.log("hellodfvgbhnjmkmn");
+    //     for (const data of ride) {
+    //       if (data.created) {
+    //         job.start();
+    //         console.log('Cron job started.');
+    //         const currentTime = new Date();
+    //         // console.log(currentTime.getTime());
+    //         const elapsedTimeInSeconds = Math.floor((currentTime.getTime() - data.created) / 1000);
+    //         console.log(elapsedTimeInSeconds);
+    //         if (elapsedTimeInSeconds >= 10) {
+    //           const result1 = await driverModel.findByIdAndUpdate(data.driver_id, { assign: "0" }, { new: true });
+    //           io.emit('riderejected', result1);
+
+
+    //           const result = await createrideModel.findByIdAndUpdate(data._id, { driver_id: null, assigned: "pending" }, { new: true });
+    //           io.emit('riderejected', result);
+    //           console.log('Cron job ended.');
+
+    //         } else {
+    //           console.log("hello");
+    //         }
+    //       }
+    //     }
+    //   }
+    //   if (ridenearestdata.length > 0) {
+    //     console.log("nearestdata");
+    //     for (const data of ridenearestdata) {
+    //       const currentTime = new Date();
+    //       // console.log(data.created);
+    //       // console.log(currentTime.getTime());
+    //       const elapsedTimeInSeconds = Math.floor((currentTime.getTime() - data.created) / 1000);
+    //       console.log(elapsedTimeInSeconds);
+    //       if (elapsedTimeInSeconds >= 10) {
+    //         console.log("hello");
+    //         const city_id = new mongoose.Types.ObjectId(data.city_id);
+    //         const vehicle_id = new mongoose.Types.ObjectId(data.vehicle_id);
+    //         const assigneddrivers = [...new Set(data.assigndriverarray)];
+    //         let alldrivers = driverModel.aggregate([
+    //           {
+    //             $match: {
+    //               status: true,
+    //               city_id: city_id,
+    //               assignService: vehicle_id,
+    //               assign: "0",
+    //               _id: { $nin: assigneddrivers }
+    //             },
+    //           },
+    //         ]);
+
+    //         const pendingdriver = await alldrivers.exec();
+    //         // console.log(pendingdriver.length);
+    //         // const array = pendingdriver
+
+    //         if (pendingdriver.length > 0) {
+    //           const randomIndex = Math.floor(Math.random() * pendingdriver.length);
+    //           const randomObject = pendingdriver[randomIndex];
+
+    //           console.log(randomObject._id);
+    //           const driver = await driverModel.findByIdAndUpdate(randomObject._id, { assign: "1" }, { new: true });
+
+    //           const ride = await createrideModel.findByIdAndUpdate(data._id, { $addToSet: { assigndriverarray: randomObject._id }, created: Date.now() }, { new: true });
+    //           // console.log(ride);
+    //           io.emit('afterselectdriver' ,driver ,ride  )
+    //         }
+    //         else {
+    //           console.log("pendingdrivers updatesssssssssssssssssssssssssssssssss ");
+    //           const city_id = new mongoose.Types.ObjectId(data.city_id);
+    //           const vehicle_id = new mongoose.Types.ObjectId(data.vehicle_id);
+    //           const assigneddrivers = [...new Set(data.assigndriverarray)];
+    //           let alldriversdatasdfghjkmnjhg = driverModel.aggregate([
+    //             {
+    //               $match: {
+    //                 status: true,
+    //                 city_id: city_id,
+    //                 assignService: vehicle_id,
+    //                 assign: "1",
+    //               },
+    //             },
+    //           ]);
+
+    //           const pendingdriverdfghjksdfghj = await alldriversdatasdfghjkmnjhg.exec();
+    //           // console.log(pendingdriverdfghjksdfghj);
+    //           for (const data of pendingdriverdfghjksdfghj) 
+    //           { 
+    //             const afterarraynulldriver = await driverModel.findByIdAndUpdate(data._id, { assign: "0" }, { new: true });
+    //            }
+
+
+    //           const afterarraynullride = await createrideModel.findByIdAndUpdate(data._id, { created: Date.now(), assigndriverarray: [], nearest: false, assigned: "pending", driver_id: null }, { new: true });
+
+    //           io.emit('afternulldriverdata',  afterarraynulldriver ,  afterarraynullride )
+    //         }
+    //       }
+
+
+    //     }
+    //   }
+    // })
 
           // const driverridedata = await CreateRide.aggregate([
           //   {

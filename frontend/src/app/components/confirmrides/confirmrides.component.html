@@ -193,7 +193,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
     <div class="modal-body">
-        <ng-container *ngIf="selectedcreateride">
+      <ng-container *ngIf="selectedcreateride">
           <p>Name: {{selectedcreateride.userdata.name}}</p>
           <p>Email: {{selectedcreateride.userdata.email}}</p>
           <p>Phone: {{ selectedcreateride.userdata.phone }}</p>
@@ -276,8 +276,8 @@
                     </div>
                 </div>
             </div>
-            <div class="d-flex justify-content-center">
-              <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" (click)="onAssignNearestDriver()">
+            <div class="d-flex justify-content-center" *ngIf ="selectedcreateride">
+              <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" (click)="onAssignNearestDriver(selectedcreateride)">
              Assign Nearest Driver
             </button>
           </div>
