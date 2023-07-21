@@ -2,25 +2,37 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer')
 const mongoose = require('mongoose');
-const stripe = require('stripe')('sk_test_51NObn2BQlJgbeIPVzCyHaca669BS3YrGmlGoSQNFIahLk6xyFc1pH5utU9GO9a78duDiyPxiCD95SneKT1Utj5oD006hxweLrL');
-const accountSid = 'ACb44d005c170946735f2e9a3280b96aab';
-const authToken = 'db965c28b6ab4012ad67085ed3571f03';
-const client = require('twilio')(accountSid, authToken);
+require('dotenv').config();
+// const stripe = require('stripe')('sk_test_51NObn2BQlJgbeIPVzCyHaca669BS3YrGmlGoSQNFIahLk6xyFc1pH5utU9GO9a78duDiyPxiCD95SneKT1Utj5oD006hxweLrL');
+// const accountSid = 'ACb44d005c170946735f2e9a3280b96aab';
+// const authToken = 'db965c28b6ab4012ad67085ed3571f03';
+const stripe = require('stripe')(process.env.STRIPESECRETEKEY);
+// const accountSid = process.env.TWILIOACCOUNTSID;
+// const authToken = process.env.TWILIOAUTHTOKEN;
+// const client = require('twilio')(accountSid, authToken);
+const nodemailer = require('nodemailer');
+const transporter = nodemailer.createTransport({
+  host: 'smtp.ethereal.email',
+  // service: 'Gmail', 
+  auth: {
+    user: process.env.NODEMAILEREMAIL,
+    pass: process.env.NODEMAILERPASSWORD,
+  },
+});
 
 
-
-async function sendmessage() {
-  try {
-    const message = await client.messages.create({
-      body: 'ride created',
-      from: '+18145262612',
-      to: '+918733930293'
-    });
-    console.log(message.sid, 'message');
-  } catch (error) {
-    console.log('Error sending message:', error);
-  }
-}
+// async function sendmessage() {
+//   try {
+//     const message = await client.messages.create({
+//       body: 'ride created',
+//       from: '+18145262612',
+//       to: '+918733930293'
+//     });
+//     console.log(message.sid, 'message');
+//   } catch (error) {
+//     console.log('Error sending message:', error);
+//   }
+// }
 
 const DIR = './public/'
 
@@ -63,14 +75,12 @@ router.post('/create-intent/:userId', async (req, res) => {
   try {
     let customer;
     const userId = req.params.userId;
-    // console.log(userId,"sdfjkljhgfdfsdfj");
     const user = await User.findById(userId);
     if (!user.stripeCustomerId) {
       customer = await stripe.customers.create({
         email: user.email,
         name: user.name,
       });
-      // Associate the Stripe customer ID with the user in your database
       user.stripeCustomerId = customer.id;
       await user.save();
       // return res.status(400).json({ error: 'User does not have a Stripe customer ID' });
@@ -93,16 +103,12 @@ router.post('/create-intent/:userId', async (req, res) => {
   router.get('/get-card/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
-    // console.log(userId,"useriddddddddddddddddddddd");
-
     const user = await User.findById(userId);
     if (!user.stripeCustomerId) {
       return res.status(400).json({ error: 'User does not have a Stripe customer ID' });
     }
 
     const customer = await stripe.customers.retrieve(user.stripeCustomerId);
-    // console.log(customer,"customersssssssss");
-
     const defaultCardId = customer.invoice_settings.default_payment_method;
     // if (!defaultCardId) {
     //       const firstCardId = customer.sources.data[0].id;
@@ -130,8 +136,6 @@ router.post('/create-intent/:userId', async (req, res) => {
 router.delete('/delete-card/:cardId', async (req, res) => {
   try {
     const cardId = req.params.cardId;
-
-    // Delete the card using the Stripe API
     const deletedCard = await stripe.paymentMethods.detach(cardId);
 
     res.status(200).json({ message: 'Card deleted successfully' });
@@ -146,11 +150,6 @@ router.patch('/default-card/:customerId', async (req, res) => {
     const cardId = req.body.cardId;
     const customerId = req.params.customerId;
     console.log(cardId,"cardidddddddddd");
-  
-     // Retrieve the customer from Stripe
-    //  const customer = await stripe.customers.retrieve(customerId);
-
-     // Set the default payment method for the customer
      await stripe.customers.update(customerId, {
        invoice_settings: {
          default_payment_method: cardId
@@ -167,29 +166,20 @@ router.patch('/default-card/:customerId', async (req, res) => {
 router.post('/cut-payment/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
-    const amount = req.body.amount; // Amount to charge in the smallest currency unit (e.g., cents for USD)
-
-    // Retrieve the user from the database
+    const amount = req.body.amount;
     const user = await User.findById(userId);
-
     if (!user.stripeCustomerId) {
       return res.status(400).json({ error: 'User does not have a Stripe customer ID' });
     }
-
-    // Retrieve the customer from Stripe
     const customer = await stripe.customers.retrieve(user.stripeCustomerId);
-
-    // Get the default payment method (card) ID from the customer's invoice settings
     const defaultCardId = customer.invoice_settings.default_payment_method;
 
     if (!defaultCardId) {
       return res.status(400).json({ error: 'User does not have a default payment method' });
     }
-
-     // Create a charge using the default payment method (default card)
      const charge = await stripe.charges.create({
       amount: amount,
-      currency: 'usd', // Change to your desired currency
+      currency: 'usd',
       customer: user.stripeCustomerId,
       payment_method: defaultCardId,
       off_session: true, // Set to true for off-session payments
@@ -215,7 +205,6 @@ router.post('/add-user', upload.single('profile'), async (req, res, next) => {
   try {
       const url = req.protocol + '://' + req.get('host');
       let profileUrl = req.file ? url + '/public/' + req.body.profile : url + '/public/' + 'profile1.png';
-      // console.log(req.body.code);
       const user = new User({
         // _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
@@ -225,22 +214,28 @@ router.post('/add-user', upload.single('profile'), async (req, res, next) => {
     });
     const userCreated = await user.save();
 
-    // Create a customer in Stripe
-    // const customer = await stripe.customers.create({
-    //   email: userCreated.email,
-    //   name: userCreated.name,
-    //   // Add any additional customer information here
-    // });
+    // Compose the email message
+    const mailOptions = {
+      from: 'ari.hartmann@ethereal.email',
+      to: userCreated.email,
+      subject: 'Welcome to the company',
+      text: 'Dear User, welcome to our company!',
+    };
+    // Send the email
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log('Error sending email:', error);
+      } else {
+        console.log('Email sent:', info.response);
+      }
+    });
 
-    // // Associate the Stripe customer ID with the user in your database
-    // userCreated.stripeCustomerId = customer.id;
-    // await userCreated.save();
+
     res.status(201).json({
       message: 'User registered successfully!',
       userCreated,
-
   });
-   
+  //  sendmessage();
   } catch (error) {
       console.log(error);
       if (error.keyPattern.email) {
@@ -256,9 +251,6 @@ router.post('/add-user', upload.single('profile'), async (req, res, next) => {
         })
       }
       res.status(400).send(error);
-      // res.status(500).json({
-      //     error: err,
-      // });
   }
 });
 
@@ -316,65 +308,6 @@ router.get('/get-users', async (req, res, next) => {
   }
 });
 
-// router.post('/cards', async (req, res) => {
-//   try {
-//     const { paymentMethod } = req.body;
-
-//     // Create a customer in Stripe
-//     const customer = await stripe.customers.create();
-
-//     // Attach the payment method to the customer
-//     await stripe.paymentMethods.attach(paymentMethod.id, { customer: customer.id });
-
-//     // Save the payment method details to your database
-//     const card = {
-//       cardName: paymentMethod.card.brand,
-//       cardLastFour: paymentMethod.card.last4,
-//       customerId: customer.id,
-//     };
-
-//     // Save the card details to your database
-//     const savedCard = await Card.create(card);
-
-//     // Return the saved card details
-//     res.status(201).json(savedCard);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Failed to save card' });
-//   }
-// });
-
-// router.get('/get-users', async (req, res, next) => {
-//   try {
-//     const page = parseInt(req.query.page) || 1;
-//     const limit = parseInt(req.query.limit) || 3;
-//     const searchQuery = req.query.searchQuery || '';
-//     const sortField = req.query.sortField || 'name'; // Default sort field is 'name'
-//     const sortOrder = req.query.sortOrder || 'asc'; 
-//     let sortOptions = {};
-//     sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
-
-//     const searchRegex = new RegExp(searchQuery, 'i');
-//     const count = await User.countDocuments({$or: [{ name: searchRegex },{ email: searchRegex },{ phone: searchRegex }]});
-//     const totalPages = Math.ceil(count / limit);
-//     const skip = (page - 1) * limit;
-
-//     const data = await User.find({ $or: [{ name: searchRegex },{ email: searchRegex },{ phone: searchRegex }] })
-//       // .sort({ name: 1 })
-//       .sort(sortOptions)
-//       .skip(skip)
-//       .limit(limit);
-
-//     res.status(200).json({
-//       message: 'Users retrieved successfully!',
-//       userdata: data,
-//       totalPages: totalPages,
-//       currentPage: page,
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// });
 
 
 router.delete('/delete-user/:id', async (req, res, next) => {
@@ -421,38 +354,61 @@ router.put('/update-user', upload.single('profile'), async (req, res, next) => {
       })
     }
     res.status(400).send(error);
-    // console.log(err);
-    // res.status(500).json({
-    //   error: err,
-    // });
-  }
-});
-
-
-
-// API endpoint to delete a card from a user's account
-router.delete('/cards/:userId/:cardId', async (req, res) => {
-  try {
-    const userId = req.params.userId;
-    const cardId = req.params.cardId;
-
-    // Retrieve the user from the database
-    const user = await User.findById(userId);
-
-    // Retrieve the Stripe customer ID associated with the user
-    const customerId = user.stripeCustomerId;
-
-    // Delete the card from the customer in Stripe
-    await stripe.customers.deleteSource(customerId, cardId);
-
-    res.status(200).json({ message: 'Card deleted successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(400).json({ error: 'Failed to delete card' });
   }
 });
 
 module.exports = router;
+
+// API endpoint to delete a card from a user's account
+// router.delete('/cards/:userId/:cardId', async (req, res) => {
+//   try {
+//     const userId = req.params.userId;
+//     const cardId = req.params.cardId;
+//     const user = await User.findById(userId);
+//     const customerId = user.stripeCustomerId;
+//     await stripe.customers.deleteSource(customerId, cardId);
+
+//     res.status(200).json({ message: 'Card deleted successfully' });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(400).json({ error: 'Failed to delete card' });
+//   }
+// });
+
+// router.get('/get-users', async (req, res, next) => {
+//   try {
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = parseInt(req.query.limit) || 3;
+//     const searchQuery = req.query.searchQuery || '';
+//     const sortField = req.query.sortField || 'name'; // Default sort field is 'name'
+//     const sortOrder = req.query.sortOrder || 'asc'; 
+//     let sortOptions = {};
+//     sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
+
+//     const searchRegex = new RegExp(searchQuery, 'i');
+//     const count = await User.countDocuments({$or: [{ name: searchRegex },{ email: searchRegex },{ phone: searchRegex }]});
+//     const totalPages = Math.ceil(count / limit);
+//     const skip = (page - 1) * limit;
+
+//     const data = await User.find({ $or: [{ name: searchRegex },{ email: searchRegex },{ phone: searchRegex }] })
+//       // .sort({ name: 1 })
+//       .sort(sortOptions)
+//       .skip(skip)
+//       .limit(limit);
+
+//     res.status(200).json({
+//       message: 'Users retrieved successfully!',
+//       userdata: data,
+//       totalPages: totalPages,
+//       currentPage: page,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// });
+
+
+
 
 
 // try {

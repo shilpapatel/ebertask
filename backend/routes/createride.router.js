@@ -22,6 +22,22 @@ async function sendmessage() {
     console.log('Error sending message:', error);
   }
 }
+
+router.put('/update-ridefeedback', async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const rideId = req.body.rideId;
+    const updatedRide = {
+      feedback: req.body.feedback,
+    };
+    const result = await CreateRide.findByIdAndUpdate(rideId, updatedRide, { new: true });
+    res.status(200).json({
+      message: 'Ride updated successfully!',
+    });
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
 // router.post('/add-ride', async (req, res, next) => {
 //   try {
 //     const rideData = req.body;

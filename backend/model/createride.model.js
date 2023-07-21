@@ -46,7 +46,8 @@ const createrideSchema = new mongoose.Schema({
     assigned: { type: Number, enum:[0,1,2,3,4,5,6,7,8]},
     created:{type:String,default:Date.now()},
     nearest:{type:Boolean},
-    assigneddrivers:{type:Array , unique : true }
+    assigneddrivers:{type:Array , unique : true },
+    feedback:{type:String}
 
 })
 

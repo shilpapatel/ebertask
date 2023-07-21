@@ -209,8 +209,8 @@ export class SocketService {
     this.socket.emit('startDriverRide', {driverrideId,driverId});
   }
   
-  completeDriverRide(driverrideId: string,driverId: string) :void{
-    this.socket.emit('completeDriverRide', {driverrideId,driverId});
+  completeDriverRide(driverrideData: any,) :void{
+    this.socket.emit('completeDriverRide', driverrideData);
   }
 
   deleteDriverRide(driverrideId: string): Observable<any> {

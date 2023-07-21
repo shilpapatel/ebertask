@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
 import { SocketService } from 'src/app/shared/socket.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CreaterideService } from 'src/app/shared/createride.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-runningrequest',
@@ -8,6 +11,8 @@ import { SocketService } from 'src/app/shared/socket.service';
 })
 export class RunningrequestComponent {
   createridedata: any[] = [];
+  feedbackForm: FormGroup;
+  selectedcreateride: any;
 
   currentPage: number = 1;
   totalPages: number = 0;
@@ -16,17 +21,25 @@ export class RunningrequestComponent {
   sortOrder: string = 'asc'; 
   sortField: string = 'assigned';
   
-  constructor(private socketService: SocketService) { }
+  constructor(private socketService: SocketService,private formBuilder: FormBuilder,private createrideService: CreaterideService,private toastr: ToastrService,) { 
+    this.feedbackForm = this.formBuilder.group({
+      name: [''],
+      email: [''],
+      feedback:['']
+    })
+
+  }
   ngOnInit(): void {
     this.getDriverRideData()
      this.subscribeToListenDriverRideUpdate()
   }
+
+ 
+
 getDriverRideData(): void {
     this.socketService.getDriverRideRunningData().subscribe(
       (driverridedata: any) => {
         this.createridedata = driverridedata;
-        // this.createridedata =driverridedata.filter(createride => createride.assigned === 'assigning');
-         console.log(this.createridedata,"driverridedata");  
       },
       (error: any) => {
         console.error(error);
@@ -47,25 +60,17 @@ getDriverRideData(): void {
 // }
   subscribeToListenDriverRideUpdate() {
     this.socketService.subscribeToListenDriverRideUpdate().subscribe(updatedDriverRide => {
-      console.log(updatedDriverRide);
-        const index = this.createridedata.findIndex(d => d._id === updatedDriverRide._id);
-        console.log(index);
-        
+        const index = this.createridedata.findIndex(d => d._id === updatedDriverRide._id);       
         if (index !== -1) {
-          // this.createridedata= updatedDriverRide
           this.createridedata[index].driverId = updatedDriverRide.driverId;
           this.createridedata[index].assigned = updatedDriverRide.assigned;
            console.log(this.createridedata);
-          //  this.getDriverRideData()
-          // this.onAssignBtnClick(this.selectedRide)
         }
         this.getDriverRideData()
-      // this.toastr.success('Driver Ride Updated');
     });
   }
 
   onAcceptRequest(driverrideId: string,driverId:string){
-    // console.log(driverrideId);
     this.socketService.acceptDriverRide(driverrideId,driverId); 
   }
 
@@ -77,8 +82,45 @@ getDriverRideData(): void {
     this.socketService.startDriverRide(driverrideId,driverId);
   }
   
-  onCompleteRequest(driverrideId: string,driverId:string) {
-    this.socketService.completeDriverRide(driverrideId,driverId);
+  onCompleteRequest(createride:any) {
+    this.selectedcreateride = createride
+    this.feedbackForm.patchValue({
+      name: this.selectedcreateride.userdata.name,
+      email: this.selectedcreateride.userdata.email,
+    });
+    this.socketService.completeDriverRide(this.selectedcreateride);
+  }
+
+  onSubmit(ride:any) {
+    const feedbackData = {
+      feedback:this.feedbackForm.value.feedback,
+      rideId:ride._id
+    }
+    console.log(feedbackData);
+    
+
+    this.createrideService.updateRideFeedbackData(feedbackData).subscribe(
+      (res) => {
+        console.log(res);
+        
+    });
+    const modalElement = document.getElementById('exampleModal');
+    if (modalElement) {
+      modalElement.classList.remove('show');
+      modalElement.style.display = 'none';
+      modalElement.setAttribute('aria-hidden', 'true');
+      modalElement.removeAttribute('aria-modal');
+      document.body.classList.remove('modal-open');
+      const modalBackdrop = document.getElementsByClassName('modal-backdrop')[0];
+      if (modalBackdrop) {
+        modalBackdrop.parentNode?.removeChild(modalBackdrop);
+      }
+    }
+    this.feedbackForm.reset();
+
+  }
+  onCancelBtn() {
+    this.feedbackForm.reset();
   }
 
    onDeleteDriver(driverrideId: string) {

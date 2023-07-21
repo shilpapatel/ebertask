@@ -6,8 +6,37 @@ let RunningRequest = require('./model/runningrequest.model')
 let CreateRide = require('./model/createride.model')
 const { mongoose } = require('mongoose')
 let User = require('./model/users.model')
-const stripe = require('stripe')('sk_test_51NObn2BQlJgbeIPVzCyHaca669BS3YrGmlGoSQNFIahLk6xyFc1pH5utU9GO9a78duDiyPxiCD95SneKT1Utj5oD006hxweLrL');
+require('dotenv').config();
+// const stripe = require('stripe')('sk_test_51NObn2BQlJgbeIPVzCyHaca669BS3YrGmlGoSQNFIahLk6xyFc1pH5utU9GO9a78duDiyPxiCD95SneKT1Utj5oD006hxweLrL');
+// const accountSid = 'ACb44d005c170946735f2e9a3280b96aab';
+// const authToken = 'db965c28b6ab4012ad67085ed3571f03';
+const stripe = require('stripe')(process.env.STRIPESECRETEKEY);
+const accountSid = process.env.TWILIOACCOUNTSID;
+const authToken = process.env.TWILIOAUTHTOKEN;
+const client = require('twilio')(accountSid, authToken);
 
+const nodemailer = require('nodemailer');
+const transporter = nodemailer.createTransport({
+  host: 'smtp.ethereal.email',
+  // service: 'Gmail', 
+  auth: {
+    user: process.env.NODEMAILEREMAIL,
+    pass: process.env.NODEMAILERPASSWORD,
+  },
+});
+
+// async function sendmessage() {
+//   try {
+//     const message = await client.messages.create({
+//       body: 'ride created',
+//       from: '+18145262612',
+//       to: '+918733930293'
+//     });
+//     console.log(message.sid, 'message');
+//   } catch (error) {
+//     console.log('Error sending message:', error);
+//   }
+// }
     // cron.schedule('*/20 * * * * *', () => {
     //   console.log("cron start");
     //   socket.setMaxListeners(100);
@@ -503,7 +532,7 @@ const configureSocket = (io) => {
             // console.log(currentTime.getTime());
             const elapsedTimeInSeconds = Math.floor((currentTime.getTime() - data.created) / 1000);
             // console.log(elapsedTimeInSeconds);
-            if (elapsedTimeInSeconds >= 20) {
+            if (elapsedTimeInSeconds >= 10) {
               const result1 = await DriverList.findByIdAndUpdate(data.driverId, { assign: "0" }, { new: true });
               io.emit('driverUpdated', result1);
 
@@ -524,7 +553,7 @@ const configureSocket = (io) => {
         for (const data of ridenearestdata) {
           const currentTime = new Date();
           const elapsedTimeInSeconds = Math.floor((currentTime.getTime() - data.created) / 1000);
-          if (elapsedTimeInSeconds >= 20) {
+          if (elapsedTimeInSeconds >= 10) {
             const city_id = new mongoose.Types.ObjectId(data.cityId);
             const vehicle_id = new mongoose.Types.ObjectId(data.vehicleTypeId);
             const assigneddrivers = [...new Set(data.assigneddrivers)];
@@ -589,31 +618,6 @@ const configureSocket = (io) => {
 
     })
 
- // socket.on("updatenearestdriverride", async (data) => {
-    //   console.log(data);
-    //   try {
-    //     const driverrideId = data.driverrideId;
-    //      const driverdata = data.driverdata;
-
-    //     // console.log(driverdata);
-    //     const firstdriver = new mongoose.Types.ObjectId(driverdata[0]._id);
-    //     // console.log(firstdriver._id);
-
-    //     const driver = await DriverList.findByIdAndUpdate(firstdriver._id, { assign: "1" }, { new: true });
-    //     await driver.save();
-    //     io.emit('driverUpdated', driver);
-    //     // console.log(driver);
-    //     const ride = await CreateRide.findByIdAndUpdate(driverrideId, { driverId: firstdriver._id, assigned: 1  ,  nearest: true, assigneddrivers: firstdriver._id, created: Date.now() }, { new: true })
-    //     await ride.save()
-    //     // Emit the 'assigndriverdatadata' event with the driver data to the client
-    //     io.emit('driverrideupdated', ride);
-    //   } catch (error) {
-    //     console.error(error);
-    //   }
-    // });
-
-    // assign nearest driver 
-
     socket.on("updatenearestdriverride", async (data) => {
  
       try {
@@ -653,9 +657,475 @@ const configureSocket = (io) => {
 
    
 
-        
+    socket.on('acceptDriverRide', async (data) => {
+      try {
+        // console.log(data,"daaaaaaaaaaaaaaaaaaaaaaa");
+        const driverrideId = data.driverrideId;
+        const driverId = data.driverId;
+        // const driverrideId = data;   
+        const result1 = await DriverList.findByIdAndUpdate(driverId, {assign: "1"}, { new: true });
+        io.emit('driverUpdated', result1);
 
-    // const job = new cron.CronJob('* * * * * *', async () => {
+        const result = await CreateRide.findByIdAndUpdate(driverrideId, {assigned:4,driverId: data.driverId}, { new: true });
+        io.emit('driverrideupdated', result);
+        async function sendmessage() {
+          try {
+            const message = await client.messages.create({
+              body: 'driver accepted request',
+              from: '+18145262612',
+              to: '+918733930293'
+            });
+            console.log(message.sid, 'message');
+          } catch (error) {
+            console.log('Error sending message:', error);
+          }
+        }
+        sendmessage()
+      } catch (err) {
+        console.log(err);
+        io.emit('acceptDriverRideError', { error: err });
+      }
+    });
+
+    socket.on('arriveDriverRide', async (data) => {
+      try {
+        const driverrideId = data.driverrideId;
+        const driverId = data.driverId;
+        // const driverrideId = data;   
+        const result1 = await DriverList.findByIdAndUpdate(driverId, {assign: "1"}, { new: true });
+        io.emit('driverUpdated', result1);
+        // const result1 = await DriverList.findOneAndUpdate({ assign: '1' }, { assign: '0' }, { new: true });
+        // io.emit('driverUpdated', result1);
+
+        const result = await CreateRide.findByIdAndUpdate(driverrideId, { assigned: 5,driverId: data.driverId}, { new: true });
+        io.emit('driverrideupdated', result);
+      } catch (err) {
+        console.log(err);
+        io.emit('arriveDriverRideError', { error: err });
+      }
+    });
+    
+    socket.on('startDriverRide', async (data) => {
+      try {
+        const driverrideId = data.driverrideId;
+        const driverId = data.driverId;
+        // const driverrideId = data;   
+        const result1 = await DriverList.findByIdAndUpdate(driverId, {assign: "1"}, { new: true });
+        io.emit('driverUpdated', result1);
+        // const result1 = await DriverList.findOneAndUpdate({ assign: '1' }, { assign: '0' }, { new: true });
+        // io.emit('driverUpdated', result1);
+
+        const result = await CreateRide.findByIdAndUpdate(driverrideId, { assigned: 6,driverId: data.driverId }, { new: true });
+        io.emit('driverrideupdated', result);
+        async function sendmessage() {
+          try {
+            const message = await client.messages.create({
+              body: 'driver started ride',
+              from: '+18145262612',
+              to: '+918733930293'
+            });
+            console.log(message.sid, 'message');
+          } catch (error) {
+            console.log('Error sending message:', error);
+          }
+        }
+        sendmessage()
+      } catch (err) {
+        console.log(err);
+        io.emit('startDriverRideError', { error: err });
+      }
+    });
+    
+    socket.on('completeDriverRide', async (data) => {
+      console.log(data);
+      try {
+        const driverrideId = data._id;
+        const driverId = data.driverId;  
+        const result1 = await DriverList.findByIdAndUpdate(driverId, {assign: "0"}, { new: true });
+        io.emit('driverUpdated', result1);
+        const result = await CreateRide.findByIdAndUpdate(driverrideId, { assigned: 7}, { new: true });
+        io.emit('driverrideupdated', result);
+
+        async function sendmessage() {
+          try {
+            const message = await client.messages.create({
+              body: 'driver completed ride',
+              from: '+18145262612',
+              to: '+918733930293'
+            });
+            console.log(message.sid, 'message');
+          } catch (error) {
+            console.log('Error sending message:', error);
+          }
+        }
+        sendmessage()
+
+        const exchangeRate = 75;
+        const user = await User.findById(result.userId);
+        if (!user.stripeCustomerId) {
+          return res.status(400).json({ error: 'User does not have a Stripe customer ID' });
+        }
+        const customer = await stripe.customers.retrieve(user.stripeCustomerId);
+        const defaultCardId = customer.invoice_settings.default_payment_method;
+        
+        const estimatePriceUSD = result.estimatePrice / exchangeRate;
+        const amountInCents = Math.round(estimatePriceUSD * 100);
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: amountInCents,
+          currency: 'usd', 
+          customer: user.stripeCustomerId,
+          payment_method: defaultCardId,
+          off_session: true,
+          confirm: true
+        });
+
+        //  const charge = await stripe.charges.create({
+        //   amount: estimatePriceUSD,
+        //   currency: 'usd', 
+        //   customer: user.stripeCustomerId,
+        //   payment_method: defaultCardId,
+        //   off_session: true, 
+        //   confirm: true, 
+        // });
+
+        const mailOptions = {
+          from: 'ari.hartmann@ethereal.email',
+          to: data.userdata.email,
+          subject: 'Welcome to the company',
+          text: 'Dear driver, welcome to our company!',
+          html:`
+          <html lang="en">
+           <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Document</title>
+            <style>
+              @import url(https://fonts.googleapis.com/css?family=Roboto:100,300,400,900,700,500,300,100);
+              * {margin: 0; box-sizing: border-box;}
+              body {background: #E0E0E0; font-family: 'Roboto', sans-serif; background-image: url(''); background-repeat: repeat-y; background-size: 100%;}
+              ::selection {background: #f31544; color: #FFF;}
+              ::moz-selection {background: #f31544; color: #FFF;}
+              h1 {font-size: 1.5em; color: #222;}
+              h2 {font-size: .9em}
+              h2 {font-size: 1.2em; font-weight: 300; line-height: 2em;}
+              p  {font-size: .7em; color: #666; line-height: 1.2em;}
+              #invoiceholder {width: 100%; hieght: 100%; padding-top: 50px;}
+              #headerimage {z-index: -1; position: relative; top: -50px; height: 350px;
+                -webkit-box-shadow: inset 0 2px 4px rgba(0, 0, 0, .15), inset 0 -2px 4px rgba(0, 0, 0, .15);
+                -moz-box-shadow: inset 0 2px 4px rgba(0, 0, 0, .15), inset 0 -2px 4px rgba(0, 0, 0, .15);
+                box-shadow: inset 0 2px 4px rgba(0, 0, 0, .15), inset 0 -2px 4px rgba(0, 0, 0, .15);
+                overflow: hidden; background-attachment: fixed; background-size: 1920px 80%; background-position: 50% -90%;}
+              #invoice {position: relative; top: -290px; margin: 0 auto; width: 700px; background: #FFF;}
+              [id*='invoice-'] {border-bottom: 1px solid #EEE; padding: 30px;}
+              #invoice-top {min-height: 120px;}
+              #invoice-mid {min-height: 120px;}
+              #invoice-bot {min-height: 250px;}
+              .logo {float: left; height: 60px; width: 60px; background: url(http://michaeltruong.ca/images/logo1.png) no-repeat; background-size: 60px 60px;}
+              .clientlogo {float: left; height: 60px; width: 60px; background: url(http://michaeltruong.ca/images/client.jpg) no-repeat; background-size: 60px 60px; border-radius: 50px;}
+              .info {display: block; float: left; margin-left: 20px;}
+              .title {float: right;}
+              .title p {text-align: right;}
+              #project {margin-left: 52%;}
+              table {width: 100%; border-collapse: collapse;}
+              td {padding: 5px 0 5px 15px; border: 1px solid #EEE}
+              .tabletitle {padding: 5px; background: #EEE;}
+    
+            .service {
+                border: 1px solid #EEE;
+            }
+    
+            .item {
+                width: 25%;
+            }
+            .Hours {
+                width: 20%;
+            }
+            .Rate {
+                width: 15%;
+            }
+            .subtotal{
+                width: 25%;
+            }
+            /* .item {
+                width: 50%;
+            } */
+            
+            
+    
+            .itemtext {
+                font-size: .9em;
+            }
+    
+            #legalcopy {
+                margin-top: 30px;
+            }
+    
+            form {
+                float: right;
+                margin-top: 30px;
+                text-align: right;
+            }
+    
+    
+            .effect2 {
+                position: relative;
+            }
+    
+            .effect2:before,
+            .effect2:after {
+                z-index: -1;
+                position: absolute;
+                content: "";
+                bottom: 15px;
+                left: 10px;
+                width: 50%;
+                top: 80%;
+                max-width: 300px;
+                background: #777;
+                -webkit-box-shadow: 0 15px 10px #777;
+                -moz-box-shadow: 0 15px 10px #777;
+                box-shadow: 0 15px 10px #777;
+                -webkit-transform: rotate(-3deg);
+                -moz-transform: rotate(-3deg);
+                -o-transform: rotate(-3deg);
+                -ms-transform: rotate(-3deg);
+                transform: rotate(-3deg);
+            }
+    
+            .effect2:after {
+                -webkit-transform: rotate(3deg);
+                -moz-transform: rotate(3deg);
+                -o-transform: rotate(3deg);
+                -ms-transform: rotate(3deg);
+                transform: rotate(3deg);
+                right: 10px;
+                left: auto;
+            }
+    
+    
+    
+            .legal {
+                width: 70%;
+            }
+        </style>
+    </head>
+    
+    <body>
+        <div id="invoiceholder">
+    
+            <div id="headerimage"></div>
+            <div id="invoice" class="effect2">
+    
+                <div id="invoice-top">
+                    <div class="logo"></div>
+                    <div class="info">
+                        <h2>Shilpa Patel</h2>
+                        <p> shilpa@gmail.com </br>
+                            9824457460
+                        </p>
+                    </div><!--End Info-->
+                    <div class="title">
+                        <h1>Invoice #1069</h1>
+                        <!-- <p>Issued: May 27, 2015</br>
+                            Payment Due: June 27, 2015
+                        </p> -->
+                    </div><!--End Title-->
+                </div><!--End InvoiceTop-->
+    
+                <div id="invoice-mid">
+    
+                    <div class="clientlogo"></div>
+                    <div class="info">
+                        <h2>${data.userdata.name}</h2>
+                        <p>${data.userdata.email}</br>
+                        ${data.userdata.phone}</br>
+                    </div>
+    
+                    <div id="project">
+                        <h2>Ride Description</h2>
+                        <p>This is the receipt for a payment of<span>$</span> ${estimatePriceUSD.toFixed(3)} you complete your ride.</p>
+                    </div>
+    
+                </div><!--End Invoice Mid-->
+    
+                <div id="invoice-bot">
+    
+                    <div id="table">
+                        <table>
+                            <tr class="tabletitle">
+                                <td class="item">
+                                    <h2>From Location</h2>
+                                </td>
+                                <td class="item">
+                                    <h2>To Location</h2>
+                                </td>
+                                <td class="Hours">
+                                    <h2>Time</h2>
+                                </td>
+                                <td class="Rate">
+                                    <h2>Distance</h2>
+                                </td>
+                                <td class="subtotal">
+                                    <h2>Amount</h2>
+                                </td>
+                            </tr>
+    
+                            <tr class="service">
+                                <td class="tableitem">
+                                    <p class="itemtext">${data.from}</p>
+                                </td>
+                                <td class="tableitem">
+                                    <p class="itemtext">${data.to}</p>
+                                </td>
+                                <td class="tableitem">
+                                    <p class="itemtext">${data.totalTime}</p>
+                                </td>
+                                <td class="tableitem">
+                                    <p class="itemtext">${data.totalDistance}</p>
+                                </td>
+                                <td class="tableitem">
+                                    <p class="itemtext"><span>$</span>${estimatePriceUSD.toFixed(3)}</p>
+                                </td>
+                            </tr>
+    
+                            <tr class="tabletitle">
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="Rate">
+                                    <h2>Total</h2>
+                                </td>
+                                <td class="payment">
+                                    <h2><span>$</span>${estimatePriceUSD.toFixed(3)}</h2>
+                                </td>
+                            </tr>
+    
+                        </table>
+                    </div><!--End Table-->
+    
+                    <!--  <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                        <input type="hidden" name="cmd" value="_s-xclick">
+                        <input type="hidden" name="hosted_button_id" value="QRZ7QTM9XRPJ6">
+                        <input type="image" src="http://michaeltruong.ca/images/paypal.png" border="0" name="submit"
+                            alt="PayPal - The safer, easier way to pay online!">
+                    </form>   -->
+    
+    
+                    <div id="legalcopy">
+                        <p class="legal"><strong>Thank you for your business!</strong>  Payment is expected within 31 days;
+                            please process this invoice within that time. There will be a 5% interest charge per month on
+                            late invoices.
+                        </p>
+                    </div>
+    
+                </div><!--End InvoiceBot-->
+            </div><!--End Invoice-->
+        </div><!-- End Invoice Holder-->
+    </body>
+    
+    </html>`
+    
+        
+        };
+    
+        // Send the email
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+                console.log('Error sending email:', error);
+          } else {
+                console.log('Email sent:', info.response);
+          }
+        });
+
+      } catch (err) {
+        console.log(err);
+        io.emit('completeDriverRideError', { error: err });
+      }
+    });
+
+    socket.on('deleteDriverRide', async (driverrideId) => {
+      try {
+        const ride = await CreateRide.findById(driverrideId)
+        driverId = ride.driverId
+
+        const result1 = await DriverList.findByIdAndUpdate(driverId, { assign: '0' }, { new: true });
+        await result1.save()
+        io.emit('driverUpdated', result1);
+
+        if(ride.nearest == false){
+        const result = await CreateRide.findByIdAndUpdate(ride._id, {
+          driverId: null,
+          assigned: 3,
+          assigneddrivers:[]
+        }, { new: true });
+        io.emit('driverrideupdated', result);
+        }
+        else{
+          let alldrivers = DriverList.aggregate([
+            {
+              $match: {
+                status: "Approved",
+                city_id: ride.cityId,
+                vehicletype_id: ride.vehicleTypeId,
+                assign: "0",
+                _id: { $nin: ride.assigneddrivers }
+              },
+            },
+          ]);
+
+          const pendingdriver = await alldrivers.exec();
+          if(pendingdriver.length >0){
+            const result = await CreateRide.findByIdAndUpdate(ride._id, { $addToSet: { assigneddrivers: pendingdriver[0]._id },driverId: pendingdriver[0]._id }, { new: true });
+            io.emit('driverrideupdated', result);
+          }else{
+            const result1 = await DriverList.findByIdAndUpdate(driverId, { assign: '0' }, { new: true });
+            io.emit('driverUpdated', result1);
+            const result = await CreateRide.findByIdAndUpdate(ride._id, {
+              driverId: null,
+              assigned: 3,
+              assigneddrivers:[]
+            }, { new: true });
+            io.emit('driverrideupdated', result);
+          }
+        }
+
+
+
+      } catch (err) {
+        console.log(err);
+        io.emit('deleteDriverRideError', { error: err });
+      }
+    });
+
+    socket.on('deleteConfirmRide', async (driverrideId) => {
+      try {
+
+        const result = await CreateRide.findByIdAndUpdate(driverrideId, { assigned: 8}, { new: true });
+        io.emit('driverrideupdated', result);
+
+      } catch (err) {
+        console.log(err);
+        io.emit('deleteConfirmRideError', { error: err });
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Client disconnected');
+    });
+  });
+
+};
+module.exports = configureSocket;
+
+
+
+
+
+
+
+
+
+ // const job = new cron.CronJob('* * * * * *', async () => {
     //   // console.log('Cron job start');
     //   const simplePendingRides = await CreateRide.find({ assigned: 1,nearest:false });
     //   const nearestPendingRides = await CreateRide.find({ assigned: 1,nearest:true });
@@ -877,159 +1347,6 @@ const configureSocket = (io) => {
     //     io.emit('updatedriverrideError', { error: err });
     //   }
     // });
-
-    socket.on('acceptDriverRide', async (data) => {
-      try {
-        // console.log(data,"daaaaaaaaaaaaaaaaaaaaaaa");
-        const driverrideId = data.driverrideId;
-        const driverId = data.driverId;
-        // const driverrideId = data;   
-        const result1 = await DriverList.findByIdAndUpdate(driverId, {assign: "1"}, { new: true });
-        io.emit('driverUpdated', result1);
-
-        const result = await CreateRide.findByIdAndUpdate(driverrideId, {assigned:4,driverId: data.driverId}, { new: true });
-        io.emit('driverrideupdated', result);
-      } catch (err) {
-        console.log(err);
-        io.emit('acceptDriverRideError', { error: err });
-      }
-    });
-
-    socket.on('arriveDriverRide', async (data) => {
-      try {
-        const driverrideId = data.driverrideId;
-        const driverId = data.driverId;
-        // const driverrideId = data;   
-        const result1 = await DriverList.findByIdAndUpdate(driverId, {assign: "1"}, { new: true });
-        io.emit('driverUpdated', result1);
-        // const result1 = await DriverList.findOneAndUpdate({ assign: '1' }, { assign: '0' }, { new: true });
-        // io.emit('driverUpdated', result1);
-
-        const result = await CreateRide.findByIdAndUpdate(driverrideId, { assigned: 5,driverId: data.driverId}, { new: true });
-        io.emit('driverrideupdated', result);
-      } catch (err) {
-        console.log(err);
-        io.emit('arriveDriverRideError', { error: err });
-      }
-    });
-    
-    socket.on('startDriverRide', async (data) => {
-      try {
-        const driverrideId = data.driverrideId;
-        const driverId = data.driverId;
-        // const driverrideId = data;   
-        const result1 = await DriverList.findByIdAndUpdate(driverId, {assign: "1"}, { new: true });
-        io.emit('driverUpdated', result1);
-        // const result1 = await DriverList.findOneAndUpdate({ assign: '1' }, { assign: '0' }, { new: true });
-        // io.emit('driverUpdated', result1);
-
-        const result = await CreateRide.findByIdAndUpdate(driverrideId, { assigned: 6,driverId: data.driverId }, { new: true });
-        io.emit('driverrideupdated', result);
-      } catch (err) {
-        console.log(err);
-        io.emit('startDriverRideError', { error: err });
-      }
-    });
-    
-    socket.on('completeDriverRide', async (data) => {
-      
-      try {
-        const driverrideId = data.driverrideId;
-        const driverId = data.driverId;
-        
-        // const driverrideId = data;   
-        const result1 = await DriverList.findByIdAndUpdate(driverId, {assign: "0"}, { new: true });
-        io.emit('driverUpdated', result1);
-        // const result1 = await DriverList.findOneAndUpdate({ assign: '0' }, { assign: '1' }, { new: true });
-        // io.emit('driverUpdated', result1);
-        const result = await CreateRide.findByIdAndUpdate(driverrideId, { assigned: 7,driverId: null }, { new: true });
-        io.emit('driverrideupdated', result);
-        // console.log(result,"rideresult");
-
-        const exchangeRate = 75;
-        const user = await User.findById(result.userId);
-        if (!user.stripeCustomerId) {
-          return res.status(400).json({ error: 'User does not have a Stripe customer ID' });
-        }
-        const customer = await stripe.customers.retrieve(user.stripeCustomerId);
-        const defaultCardId = customer.invoice_settings.default_payment_method;
-        
-        const estimatePriceUSD = result.estimatePrice / exchangeRate;
-        const amountInCents = Math.round(estimatePriceUSD * 100);
-        const paymentIntent = await stripe.paymentIntents.create({
-          amount: amountInCents,
-          currency: 'usd', 
-          customer: user.stripeCustomerId,
-          payment_method: defaultCardId,
-          off_session: true,
-          confirm: true
-        });
-
-        //  const charge = await stripe.charges.create({
-        //   amount: estimatePriceUSD,
-        //   currency: 'usd', 
-        //   customer: user.stripeCustomerId,
-        //   payment_method: defaultCardId,
-        //   off_session: true, 
-        //   confirm: true, 
-        // });
-
-      } catch (err) {
-        console.log(err);
-        io.emit('completeDriverRideError', { error: err });
-      }
-    });
-
-    socket.on('deleteDriverRide', async (driverrideId) => {
-      try {
-        const updatedDriverId = {
-          driverId: null,
-          assigned: 3
-        };
-        const result1 = await DriverList.findOneAndUpdate({ assign: '1' }, { assign: '0' }, { new: true });
-          io.emit('driverUpdated', result1);
-
-         const result = await CreateRide.findOneAndUpdate({ assigned: 1 }, updatedDriverId, { new: true });
-        io.emit('driverrideupdated', result);
-      } catch (err) {
-        console.log(err);
-        io.emit('deleteDriverRideError', { error: err });
-      }
-    });
-
-    socket.on('deleteConfirmRide', async (driverrideId) => {
-      try {
-        const updatedDriverId = {
-          // driverId: null,
-          assigned: 8
-        };
-    
-        // const result1 = await DriverList.findOneAndUpdate({ assign: '1' }, { assign: '0' }, { new: true });
-        //   io.emit('driverUpdated', result1);
-          // console.log(result1);
-          const result = await CreateRide.findByIdAndUpdate(driverrideId, updatedDriverId, { new: true });
-        //  const result = await CreateRide.findOneAndUpdate({ assigned: 'assigning' }, updatedDriverId, { new: true });
-        io.emit('driverrideupdated', result);
-        // if (!result) {
-        //   io.emit('deleteDriverRideError', { message: 'Driver not found' });
-        // } else {
-        //   io.emit('driverRideDeleted', { message: 'Driver ride updated successfully' });
-      // }
-      
-      } catch (err) {
-        console.log(err);
-        io.emit('deleteConfirmRideError', { error: err });
-      }
-    });
-
-    socket.on('disconnect', () => {
-      console.log('Client disconnected');
-    });
-  });
-
-};
-module.exports = configureSocket;
-
 
     // const job = new cron.CronJob('* * * * * *', async () => {
     //   // console.log('Cron job start');

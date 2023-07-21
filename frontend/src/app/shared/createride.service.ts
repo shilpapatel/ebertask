@@ -20,4 +20,7 @@ export class CreaterideService {
   addRide(rideData:any) {
     return this.http.post(`${this.baseURL}/add-ride`, rideData);
   }
+  updateRideFeedbackData(feedbackData:any){
+    return this.http.put(`${this.baseURL}/update-ridefeedback`, feedbackData);
+  }
 }

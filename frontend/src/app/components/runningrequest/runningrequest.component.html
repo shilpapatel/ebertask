@@ -10,7 +10,7 @@
                             <th>Driver Name</th>
                             <th>From</th>
                             <th>To</th>
-                             <!-- <th>Stops</th> -->
+                            <!-- <th>Stops</th> -->
                             <th>VehicleType</th>
                             <th>TotalDistance</th>
                             <th>TotalTime</th>
@@ -35,19 +35,29 @@
                             <td>
                                 <ng-container *ngIf="confirmride.assigned === 1">Assigning</ng-container>
                                 <ng-container *ngIf="confirmride.assigned === 4">Accepted</ng-container>
-                              <ng-container *ngIf="confirmride.assigned === 5">Arrived</ng-container>
-                              <ng-container *ngIf="confirmride.assigned === 6">Started</ng-container>
+                                <ng-container *ngIf="confirmride.assigned === 5">Arrived</ng-container>
+                                <ng-container *ngIf="confirmride.assigned === 6">Started</ng-container>
                             </td>
                             <!-- <td>
                                 <button type="button" class="btn btn-secondary btn-sm" (click)="onAcceptRequest(confirmride._id)">Accept Request</button>
                             </td> -->
                             <td>
-                                <button type="button" class="btn btn-secondary btn-sm m-1" (click)="onAcceptRequest(confirmride._id,confirmride.driverId)" *ngIf="confirmride.assigned === 1">Accept</button>
-                                <button type="button" class="btn btn-secondary btn-sm m-1" (click)="onArriveRequest(confirmride._id,confirmride.driverId)" *ngIf="confirmride.assigned === 4">Arrive</button>
-                                <button type="button" class="btn btn-secondary btn-sm m-1" (click)="onStartRequest(confirmride._id,confirmride.driverId)" *ngIf="confirmride.assigned === 5">Start</button>
-                                <button type="button" class="btn btn-secondary btn-sm m-1" (click)="onCompleteRequest(confirmride._id,confirmride.driverId)" *ngIf="confirmride.assigned === 6">Complete</button>
+                                <button type="button" class="btn btn-secondary btn-sm m-1"
+                                    (click)="onAcceptRequest(confirmride._id,confirmride.driverId)"
+                                    *ngIf="confirmride.assigned === 1">Accept</button>
+                                <button type="button" class="btn btn-secondary btn-sm m-1"
+                                    (click)="onArriveRequest(confirmride._id,confirmride.driverId)"
+                                    *ngIf="confirmride.assigned === 4">Arrive</button>
+                                <button type="button" class="btn btn-secondary btn-sm m-1"
+                                    (click)="onStartRequest(confirmride._id,confirmride.driverId)"
+                                    *ngIf="confirmride.assigned === 5">Start</button>
+                                <button type="button" class="btn btn-secondary btn-sm m-1" data-bs-toggle="modal"
+                                    data-bs-target="#exampleModal"
+                                    (click)="onCompleteRequest(confirmride)"
+                                    *ngIf="confirmride.assigned === 6">Complete</button>
                                 <!-- <button type="button" class="btn btn-secondary btn-sm m-1" (click)="onAcceptRequest(confirmride._id)">Accept</button> -->
-                                <button type="button" class="btn btn-secondary btn-sm m-1" (click)="onDeleteDriver(confirmride._id)">Reject</button>
+                                <button type="button" class="btn btn-secondary btn-sm m-1"
+                                    (click)="onDeleteDriver(confirmride._id)">Reject</button>
                             </td>
                         </tr>
                     </tbody>
@@ -56,17 +66,50 @@
                 <div *ngIf="createridedata.length === 0" class="text-center">
                     <p class="text-muted">No Running rides are available.</p>
                 </div>
+            </div>
         </div>
-
-        <!-- <div class="pagination">
-                <button class="btn btn-secondary" [disabled]="currentPage === 1" (click)="prevPage()">Previous</button>
-                <ng-container *ngFor="let page of generatePageArray()">
-                    <button class="btn btn-secondary" [class.active]="page === currentPage" (click)="goToPage(page)">{{
-                        page }}</button>
-                </ng-container>
-                <button class="btn btn-secondary" [disabled]="currentPage === totalPages"
-                    (click)="nextPage()">Next</button>
-            </div> -->
     </div>
 </div>
+
+
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="exampleModalLabel">Feedback Form</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" *ngIf="selectedcreateride">
+                <form [formGroup]="feedbackForm" (ngSubmit)="onSubmit(selectedcreateride)" novalidate>
+                    <div class="form-group row m-2">
+                      <label for="name" class="col-sm-2 col-form-label">Name</label>
+                      <div class="col-sm-10">
+                        <input type="Text" class="form-control" id="name" name="name" formControlName="name">
+                      </div>
+                    </div>
+                    <div class="form-group row m-3">
+                      <label for="email" class="col-sm-2 col-form-label">Email</label>
+                      <div class="col-sm-10">
+                        <input type="email" class="form-control" id="email" name="email" formControlName="email">
+                      </div>
+                    </div>
+                    <div class="form-group row m-3">
+                      <label for="feedback" class="col-sm-2 col-form-label">Feedback</label>
+                      <div class="col-sm-10">
+                        <textarea class="form-control" id="feedback" rows="5" name="feedback" placeholder="Write Message"
+                        formControlName="feedback"></textarea>
+                      </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-center">
+                      <button class="btn btn-secondary m-2" >Submit</button>
+                    </div>
+                  </form>
+            </div>
+            <div class="modal-footer d-flex justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="onCancelBtn()">Cancel</button>
+            </div>
+        </div>
+    </div>
 </div>
