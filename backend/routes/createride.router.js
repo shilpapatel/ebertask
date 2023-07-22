@@ -9,6 +9,7 @@ const client = require('twilio')(accountSid, authToken);
 
 const DIR = './public/'
 let CreateRide = require('../model/createride.model')
+let User = require('../model/users.model')
 
 async function sendmessage() {
   try {
@@ -38,6 +39,27 @@ router.put('/update-ridefeedback', async (req, res, next) => {
     res.status(400).send(error);
   }
 });
+
+router.get('/get-userdetails', async (req, res, next) => {
+  try {
+console.log(req.query);
+const phone = req.query.phone
+const user = await User.findOne({ phone: phone });
+if (!user) {
+  return res.status(404).json({
+    message: 'User not found!',
+  });
+}
+    res.status(200).json({
+      // message: 'Users retrieved successfully!',
+      userdetails: user,
+    });
+    //  console.log(user);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // router.post('/add-ride', async (req, res, next) => {
 //   try {
 //     const rideData = req.body;

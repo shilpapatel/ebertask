@@ -222,7 +222,7 @@
                             <div class="form-group">
                                 <label for="datetimepicker" class="col-form-label ml-5">Date and Time</label>
                                 <input type="datetime-local" class="form-control" formControlName="datetime"
-                                    id="datetimepicker" [min]="currentDateTime">
+                                    id="datetimepicker" [min]="currentDateTime" >
                                 <div
                                     *ngIf="bookrideForm.get('datetime').invalid && bookrideForm.get('datetime').touched">
                                     <small class="text-danger">Please select a Date and Time.</small>

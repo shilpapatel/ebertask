@@ -58,6 +58,7 @@ export class CreaterideComponent {
   totalDistanceInKm: any;
   totalTimeInHr: any;
   totalTimeInMin: any;
+  remainTimeInMin:any;
   vehicleTypesService: any[] = [];
   showEstimatedPrices: boolean = false;
   estimatePrice:any;
@@ -68,6 +69,9 @@ export class CreaterideComponent {
   matchedVehicles:any
   vehicles: any[] = [];
   createridedata: any[] = [];
+  isWithinPolygon = false;
+  fromInput:any;
+  toInput:any;
   
   // selectedCity:any;
   // selectedVehicle:any;
@@ -133,20 +137,20 @@ export class CreaterideComponent {
     this.initMap();
     this.getCity();
     this.getVehiclePricing();
-    this.getCreateRide()
+    // this.getCreateRide()
 
     // this.getSetting();
   }
   ngAfterViewInit() {
     // this.initAutocomplete();
   }
-  getCreateRide() {
-    this.createrideService.getCreateRide().subscribe((res) => {
-      this.createridedata = res['createridedata'];
-      console.log(this.createridedata);
+  // getCreateRide() {
+  //   this.createrideService.getCreateRide().subscribe((res) => {
+  //     this.createridedata = res['createridedata'];
+  //     console.log(this.createridedata);
       
-    });
-  }
+  //   });
+  // }
   getVehicleType() {
     this.vehicletypeService.getVehicleType().subscribe((res) => {
       this.vehicles = res['vehicletype'];
@@ -182,23 +186,35 @@ export class CreaterideComponent {
       });
   }
 
-  getUserDetails(phone: string) {
-    return this.userdatas.find((user) => user.phone === phone);
-  }
+  // getUserDetails(phone: string) {
+  //   return this.userdatas.find((user) => user.phone === phone);
+  // }
 
   onGetUserDetails() {
     const phone = this.userphoneForm.value.code + this.userphoneForm.value.phone;
-    this.userDetails = this.getUserDetails(phone);
-    // const userId = this.userDetails._id
-    //  console.log(userId);
-    if (this.userDetails) {
-      this.isShow =  true;
-      this.isbuttonshow = false;
-        // this.isShowDirectionBtn =  true;
-      this.usersForm.patchValue(this.userDetails);
-    } else {
-      this.toastr.error('No user found', 'Error');
-    }
+    // this.userDetails = this.getUserDetails(phone);
+
+    this.createrideService.getUserDetails(phone).subscribe(
+      (res) => {
+        this.userDetails = res['userdetails']
+        console.log(this.userDetails);
+         },
+         (error) =>{
+          this.toastr.error(error.error.message);
+         });
+
+setTimeout(() => {
+  if (this.userDetails) {
+    this.isShow =  true;
+    this.isbuttonshow = false;
+      // this.isShowDirectionBtn =  true;
+    this.usersForm.patchValue(this.userDetails);
+  }
+}, 200);
+   
+    //  else {
+    //   this.toastr.error('No user found', 'Error');
+    // }
     // if (this.isShow) {
     //   this.isShow = this.isShow;
     // }
@@ -247,12 +263,7 @@ export class CreaterideComponent {
 
   onAddStop() {
     if (this.stops.length < +this.settingsdata[0].maxstops) {
-      // console.log(+this.settingsdata[0].maxstops);
-
-      // this.stops.push(this.stops.length);
       this.stops.push({ name: '', coordinates: null });
-      //  this.stops.push({ name: ''});
-      // this.stopControls.push(new FormControl(''));
     }
   }
   initAutocomplete() {
@@ -280,26 +291,24 @@ export class CreaterideComponent {
       zoom: 7,
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
-
     const map = new google.maps.Map(document.getElementById('googleMap'), mapOptions);
-
     const directionsService = new google.maps.DirectionsService();
     const directionsDisplay = new google.maps.DirectionsRenderer();
     directionsDisplay.setMap(map);
 
     const calcRoute = () => {
-      let fromInput = document.getElementById("from") as HTMLInputElement;
-      let toInput = document.getElementById("to") as HTMLInputElement;
+      this.fromInput = document.getElementById("from") as HTMLInputElement;
+      this.toInput = document.getElementById("to") as HTMLInputElement;
       this.totalDistanceInput = document.getElementById("totalDistance") as HTMLInputElement;
       this.totalTimeInput = document.getElementById("totalTime") as HTMLInputElement;
 
-      if (fromInput && toInput && this.totalDistanceInput && this.totalTimeInput) {
+      if (this.fromInput && this.toInput && this.totalDistanceInput && this.totalTimeInput) {
         const waypoints = this.stops.map(stop => ({ location: stop.name, stopover: true }));
         console.log(waypoints, "waypoints");
 
         const request = {
-          origin: fromInput.value,
-          destination: toInput.value,
+          origin: this.fromInput.value,
+          destination: this.toInput.value,
           waypoints: waypoints,
           travelMode: google.maps.TravelMode.DRIVING,
           unitSystem: google.maps.UnitSystem.METRIC // Use metric unit system for kilometers
@@ -320,20 +329,20 @@ export class CreaterideComponent {
               totalDistance += leg.distance.value;
               totalTime += leg.duration.value;
             });
-            console.log(totalDistance);
-            console.log(totalTime);
+            // console.log(totalDistance);
+            // console.log(totalTime);
             
-            
-
             this.totalDistanceInKm = (totalDistance / 1000).toFixed(2); // Convert meters to kilometers
-            // this.totalTimeInHr = (totalTime / 3600).toFixed(2); // Convert seconds to hours
+             this.totalTimeInMin =  Math.round(totalTime / 60).toFixed(0); // Convert seconds to minutes
+             console.log(this.totalTimeInMin);
+             
             // this.totalTimeInHr = Math.floor(totalTime / 3600); // Convert seconds to hours
             this.totalTimeInHr = (totalTime / 3600);
-            this.totalTimeInMin = (Math.round(totalTime % 3600)/60).toFixed(0); 
+            this.remainTimeInMin = (Math.round(totalTime % 3600)/60).toFixed(0); 
 
             this.totalDistanceInput.value = `${this.totalDistanceInKm} km`;
-            this.totalTimeInput.value = `${Math.floor(this.totalTimeInHr)} hr  ${this.totalTimeInMin} minutes`;
-            console.log(this.totalTimeInput.value);
+            this.totalTimeInput.value = `${Math.floor(this.totalTimeInHr)} hr  ${this.remainTimeInMin} minutes`;
+            // console.log(this.totalTimeInput.value);
             
 
             directionsDisplay.setDirections(result);
@@ -357,8 +366,8 @@ export class CreaterideComponent {
           } else {
             directionsDisplay.setDirections({ routes: [] });
             map.setCenter(myLatLng);
-            fromInput.value = "";
-            toInput.value = "";
+            this.fromInput.value = "";
+            this.toInput.value = "";
             this.vehicleTypesService =[];
             this.totalDistanceInput.value = "";
             this.totalTimeInput.value = "";
@@ -378,9 +387,7 @@ export class CreaterideComponent {
     // }
 
     const input1 = document.getElementById("from");
-    // const autocomplete1 = new google.maps.places.Autocomplete(input1, options);
     const autocomplete1 = new google.maps.places.Autocomplete(input1);
-
     autocomplete1.addListener("place_changed", () => {
       const place = autocomplete1.getPlace();
 
@@ -390,23 +397,14 @@ export class CreaterideComponent {
           lat: place.geometry.location.lat(),
           lng: place.geometry.location.lng()
         };
-
-        // Use the input1Coordinates as needed
-        // console.log(this.fromCoordinates);
-
         const placeLatitude = this.fromCoordinates.lat;
         const placeLongitude = this.fromCoordinates.lng;
-
         // Check if the place coordinates fall within any of the polygons
-        let isWithinPolygon = false;
+        // let isWithinPolygon = false;
         let matchingCoordinateGroup = null;
-
         for (const polygon of this.citiesrcvd) {
-          // console.log(polygon);
-
           let isInside = false;
           let j = polygon.coordinates.length - 1;
-
           for (let i = 0; i < polygon.coordinates.length; i++) {
             if (
               ((polygon.coordinates[i].lng < placeLongitude &&
@@ -425,47 +423,35 @@ export class CreaterideComponent {
           }
 
           if (isInside) {
-            isWithinPolygon = true;
+            this.isWithinPolygon = true;
             matchingCoordinateGroup = polygon;
             this.ridecity = matchingCoordinateGroup;
             console.log(this.ridecity);
-            
-            
             this.matchedVehicles = this.vehiclepricingdata.filter(vehicle => vehicle.citydata.city=== this.ridecity.city);
-
-            console.log(this.matchedVehicles,"matchedVehicles");
-            
             if (this.matchedVehicles.length > 0) {
               this.vehicleTypesService = this.matchedVehicles.map(vehicle => vehicle.vehicletypedata.vehicletype);
-              console.log(this.vehicleTypesService, "vehicleTypesService");
-
+              // this.toastr.success('Service is Available');
               // Calculate estimated price for each vehicle type
-
             } else {
+              // this.toastr.error('Service is not Available.');
               // City not found in vehicle pricing data or no vehicles found for the city
             }
-
             break;
-
-
-            // if (matchedVehicles.length > 0) {
-            //   const vehicleTypes = matchedVehicles.map(vehicle => vehicle.vehicletype);
-            //   console.log(vehicleTypes,"saddfhgj");
-            //   // Do something with the vehicle types
-            // } else {
-            //   // City not found in vehicle pricing data or no vehicles found for the city
-            // }
-
-            // break;
           }
         }
 
-        if (isWithinPolygon) {
+        if (this.isWithinPolygon) {
           this.toastr.success('Service is Available');
           console.log('exist');
-
         } else {
           this.toastr.error('Service is not Available.');
+          this.stops = [];
+            this.totalDistanceInput.value = '';
+            this.totalTimeInput.value = '';
+            this.fromInput.value = '';
+            this.toInput.value = '';
+            this.vehicleTypesService =[];
+            this.initMap();
           console.log('not exist');
         }
       }
@@ -481,14 +467,26 @@ export class CreaterideComponent {
       this.estimatePrice = this.getEstimatedPrice(vehicleType);
       console.log(`Estimated price for ${vehicleType}: ${this.estimatePrice}`);
     });
+    // if (this.isWithinPolygon) {
+    //   // this.toastr.success('Service is Available');
+    //   console.log('exist');
+
+    // } else {
+    //   this.toastr.error('Service is not Available.');
+    //     this.stops = [];
+    //     this.totalDistanceInput.value = '';
+    //     this.totalTimeInput.value = '';
+    //     this.fromInput.value = '';
+    //     this.toInput.value = '';
+    //     this.vehicleTypesService =[];
+    //     this.initMap();
+    // }
     this.showEstimatedPrices = true;
 
   }
 
   getEstimatedPrice(vehicleType: string): number {
     const vehicle = this.vehiclepricingdata.find(item => item.vehicletypedata.vehicletype === vehicleType);
-// console.log(vehicle);
-
     if (vehicle) {
       let basePrice = Number(vehicle.baseprice);
       let baseDistance = Number(vehicle.distanceforbaseprice);
@@ -496,12 +494,7 @@ export class CreaterideComponent {
       let unitPerTime = Number(vehicle.priceperunittime);
       let minFare = Number(vehicle.minfare);
 
-      let estimatePrice = basePrice + ((Number(this.totalDistanceInKm) - baseDistance) * unitPerDistance) + (Number(this.totalTimeInHr) * unitPerTime);
-      // console.log(estimatePrice);
-      // console.log(this.totalDistanceInKm);
-      // console.log(this.totalTimeInHr);
-      
-      
+      let estimatePrice = basePrice + ((this.totalDistanceInKm - baseDistance) * unitPerDistance) + (this.totalTimeInMin * unitPerTime);      
       estimatePrice = Math.ceil(estimatePrice);
 
       if (estimatePrice < minFare) {
@@ -511,17 +504,17 @@ export class CreaterideComponent {
     }
     return 0; // Or any default value if vehicle type is not found
   }
-
-
   onOptionChange() {
     if (this.bookrideForm.value.bookride === 'now') {
-      // const now = new Date().toISOString().slice(0, 16);
-      // this.bookrideForm.patchValue({ datetime: now });
       const now = new Date();
       const offset = now.getTimezoneOffset();
       now.setMinutes(now.getMinutes() - offset);
       const formattedDateTime = now.toISOString().slice(0, 16);
       this.bookrideForm.patchValue({ datetime: formattedDateTime });
+      this.bookrideForm.get('datetime').disable();
+    }
+    else {
+      this.bookrideForm.get('datetime').enable();
     }
   }
   onBookRideSubmit() {
@@ -541,29 +534,29 @@ export class CreaterideComponent {
       return;
     }
 
-    const name = this.usersForm.get('name').value;
-    const email = this.usersForm.get('email').value;
-    const phone = this.usersForm.get('phone').value;
-    const fromInput = document.getElementById("from") as HTMLInputElement;
-    const toInput = document.getElementById("to") as HTMLInputElement;
-    const from = fromInput.value;
-    const to = toInput.value;
+    // const name = this.usersForm.get('name').value;
+    // const email = this.usersForm.get('email').value;
+    // const phone = this.usersForm.get('phone').value;
+    // const fromInput = document.getElementById("from") as HTMLInputElement;
+    // const toInput = document.getElementById("to") as HTMLInputElement;
+    // const from = fromInput.value;
+    // const to = toInput.value;
     
-    const stops = this.stops.map(stop => stop.name);
-    const datetime = this.datePipe.transform(this.bookrideForm.value.datetime, 'dd-MMM-yyyy hh:mm a');
-    const totalDistance = this.totalDistanceInput.value
-    const totalTime = this.totalTimeInput.value
-    const vehicleType = this.bookrideForm.value.vehicletype;
+    // const stops = this.stops.map(stop => stop.name);
+    // const datetime = this.datePipe.transform(this.bookrideForm.value.datetime, 'dd-MMM-yyyy hh:mm a');
+    // const totalDistance = this.totalDistanceInput.value
+    // const totalTime = this.totalTimeInput.value
+     const vehicleType = this.bookrideForm.value.vehicletype;
     
-    const estimatePrice = this.getEstimatedPrice(vehicleType);
-    const paymentOption = this.bookrideForm.value.paymentoption;
-    const bookRide = this.bookrideForm.value.bookride;
+    // const estimatePrice = this.getEstimatedPrice(vehicleType);
+    // const paymentOption = this.bookrideForm.value.paymentoption;
+    // const bookRide = this.bookrideForm.value.bookride;
 
-    const userId = this.userDetails ? this.userDetails._id : null;
+    // const userId = this.userDetails ? this.userDetails._id : null;
     const selectedCity = this.citiesrcvd.find(city => city.city === this.ridecity.city);
-    const cityId = selectedCity ? selectedCity._id : null;
+    // const cityId = selectedCity ? selectedCity._id : null;
     const selectedVehicle = this.vehicles.find(vehicle => vehicle.vehicletype === vehicleType);
-    const vehicleTypeId = selectedVehicle ? selectedVehicle._id : null;
+    // const vehicleTypeId = selectedVehicle ? selectedVehicle._id : null;
 
     const rideData = {
       userId :this.userDetails ? this.userDetails._id : null,
@@ -598,8 +591,8 @@ export class CreaterideComponent {
         this.usersForm.get('name').setValue('');
         this.usersForm.get('email').setValue('');
         this.usersForm.get('phone').setValue('');
-        fromInput.value = '';
-        toInput.value = '';
+        this.fromInput.value = '';
+        this.toInput.value = '';
         this.vehicleTypesService =[];
         this.initMap();
       },

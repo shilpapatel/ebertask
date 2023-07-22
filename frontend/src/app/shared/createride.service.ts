@@ -23,4 +23,7 @@ export class CreaterideService {
   updateRideFeedbackData(feedbackData:any){
     return this.http.put(`${this.baseURL}/update-ridefeedback`, feedbackData);
   }
+  getUserDetails(phone:string){
+    return this.http.get(`${this.baseURL}/get-userdetails`, { params: { phone: phone } });
+  }
 }
