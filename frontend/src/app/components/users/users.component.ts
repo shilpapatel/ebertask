@@ -319,7 +319,7 @@ onCancelBtnList() {
   // this.isShow = false; // Hide the form container
 }
 
-selectddefaultid:any;
+  selectddefaultid:any;
   onCardClick(userId: string){
     this.id = userId
      this.getCard(this.id)

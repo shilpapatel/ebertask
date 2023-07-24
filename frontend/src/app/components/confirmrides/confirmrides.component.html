@@ -247,7 +247,7 @@
                             </thead>
                             <tbody id="tbody">
                               <!-- <ng-container *ngIf="driverdatafiltered.length > 0; else noDrivers"> -->
-                                <tr class="align-middle" id="tabletr" *ngFor="let driver of driverdatafiltered; let i = index">
+                                <tr class="align-middle" id="tabletr" *ngFor="let driver of assignedDriverData; let i = index">
                                     <td>{{i + 1}}
                                     </td>
                                     <td><img src="{{driver.profile}}" width="50" class="img-thumbnail"></td>
@@ -270,7 +270,7 @@
                         <!-- <ng-template #noDrivers>
                           <p>No drivers are available for this ride.</p>
                       </ng-template> -->
-                      <div *ngIf="driverdatafiltered.length === 0" class="text-center">
+                      <div *ngIf="assignedDriverData.length === 0" class="text-center">
                         <p class="text-muted">No drivers are available for this ride.</p>
                       </div>
                     </div>

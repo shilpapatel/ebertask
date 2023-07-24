@@ -73,6 +73,7 @@ export class CreaterideComponent {
   fromInput:any;
   toInput:any;
   
+  
   // selectedCity:any;
   // selectedVehicle:any;
   // availabelcordinates: any;
@@ -441,7 +442,11 @@ setTimeout(() => {
         }
 
         if (this.isWithinPolygon) {
+          console.log(input1);
+          
           this.toastr.success('Service is Available');
+          this.isWithinPolygon = false;
+
           console.log('exist');
         } else {
           this.toastr.error('Service is not Available.');
@@ -511,10 +516,10 @@ setTimeout(() => {
       now.setMinutes(now.getMinutes() - offset);
       const formattedDateTime = now.toISOString().slice(0, 16);
       this.bookrideForm.patchValue({ datetime: formattedDateTime });
-      this.bookrideForm.get('datetime').disable();
+      // this.bookrideForm.get('datetime').disable();      
     }
     else {
-      this.bookrideForm.get('datetime').enable();
+      // this.bookrideForm.get('datetime').enable();
     }
   }
   onBookRideSubmit() {

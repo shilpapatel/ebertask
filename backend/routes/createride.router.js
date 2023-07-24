@@ -26,7 +26,7 @@ async function sendmessage() {
 
 router.put('/update-ridefeedback', async (req, res, next) => {
   try {
-    console.log(req.body);
+    // console.log(req.body);
     const rideId = req.body.rideId;
     const updatedRide = {
       feedback: req.body.feedback,

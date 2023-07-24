@@ -81,6 +81,23 @@ export class SocketService {
     });
   }
 
+  emitridefordriverdata(cityId: string, vehicletypeId: string,):void{
+    this.socket.emit('emitridefordriverdata', {cityId, vehicletypeId});
+  }
+
+  subscribeToListenAssignDriverData(): Observable<any> {
+    return new Observable<any>(observer => {
+      this.socket.on('assigndriverdata', assigndriverdata => {
+        observer.next(assigndriverdata);
+      });
+
+      return () => {
+        this.socket.off('assigndriverdata');
+      };
+    });
+  }
+
+
   addDriverRide(driverrideData: any): Observable<any> {
     return new Observable<any>(observer => {
       this.socket.emit('addDriverRide', driverrideData);
@@ -175,8 +192,8 @@ export class SocketService {
     });
   }
 
-  updateDriverRide(driverrideId: string, driverId: string,created:string): void {
-    this.socket.emit('updatedriverride', {driverrideId, driverId,created});
+  updateDriverRide(driverrideId: string, driverId: string): void {
+    this.socket.emit('updatedriverride', {driverrideId, driverId});
   }
 
   // updateNearestDriverRide(driverrideId: string,driverdata:any,created:string): void {
@@ -184,7 +201,7 @@ export class SocketService {
   // }
 
   updateNearestDriverRide(driverrideData: any,): void {
-    this.socket.emit('updatenearestdriverride', {driverrideData});
+    this.socket.emit('updatenearestdriverride', driverrideData);
   }
   subscribeToListenDriverRideUpdate(): Observable<any> {
     return new Observable<any>(observer => {

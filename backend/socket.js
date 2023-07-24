@@ -18,7 +18,7 @@ const client = require('twilio')(accountSid, authToken);
 const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
   host: 'smtp.ethereal.email',
-  // service: 'Gmail', 
+  service: 'Gmail', 
   auth: {
     user: process.env.NODEMAILEREMAIL,
     pass: process.env.NODEMAILERPASSWORD,
@@ -154,6 +154,79 @@ const configureSocket = (io) => {
         io.emit('driversAllData', driversData);
       } catch (error) {
         console.log(error);
+      }
+    });
+
+
+
+    socket.on("emitridefordriverdata", async (data) => {
+      //  console.log(data);
+      try {
+        const city_id = new mongoose.Types.ObjectId(data.cityId);
+        const vehicletype_id = new mongoose.Types.ObjectId(data.vehicletypeId);
+
+        let pricingQuery = DriverList.aggregate([
+          // {
+          //   $match: {
+          //     status: true,
+          //     city_id: city_id,
+          //     assignService: assignService,
+          //   },
+          // },
+          {
+            $lookup: {
+              from: "countries",
+              foreignField: "_id",
+              localField: "country_id",
+              as: "countrydata",
+            },
+          },
+          {
+            $unwind: "$countrydata",
+          },
+          {
+            $lookup: {
+              from: "cities",
+              foreignField: "_id",
+              localField: "city_id",
+              as: "citydata",
+            },
+          },
+          {
+            $unwind: "$citydata",
+          },
+          {
+            $lookup: {
+              from: "vehicletypes",
+              foreignField: "_id",
+              localField: "vehicletype_id",
+              as: "vehicletypedata",
+            },
+          },
+          {
+            $unwind: {
+              path: "$vehicletypedata",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $match: {
+              status: "Approved",
+              city_id: city_id,
+              vehicletype_id: vehicletype_id,
+              assign: "0",
+            },
+          },
+        ]);
+
+        const assigndriverdata = await pricingQuery.exec();
+
+        // console.log(driver);
+
+        // Emit the 'assigndriverdatadata' event with the driver data to the client
+        io.emit("assigndriverdata", assigndriverdata );
+      } catch (error) {
+        console.error(error);
       }
     });
 
@@ -515,28 +588,21 @@ const configureSocket = (io) => {
       }
     });
 
-
-    const job = cron.schedule('* * * * * *', async () => {
-      // console.log();
+    // console.log('here');
+    cron.schedule('* * * * * *', async () => {
+      // var date =new Date()
+      //  console.log(date);
       const ride = await CreateRide.find({ assigned: 1 ,  nearest: false });
       const ridenearestdata = await CreateRide.find({ assigned: 1 , nearest: true });
-      // console.log(ridenearestdata);
 
       if (ride.length > 0) {
-        // console.log("hellodfvgbhnjmkmn");
         for (const data of ride) {
           if (data.created) {
-            job.start();
-            // console.log('Cron job started.');
             const currentTime = new Date();
-            // console.log(currentTime.getTime());
             const elapsedTimeInSeconds = Math.floor((currentTime.getTime() - data.created) / 1000);
-            // console.log(elapsedTimeInSeconds);
             if (elapsedTimeInSeconds >= 10) {
               const result1 = await DriverList.findByIdAndUpdate(data.driverId, { assign: "0" }, { new: true });
               io.emit('driverUpdated', result1);
-
-
               const result = await CreateRide.findByIdAndUpdate(data._id, { driverId: null, assigned: 2}, { new: true });
               io.emit('driverrideupdated', result);
               // console.log('Cron job ended.');
@@ -578,8 +644,8 @@ const configureSocket = (io) => {
 
               const result = await CreateRide.findByIdAndUpdate(data._id, { $addToSet: { assigneddrivers: randomObject._id }, created: Date.now(), driverId: randomObject._id }, { new: true });
               // console.log(result);
-              io.emit('driverUpdated', driver );
-              io.emit('driverUpdated', driverdata );
+              // io.emit('driverUpdated', driver );
+              io.emit('driverUpdated', driverdata,driver );
               io.emit('driverrideupdated', result);
             }
             else {
@@ -591,11 +657,10 @@ const configureSocket = (io) => {
             }
           }
 
-
         }
       }
     })
-
+    // job.stop()
 
     socket.on('updatedriverride', async (data) => {
       // console.log(data);
@@ -619,11 +684,11 @@ const configureSocket = (io) => {
     })
 
     socket.on("updatenearestdriverride", async (data) => {
- 
+//  console.log(data,"datalog");
       try {
 
-        const city_id = new mongoose.Types.ObjectId(data.driverrideData.cityId);
-        const assignService = new mongoose.Types.ObjectId(data.driverrideData.vehicleTypeId);
+        const city_id = new mongoose.Types.ObjectId(data.cityId);
+        const assignService = new mongoose.Types.ObjectId(data.vehicleTypeId);
 
         let assignnearestdriverdata = DriverList.aggregate([
           {
@@ -644,9 +709,9 @@ const configureSocket = (io) => {
 
         const driver = await DriverList.findByIdAndUpdate(firstdriver._id, { assign: "1" }, { new: true });
         await driver.save();
-        io.emit('driverUpdated', driver);
+         io.emit('driverUpdated', driver);
         // console.log(driver);
-        const ride = await CreateRide.findByIdAndUpdate(data.driverrideData._id, { driverId: firstdriver._id, assigned: 1  ,  nearest: true, assigneddrivers: firstdriver._id, created: Date.now() }, { new: true })
+        const ride = await CreateRide.findByIdAndUpdate(data._id, { driverId: firstdriver._id, assigned: 1  ,  nearest: true, assigneddrivers: firstdriver._id, created: Date.now() }, { new: true })
         await ride.save()
         // Emit the 'assigndriverdatadata' event with the driver data to the client
         io.emit('driverrideupdated', ride);

@@ -56,6 +56,7 @@ export class ConfirmridesComponent {
   fromFilter:string = '';
   toFilter:string = '';
   vehicles: any[] = [];
+  assignedDriverData: any[] = [];
   
 
   constructor(private http: HttpClient, private formBuilder: FormBuilder, public router: Router, private toastr: ToastrService,
@@ -70,6 +71,7 @@ export class ConfirmridesComponent {
     this.subscribeToListenDriverStatusUpdate()
     this.subscribeToListenDriverTypeUpdate()
     this.subscribeToListenDriverUpdate()
+    this.subscribeToListenAssignDriverData()
     // this.onAssignBtnClick(this.selectedRide)
     // this.subscribeToListenDriverRideUpdate()
 
@@ -235,29 +237,53 @@ export class ConfirmridesComponent {
     this.selectedcreateride = createride
     // console.log(this.selectedcreateride);
   }
-  onAssignBtnClick(createride: any) {
-    this.selectedcreateride = createride;
-    console.log(this.selectedcreateride);
-    this.assignedDriverName = 'Assign Driver';
 
-    if (this.selectedcreateride) {
-      const selectedCityId = this.selectedcreateride.cityId;
-      const selectedVehicleTypeId = this.selectedcreateride.vehicleTypeId;
-      const filteredDrivers = this.driverdata.filter(driver => {
-        return driver.city_id === selectedCityId && driver.vehicletype_id === selectedVehicleTypeId;
-      });
-      console.log(filteredDrivers);
-      
-      this.driverdatafiltered = filteredDrivers.filter(driver => driver.status === 'Approved' && driver.assign === '0');
-      console.log(this.driverdatafiltered, "driverfiltereddata");
-
-      if (this.driverdatafiltered.length === 0) {
+  subscribeToListenAssignDriverData() {
+    this.socketService.subscribeToListenAssignDriverData().subscribe(assigndriverdata => {
+       console.log(assigndriverdata);
+       this.assignedDriverData = assigndriverdata
+       console.log(this.assignedDriverData.length);
+       if (this.assignedDriverData.length == 0) {
         this.notificationService.incrementNotificationCount();  // Increment notification count
         this.showNotification('Driver Not Found'); // Show browser notification
+        this.notifysent = true
       } else {
         this.notificationService.decrementNotificationCount();// Decrement notification count
       }
-    }  
+    });
+  }
+
+  notifysent:boolean = false;
+  onAssignBtnClick(createride: any) {
+    this.selectedcreateride = createride;
+    console.log(this.selectedcreateride);
+    const cityId = this.selectedcreateride.cityId
+    const vehicleTypeId = this.selectedcreateride.vehicleTypeId
+
+     this.socketService.emitridefordriverdata(cityId,vehicleTypeId);
+    //  this.subscribeToListenAssignDriverData()
+    // this.assignedDriverName = 'Assign Driver';
+    // if (this.selectedcreateride) {
+    //   const selectedCityId = this.selectedcreateride.cityId;
+    //   const selectedVehicleTypeId = this.selectedcreateride.vehicleTypeId;
+    //   const filteredDrivers = this.driverdata.filter(driver => {
+    //     return driver.city_id === selectedCityId && driver.vehicletype_id === selectedVehicleTypeId;
+    //   });
+    //   console.log(filteredDrivers);
+      
+    //   this.driverdatafiltered = filteredDrivers.filter(driver => driver.status === 'Approved' && driver.assign === '0');
+    //   console.log(this.driverdatafiltered, "driverfiltereddata");
+    // if (this.selectedcreateride) {
+      // console.log(this.assignedDriverData.length);
+      
+      // if (this.assignedDriverData.length == 0) {
+      //   this.notificationService.incrementNotificationCount();  // Increment notification count
+      //   this.showNotification('Driver Not Found'); // Show browser notification
+      //   this.notifysent = true
+      // } else {
+      //   this.notificationService.decrementNotificationCount();// Decrement notification count
+      // }
+    // }  
   }
 
   showNotification(message: string) {
@@ -275,15 +301,15 @@ export class ConfirmridesComponent {
     this.selectedDriver = driver;
     // this.selectedDriver.rideStatus = "Hold";
     // this.selectedcreateride.assigned = 1 ;
-    this.selectedcreateride.created = Date.now()
-    this.socketService.updateDriverRide(this.selectedcreateride._id, this.selectedDriver._id,this.selectedcreateride.created);
+    // this.selectedcreateride.created = Date.now()
+    this.socketService.updateDriverRide(this.selectedcreateride._id, this.selectedDriver._id);
 }
  onAssignNearestDriver(selectedcreateride:any) {
   // console.log(this.driverdatafiltered);
   console.log(selectedcreateride);
   
   // this.selectedcreateride.assigned = 1;
-  this.selectedcreateride.created = Date.now()
+  // this.selectedcreateride.created = Date.now()
   this.socketService.updateNearestDriverRide(this.selectedcreateride);
   // this.socketService.updateNearestDriverRide(this.selectedcreateride._id, this.driverdatafiltered,this.selectedcreateride.created);
   // this.subscribeToListenDriverRideUpdate() 
