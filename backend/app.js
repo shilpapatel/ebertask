@@ -5,12 +5,22 @@ require('./model/admin.model')
 const socketio = require('socket.io');
 const http = require('http');
 const express = require('express');
+var app = express();
 const bodyParser = require('body-parser');
 const configureSocket = require('./socket.js');
 const cors = require('cors');
-
-var app = express();
+const Settings = require('./model/settings.model');
 const server = http.createServer(app);
+// var settings
+(async () => {
+    try {
+     const settings = await Settings.findOne({});
+    //   app.locals.settings = settings;
+      // console.log('Settings data loaded:', settings);
+    } catch (err) {
+      console.error('Error fetching settings:', err);
+    }
+  })();
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -26,7 +36,8 @@ const listRoutes = require('./routes/list.router');
 const createrideRoutes = require('./routes/createride.router')
 const settingsRoutes = require('./routes/settings.router')
 const confirmridesRoutes = require('./routes/confirmrides.router')
-const runningrequestRoutes = require('./routes/runningrequest.router')
+const runningrequestRoutes = require('./routes/runningrequest.router');
+const { LegacyContentInstance } = require('twilio/lib/rest/content/v1/legacyContent');
 
 app.use('/api', adminRoutes);
 app.use('/api', vehicletypeRoutes);

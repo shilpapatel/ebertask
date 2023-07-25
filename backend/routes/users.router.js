@@ -6,33 +6,28 @@ require('dotenv').config();
 // const stripe = require('stripe')('sk_test_51NObn2BQlJgbeIPVzCyHaca669BS3YrGmlGoSQNFIahLk6xyFc1pH5utU9GO9a78duDiyPxiCD95SneKT1Utj5oD006hxweLrL');
 // const accountSid = 'ACb44d005c170946735f2e9a3280b96aab';
 // const authToken = 'db965c28b6ab4012ad67085ed3571f03';
+
 const stripe = require('stripe')(process.env.STRIPESECRETEKEY);
 // const accountSid = process.env.TWILIOACCOUNTSID;
 // const authToken = process.env.TWILIOAUTHTOKEN;
 // const client = require('twilio')(accountSid, authToken);
 const nodemailer = require('nodemailer');
+// const transporter = nodemailer.createTransport({
+//   host: 'smtp.ethereal.email',
+//   // service: 'Gmail', 
+//   auth: {
+//     user: process.env.NODEMAILEREMAIL,
+//     pass: process.env.NODEMAILERPASSWORD,
+//   },
+// });
 const transporter = nodemailer.createTransport({
   host: 'smtp.ethereal.email',
-  // service: 'Gmail', 
+  //  service: 'Gmail', 
   auth: {
     user: process.env.NODEMAILEREMAIL,
     pass: process.env.NODEMAILERPASSWORD,
   },
 });
-
-
-// async function sendmessage() {
-//   try {
-//     const message = await client.messages.create({
-//       body: 'ride created',
-//       from: '+18145262612',
-//       to: '+918733930293'
-//     });
-//     console.log(message.sid, 'message');
-//   } catch (error) {
-//     console.log('Error sending message:', error);
-//   }
-// }
 
 const DIR = './public/'
 

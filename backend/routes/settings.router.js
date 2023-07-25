@@ -9,19 +9,19 @@ const fs = require('fs');
 const dotenv = require('dotenv');
 
 
-async function createDefaultSettings() {
-  try {
-    const count = await Settings.countDocuments();
-    if (count === 0) {
-      const defaultSettings = new Settings();
-      await defaultSettings.save();
-      console.log('Default settings added successfully');
-    }
-  } catch (error) {
-    console.error('Error creating default settings:', error);
-  }
-}
-createDefaultSettings();
+// async function createDefaultSettings() {
+//   try {
+//     const count = await Settings.countDocuments();
+//     if (count === 0) {
+//       const defaultSettings = new Settings();
+//       await defaultSettings.save();
+//       console.log('Default settings added successfully');
+//     }
+//   } catch (error) {
+//     console.error('Error creating default settings:', error);
+//   }
+// }
+// createDefaultSettings();
 
 router.get('/get-settings', async (req, res, next) => {
     try {
