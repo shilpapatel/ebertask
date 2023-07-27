@@ -22,6 +22,7 @@ const { Schema } = mongoose;
 //     // started:6,
 //     // completed:7,
 //     // cancelled:8
+        // hold:9
 
 // });
 
@@ -43,7 +44,7 @@ const createrideSchema = new mongoose.Schema({
     datetime:{ type:String, required:true,},
     // assigned:{ type:String, default:"pending"},
     // assigned: { type: Number}
-    assigned: { type: Number, enum:[0,1,2,3,4,5,6,7,8]},
+    assigned: { type: Number, enum:[0,1,2,3,4,5,6,7,8,9]},
     created:{type:String,default:Date.now()},
     nearest:{type:Boolean},
     assigneddrivers:{type:Array , unique : true },
