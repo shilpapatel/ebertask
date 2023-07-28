@@ -105,8 +105,8 @@ export class AdminpanelComponent implements OnInit {
 };
 
 startLogoutTimer() {
-  //  const timeout = 5000;
-  const timeout = 60000 * 60;
+    // const timeout = 10000;
+   const timeout = 60000 * 60;
 
   // Start the timer
   this.logoutTimer = setTimeout(() => {

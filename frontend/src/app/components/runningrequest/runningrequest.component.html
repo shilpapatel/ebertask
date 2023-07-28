@@ -58,7 +58,9 @@
                                     *ngIf="confirmride.assigned === 6">Complete</button>
                                 <!-- <button type="button" class="btn btn-secondary btn-sm m-1" (click)="onAcceptRequest(confirmride._id)">Accept</button> -->
                                 <button type="button" class="btn btn-secondary btn-sm m-1"
-                                    (click)="onDeleteDriver(confirmride._id)">Reject</button>
+                                    (click)="onDeleteDriver(confirmride._id)" *ngIf="confirmride.assigned === 1">Reject</button>
+                                <button type="button" class="btn btn-secondary btn-sm m-1"
+                               *ngIf="confirmride.assigned === 9">Hold</button>
                             </td>
                         </tr>
                     </tbody>
