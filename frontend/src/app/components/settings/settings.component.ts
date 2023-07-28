@@ -23,14 +23,23 @@ export class SettingsComponent implements OnInit {
   constructor(private fb: FormBuilder, public router: Router, private settingsService: SettingsService,
     private toastr: ToastrService, private http: HttpClient) {
     this.rideForm = this.fb.group({
-      requesttime: ['10'],
-      maxstops: ['1'],
-      twilioacoountsid : ['ACb44d005c170946735f2e9a3280b96aab'],
-      twilioauthtoken:['db965c28b6ab4012ad67085ed3571f03'],
-      nodemaileremail:['ari.hartmann@ethereal.email'],
-      nodemailerpassword:['mEgbgUtBfUpZkZVbmd'],
-      stripepublickey:['pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou'],
-      stripesecretkey:['sk_test_51NObn2BQlJgbeIPVzCyHaca669BS3YrGmlGoSQNFIahLk6xyFc1pH5utU9GO9a78duDiyPxiCD95SneKT1Utj5oD006hxweLrL']
+      // requesttime: ['10'],
+      // maxstops: ['1'],
+      // twilioacoountsid : ['ACb44d005c170946735f2e9a3280b96aab'],
+      // twilioauthtoken:['db965c28b6ab4012ad67085ed3571f03'],
+      // nodemaileremail:['ari.hartmann@ethereal.email'],
+      // nodemailerpassword:['mEgbgUtBfUpZkZVbmd'],
+      // stripepublickey:['pk_test_51NObn2BQlJgbeIPVDnE96vIkSEi49vOF3vQEBazaLYwOs6L1LdAfIsC8w8uZTsBjBOmWcmJYsr9VazeXdSZuTti500MZxo1uou'],
+      // stripesecretkey:['sk_test_51NObn2BQlJgbeIPVzCyHaca669BS3YrGmlGoSQNFIahLk6xyFc1pH5utU9GO9a78duDiyPxiCD95SneKT1Utj5oD006hxweLrL']
+
+      requesttime: [''],
+      maxstops: [''],
+      twilioacoountsid : [''],
+      twilioauthtoken:[''],
+      nodemaileremail:[''],
+      nodemailerpassword:[''],
+      stripepublickey:[''],
+      stripesecretkey:['']
 
 
 
@@ -47,7 +56,17 @@ export class SettingsComponent implements OnInit {
 
         this.settingsdata = res['settingsdata'];
         this._id =  this.settingsdata[0]._id
-        console.log(this._id);
+        console.log(this.settingsdata);
+        this.rideForm.patchValue({
+          requesttime:this.settingsdata[0].requesttime ,
+          maxstops:this.settingsdata[0].maxstops,
+          twilioacoountsid : this.settingsdata[0].twilioacoountsid,
+          twilioauthtoken:this.settingsdata[0].twilioauthtoken,
+          nodemaileremail:this.settingsdata[0].nodemaileremail,
+          nodemailerpassword:this.settingsdata[0].nodemailerpassword,
+          stripepublickey:this.settingsdata[0].stripepublickey,
+          stripesecretkey:this.settingsdata[0].stripesecretkey
+        });
       },
       error => {
         console.error('Error fetching settings:', error);
@@ -55,7 +74,6 @@ export class SettingsComponent implements OnInit {
     );
   }
   submitForm() {
-
     const updatedSettings = {
       requesttime: this.rideForm.value.requesttime,
       maxstops: this.rideForm.value.maxstops,
@@ -70,6 +88,10 @@ export class SettingsComponent implements OnInit {
     if (this._id) {
       this.settingsService.updateSetting(this._id, updatedSettings).subscribe(
         (response: any) => {
+          console.log(response.settingsUpdated);
+          
+
+          
           this.toastr.success(response.message);
         },
         (error: any) => {

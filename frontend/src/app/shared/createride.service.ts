@@ -17,6 +17,23 @@ export class CreaterideService {
   getCreateRide() {
     return this.http.get(`${this.baseURL}/get-createride`);
   }
+  getRideHistory(page: number, pageSize: number, searchQuery: string, sortField: string, sortOrder: string,paymentFilter: string,statusFilter: string,vehicleTypeFilter: string,fromFilter: string,toFilter: string,startDateFilter:string,endDateFilter:string): Observable<any> {
+      const params = {
+        page: page.toString(),
+        pageSize: pageSize.toString(),
+        searchQuery: searchQuery,
+        sortField: sortField,
+        sortOrder: sortOrder,
+        paymentFilter:paymentFilter,
+        statusFilter:statusFilter,
+        vehicleTypeFilter:vehicleTypeFilter,
+        fromFilter:fromFilter,
+        toFilter:toFilter,
+        startDateFilter:startDateFilter,
+        endDateFilter:endDateFilter
+      };
+    return this.http.get(`${this.baseURL}/get-ridehistory`, {params});
+  }
   addRide(rideData:any) {
     return this.http.post(`${this.baseURL}/add-ride`, rideData);
   }

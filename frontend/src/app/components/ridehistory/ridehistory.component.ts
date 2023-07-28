@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { CreaterideService } from 'src/app/shared/createride.service';
 import { CsvExportService } from 'src/app/shared/csv-export.service';
 import { SocketService } from 'src/app/shared/socket.service';
 import { VehicletypeService } from 'src/app/shared/vehicletype.service';
@@ -16,7 +17,7 @@ export class RidehistoryComponent {
   currentPage: number = 1;
   totalPages: number = 0;
   pageSize: number = 3;
-  searchQuery: string
+  searchQuery: string = '';
   sortOrder: string = 'asc'; 
   sortField: string = 'datetime';
   // filterField: string = 'from';
@@ -30,10 +31,11 @@ export class RidehistoryComponent {
   vehicles: any[] = [];
   
 
-  constructor(private socketService: SocketService, private csvExportService: CsvExportService,private vehicletypeService: VehicletypeService) { }
+  constructor(private socketService: SocketService, private csvExportService: CsvExportService,private vehicletypeService: VehicletypeService,private createrideService:CreaterideService) { }
   ngOnInit(): void {
     this.getVehicleType()
-    this.getDriverRideData()
+    // this.getDriverRideData()
+    this.getRideHistory()
      this.subscribeToListenDriverRideUpdate()
      this.initMap()
   }
@@ -59,27 +61,45 @@ export class RidehistoryComponent {
 //   }
 //   return Array.from(uniqueTypes);
 // }
-
-  getDriverRideData(): void {
-    this.socketService.getDriverRideHistoryData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder,this.paymentFilter,this.statusFilter, this.vehicleTypeFilter, this.fromFilter, this.toFilter,this.startDateFilter,
-      this.endDateFilter).subscribe(
-      (data: any) => {
-        console.log(data);
-        
-        console.log(data.driverridedata);
-        this.createridedata = data.driverridedata;
-        // this.createridedata = data.driverridedata.filter(createride => createride.assigned === 'cancelled');
-        this.totalPages = data.totalPages;
-        this.currentPage = data.currentPage
-      },
-      (error: any) => {
-        console.error(error);
-      }
-    );
+getRideHistory():void{
+  this.createrideService.getRideHistory(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder,this.paymentFilter,this.statusFilter, this.vehicleTypeFilter, this.fromFilter, this.toFilter,this.startDateFilter,
+    this.endDateFilter).subscribe(
+    (data: any) => {
+      console.log(data);
+      
+      console.log(data.driverridedata);
+      this.createridedata = data.driverridedata;
+      // this.createridedata = data.driverridedata.filter(createride => createride.assigned === 'cancelled');
+      this.totalPages = data.totalPages;
+      this.currentPage = data.currentPage
+    },
+    (error: any) => {
+      console.error(error);
+    }
+  );
   }
+  
+  // getDriverRideData(): void {
+  //   this.socketService.getDriverRideHistoryData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder,this.paymentFilter,this.statusFilter, this.vehicleTypeFilter, this.fromFilter, this.toFilter,this.startDateFilter,
+  //     this.endDateFilter).subscribe(
+  //     (data: any) => {
+  //       console.log(data);
+        
+  //       console.log(data.driverridedata);
+  //       this.createridedata = data.driverridedata;
+  //       // this.createridedata = data.driverridedata.filter(createride => createride.assigned === 'cancelled');
+  //       this.totalPages = data.totalPages;
+  //       this.currentPage = data.currentPage
+  //     },
+  //     (error: any) => {
+  //       console.error(error);
+  //     }
+  //   );
+  // }
   applyFilter(): void {
     this.currentPage = 1; // Reset to the first page when applying filters
-    this.getDriverRideData();
+    // this.getDriverRideData();
+    this.getRideHistory()
   }
   clearFilter(): void {
     this.paymentFilter = '';
@@ -90,7 +110,8 @@ export class RidehistoryComponent {
     this.startDateFilter = '';
     this.endDateFilter = '';
     this.currentPage = 1; // Reset to the first page when clearing filters
-    this.getDriverRideData();
+    // this.getDriverRideData();
+    this.getRideHistory()
   }
 
   generatePageArray(): number[] {
@@ -100,30 +121,35 @@ export class RidehistoryComponent {
   onSearch() {
     console.log('Search query:', this.searchQuery);
     this.currentPage = 1; // Reset to the first page when searching
-    this.getDriverRideData()
+    // this.getDriverRideData()
+    this.getRideHistory()
   }
   prevPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
     }
-    this.getDriverRideData()
+    // this.getDriverRideData()
+    this.getRideHistory()
   }
   
   goToPage(page: number): void {
     this.currentPage = page;
-    this.getDriverRideData()
+    // this.getDriverRideData()
+    this.getRideHistory()
   }
   // Function to go to the next page
   nextPage() {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
     }
-    this.getDriverRideData()
+    // this.getDriverRideData()
+    this.getRideHistory()
   }
 
   onSort() {
     this.currentPage = 1; // Reset to the first page when sorting
-    this.getDriverRideData()
+    // this.getDriverRideData()
+    this.getRideHistory()
   }
   clearSearch(): void {
     this.searchQuery = '';
@@ -138,7 +164,8 @@ export class RidehistoryComponent {
           // this.createridedata[index].driverId = updatedDriverRide.driverId;
           this.createridedata[index].assigned = updatedDriverRide.assigned;
         }
-        this.getDriverRideData()
+        // this.getDriverRideData()
+        this.getRideHistory()
       // this.toastr.success('Driver Ride Updated');
     });
   }
