@@ -48,23 +48,26 @@
 
 <div class="container my-5">
     <div class="form-group row m-2 d-flex justify-content-center">
-        <div class="col-sm-1 m-1">
+        <div class="col-sm-1">
             <select class="form-control bg-secondary text-white text-center" [(ngModel)]="sortOrder" (ngModelChange)="onSort()">
                 <option value="asc">Asc</option>
                 <option value="desc">Desc</option>
             </select>
         </div>
-        <div class="col-sm-5 m-1">
+        <div class="col-sm-5">
             <input type="text" class="form-control" placeholder="Search by name" [(ngModel)]="searchQuery">
         </div>
-        <div class="col-sm-1 m-1">
+        <div class="col-sm-1">
             <button class="btn btn-secondary" (click)="onSearch()">Search</button>
         </div>
-        <div class="col-sm-2 m-1">
+        <div class="col-sm-1">
             <button class="btn btn-secondary" (click)="clearSearch()">Clear</button>
         </div>
-        <div class="col-sm-2 m-1">
+        <div class="col-sm-2 ">
             <button class="btn btn-secondary d-flex align-items-center" (click)="downloadDataAsCsv()"><mat-icon>arrow_downward</mat-icon>Download</button>
+        </div>
+          <div class="col-sm-2">
+            <button class="btn btn-secondary d-flex align-items-center" (click)="downloadDataAsCsvAll()"><mat-icon>arrow_downward</mat-icon>Download All</button>
           </div>
         <!-- <div class="col-sm-2 m-1">
             <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal"

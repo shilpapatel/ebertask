@@ -12,6 +12,7 @@ declare const google: any;
 })
 export class RidehistoryComponent {
   createridedata: any[] = [];
+  createridedatawithoutpage:any[] = [];
   selectedcreateride: any;
 
   currentPage: number = 1;
@@ -36,6 +37,7 @@ export class RidehistoryComponent {
     this.getVehicleType()
     // this.getDriverRideData()
     this.getRideHistory()
+    this.getRideHistoryWithoutPagination()
      this.subscribeToListenDriverRideUpdate()
      this.initMap()
   }
@@ -49,6 +51,10 @@ export class RidehistoryComponent {
      this.csvExportService.exportToCsv(this.createridedata, 'ridehistory.csv');
   }
 
+  downloadDataAsCsvAll(): void {
+    this.csvExportService.exportToCsv(this.createridedatawithoutpage, 'ridehistory.csv');
+ }
+
 
 // getUniqueVehicleTypes(createridedata: any[]): string[] {
 //   console.log(createridedata);
@@ -61,6 +67,20 @@ export class RidehistoryComponent {
 //   }
 //   return Array.from(uniqueTypes);
 // }
+getRideHistoryWithoutPagination():void{
+  this.createrideService.getRideHistoryWithoutPagination().subscribe(
+    (data: any) => {
+      // console.log(data);
+      
+      // console.log(data.driverridedata);
+      this.createridedatawithoutpage = data.driverridedata;
+    },
+    (error: any) => {
+      console.error(error);
+    }
+  );
+}
+
 getRideHistory():void{
   this.createrideService.getRideHistory(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder,this.paymentFilter,this.statusFilter, this.vehicleTypeFilter, this.fromFilter, this.toFilter,this.startDateFilter,
     this.endDateFilter).subscribe(

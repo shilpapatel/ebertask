@@ -189,6 +189,79 @@ router.get('/get-ridehistory', async (req, res, next) => {
     }
   });
 
+
+  router.get('/get-ridehistorywithoutpaginaton', async (req, res, next) => {
+  // console.log(req.query)
+  try {
+    const matchStage = {
+      assigned:{$in:[7,8]},
+    };
+    const driverridedata = await CreateRide.aggregate([
+      {
+        $lookup: {
+          from: 'cities',
+          foreignField: '_id',
+          localField: 'cityId',
+          as: 'citydata'
+        }
+      },
+      {
+        $unwind: '$citydata'
+      },
+      {
+        $lookup: {
+          from: 'vehicletypes',
+          foreignField: '_id',
+          localField: 'vehicleTypeId',
+          as: 'vehicletypedata'
+        }
+      },
+      {
+        $unwind: '$vehicletypedata'
+      },
+      {
+        $lookup: {
+          from: 'users',
+          foreignField: '_id',
+          localField: 'userId',
+          as: 'userdata'
+        }
+      },
+      {
+        $unwind: '$userdata'
+      },
+      {
+        $lookup: {
+          from: 'driverlists',
+          foreignField: '_id',
+          localField: 'driverId',
+          as: 'driverdata'
+        }
+      },
+      {
+        $unwind: {
+        path: '$driverdata',
+        preserveNullAndEmptyArrays:true
+      }
+      }
+      ,
+  {
+    $match: matchStage
+  }
+  ])
+  
+  //  console.log(driverridedata,"driverridedataaaaaaaaaaaaaaaaaaaa")
+      res.status(200).json({
+        message: 'CreateRide retrieved successfully!',
+        driverridedata,
+
+      });
+      //  sendmessage();
+    } catch (error) {
+      next(error);
+    }
+  });
+
 // router.post('/add-ride', async (req, res, next) => {
 //   try {
 //     const rideData = req.body;

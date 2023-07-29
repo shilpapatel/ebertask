@@ -17,6 +17,9 @@ export class CreaterideService {
   getCreateRide() {
     return this.http.get(`${this.baseURL}/get-createride`);
   }
+  getRideHistoryWithoutPagination() {
+    return this.http.get(`${this.baseURL}/get-ridehistorywithoutpaginaton`);
+  }
   getRideHistory(page: number, pageSize: number, searchQuery: string, sortField: string, sortOrder: string,paymentFilter: string,statusFilter: string,vehicleTypeFilter: string,fromFilter: string,toFilter: string,startDateFilter:string,endDateFilter:string): Observable<any> {
       const params = {
         page: page.toString(),
