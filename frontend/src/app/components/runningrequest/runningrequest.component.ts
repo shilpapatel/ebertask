@@ -3,6 +3,7 @@ import { SocketService } from 'src/app/shared/socket.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CreaterideService } from 'src/app/shared/createride.service';
 import { ToastrService } from 'ngx-toastr';
+import { NotificationService } from 'src/app/shared/notification.service';
 
 @Component({
   selector: 'app-runningrequest',
@@ -21,7 +22,7 @@ export class RunningrequestComponent {
   sortOrder: string = 'asc'; 
   sortField: string = 'assigned';
   
-  constructor(private socketService: SocketService,private formBuilder: FormBuilder,private createrideService: CreaterideService,private toastr: ToastrService,) { 
+  constructor(private socketService: SocketService,private formBuilder: FormBuilder,private createrideService: CreaterideService,private toastr: ToastrService,private notificationService: NotificationService) { 
     this.feedbackForm = this.formBuilder.group({
       name: [''],
       email: [''],
@@ -64,12 +65,32 @@ getDriverRideData(): void {
         if (index !== -1) {
           this.createridedata[index].driverId = updatedDriverRide.driverId;
           this.createridedata[index].assigned = updatedDriverRide.assigned;
-           console.log(this.createridedata);
+          console.log(this.createridedata[index].assigned);
+          if(this.createridedata[index].assigned == 2){
+            this.notificationService.incrementNotificationCount();  // Increment notification count
+            this.showNotification('Driver Not Found'); // Show browser notification
+          }
+          else{
+            this.notificationService.decrementNotificationCount();// Decrement notification count
+          }
         }
+        
+        // if(this.createridedata.assigned == 2)
         this.getDriverRideData()
     });
   }
 
+  showNotification(message: string) {
+    if (Notification.permission === 'granted') {
+      const notification = new Notification('Notification Title', { body: message });
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          const notification = new Notification('Notification Title', { body: message });
+        }
+      });
+    }
+  }
   onAcceptRequest(driverrideId: string,driverId:string){
     this.socketService.acceptDriverRide(driverrideId,driverId); 
   }

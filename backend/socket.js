@@ -160,8 +160,6 @@ const configureSocket = (io) => {
       }
     });
 
-
-
     socket.on("emitridefordriverdata", async (data) => {
       //  console.log(data);
       try {
@@ -1150,7 +1148,7 @@ const configureSocket = (io) => {
         }, { new: true });
         io.emit('driverrideupdated', result);
         }
-        else{
+        else {
           let alldrivers = DriverList.aggregate([
             {
               $match: {
@@ -1164,21 +1162,37 @@ const configureSocket = (io) => {
           ]);
 
           const pendingdriver = await alldrivers.exec();
-          if(pendingdriver.length >0){
-            const result = await CreateRide.findByIdAndUpdate(ride._id, { $addToSet: { assigneddrivers: pendingdriver[0]._id },driverId: pendingdriver[0]._id }, { new: true });
+          if (pendingdriver.length > 0) {
+            const result = await CreateRide.findByIdAndUpdate(ride._id, { $addToSet: { assigneddrivers: pendingdriver[0]._id }, driverId: pendingdriver[0]._id }, { new: true });
             io.emit('driverrideupdated', result);
-          }else{
-            const result1 = await DriverList.findByIdAndUpdate(driverId, { assign: '0' }, { new: true });
-            io.emit('driverUpdated', result1);
-            const result = await CreateRide.findByIdAndUpdate(ride._id, {
-              driverId: null,
-              assigned: 3,
-              assigneddrivers:[]
-            }, { new: true });
-            io.emit('driverrideupdated', result);
+          } else {
+
+            let assigndriverlist = DriverList.aggregate([
+              {
+                $match: {
+                  status: "Approved",
+                  city_id: ride.cityId,
+                  vehicletype_id: ride.vehicleTypeId,
+                  assign: "1",
+                  _id: { $nin: ride.assigneddrivers}
+                },
+              },
+            ]);
+            const assigndriver = await assigndriverlist.exec();
+            // console.log(assigndriver);
+            if (assigndriver.length > 0) {
+              const result1 = await DriverList.findByIdAndUpdate(driverId, { assign: "0" }, { new: true });
+              io.emit('driverUpdated', result1);
+              const result = await CreateRide.findByIdAndUpdate(ride._id, { assigned: 9, driverId: null, created: Date.now(), }, { new: true });
+              io.emit('driverrideupdated', result);
+            } else {
+              const result1 = await DriverList.findByIdAndUpdate(driverId, { assign: '0' }, { new: true });
+              io.emit('driverUpdated', result1);
+              const result = await CreateRide.findByIdAndUpdate(ride._id, { driverId: null, assigned: 3, assigneddrivers: [] }, { new: true });
+              io.emit('driverrideupdated', result);
+            }
           }
         }
-
 
 
       } catch (err) {

@@ -24,8 +24,6 @@ export class SocketService {
   subscribeToListenDriverUpdate(): Observable<any> {
     return new Observable<any>(observer => {
       this.socket.on('driverUpdated', updatedDriver => {
-        console.log(updatedDriver);
-        
         observer.next(updatedDriver);
       });
   
@@ -150,7 +148,7 @@ export class SocketService {
       this.socket.emit('getDriverRideRunning');
 
       this.socket.on('driverRideRunningData', (driverridedata) => {
-        console.log(driverridedata);
+        // console.log(driverridedata);
         
         observer.next(driverridedata);
       });

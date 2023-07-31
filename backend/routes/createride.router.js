@@ -60,6 +60,135 @@ if (!user) {
   }
 });
 
+router.get('/get-createride', async (req, res, next) => {
+  // console.log(req.query)
+  try {
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.pageSize) || 3;
+    const searchQuery =req.query.searchQuery || '';
+    const sortField = req.query.sortField || 'datetime'; // Default sort field is 'name'
+    const sortOrder =req.query.sortOrder || 'asc';
+    const statusFilter = req.query.statusFilter || '';
+    const vehicleTypeFilter = req.query.vehicleTypeFilter || '';
+    const fromFilter = req.query.fromFilter || '';
+    const toFilter = req.query.toFilter || '';
+    const startDateFilter = req.query.startDateFilter || '';
+    const endDateFilter= req.query.endDateFilter || '';
+    const startDateTime = startDateFilter ? moment(startDateFilter).format('DD-MMM-YYYY hh:mm A') : null;
+    const endDateTime = endDateFilter ? moment(endDateFilter).format('DD-MMM-YYYY hh:mm A') : null;
+
+    let sortOptions = {};
+    sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1; 
+    const searchRegex = new RegExp(searchQuery, 'i');
+    const skip = (page - 1) * limit;
+
+    const matchStage = {
+      $or: [
+        { from: searchRegex },
+        { to: searchRegex },
+        { estimatePrice: searchRegex }
+      ],
+      datetime: startDateTime && endDateTime ? { $gte: startDateTime, $lte: endDateTime } : { $exists: true },
+      assigned:{ $in:[0,1,2,3,9]},
+      vehicleType: { $regex: vehicleTypeFilter, $options: 'i' },
+      from: { $regex: fromFilter, $options: 'i' },
+      to: { $regex: toFilter, $options: 'i' }
+    };
+
+    if (statusFilter !== '') {
+      const assignedFilter = parseInt(statusFilter);
+      matchStage.assigned = assignedFilter;
+    }
+
+    if (searchQuery !== '') {
+      matchStage.$or.push({ assigned: searchRegex });
+    }
+
+    const data = await CreateRide.aggregate([
+      {
+        $lookup: {
+          from: 'cities',
+          foreignField: '_id',
+          localField: 'cityId',
+          as: 'citydata'
+        }
+      },
+      {
+        $unwind: '$citydata'
+      },
+      {
+        $lookup: {
+          from: 'vehicletypes',
+          foreignField: '_id',
+          localField: 'vehicleTypeId',
+          as: 'vehicletypedata'
+        }
+      },
+      {
+        $unwind: '$vehicletypedata'
+      },
+      {
+        $lookup: {
+          from: 'users',
+          foreignField: '_id',
+          localField: 'userId',
+          as: 'userdata'
+        }
+      },
+      {
+        $unwind: '$userdata'
+      },
+      {
+        $lookup: {
+          from: 'driverlists',
+          foreignField: '_id',
+          localField: 'driverId',
+          as: 'driverdata'
+        }
+      },
+      {
+        $unwind: {
+        path: '$driverdata',
+        preserveNullAndEmptyArrays:true
+      }
+      },
+      {
+        $match: matchStage
+      },
+      {
+        $facet: {
+          paginatedResults: [
+            { $sort: sortOptions },
+            { $skip: skip },
+            { $limit: limit }
+          ],
+          totalCount: [
+            { $count: 'count' }
+          ]
+        }
+      } 
+    ])
+
+    const metadata = data[0].totalCount[0];
+    const totalDocuments = metadata ? metadata.count : 0;
+    const totalPages = Math.ceil(totalDocuments / limit);
+    const driverridedata = data[0].paginatedResults;
+
+   console.log(driverridedata)
+      res.status(200).json({
+        message: 'CreateRide retrieved successfully!',
+        driverridedata,
+        totalPages,page
+
+      });
+      //  sendmessage();
+    } catch (error) {
+      next(error);
+    }
+  });
+
+
 
 router.get('/get-ridehistory', async (req, res, next) => {
   // console.log(req.query)
@@ -249,8 +378,6 @@ router.get('/get-ridehistory', async (req, res, next) => {
     $match: matchStage
   }
   ])
-  
-  //  console.log(driverridedata,"driverridedataaaaaaaaaaaaaaaaaaaa")
       res.status(200).json({
         message: 'CreateRide retrieved successfully!',
         driverridedata,
