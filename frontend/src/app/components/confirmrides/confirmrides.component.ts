@@ -170,7 +170,6 @@ export class ConfirmridesComponent {
     this.searchQuery = '';
     this.onSearch();
   }
-
   subscribeToListenDriverRideUpdate() {
     this.socketService.subscribeToListenDriverRideUpdate().subscribe(updatedDriverRide => {
         const index = this.createridedata.findIndex(d => d._id === updatedDriverRide._id);
@@ -179,18 +178,8 @@ export class ConfirmridesComponent {
           this.createridedata[index].driverId = updatedDriverRide.driverId;
           this.createridedata[index].assigned = updatedDriverRide.assigned;
         }
-        //  console.log(this.createridedata);
-
-        // if (this.assignedDriverData.length == 0) {
-        //   this.notificationService.incrementNotificationCount();  // Increment notification count
-        //   this.showNotification('Driver Not Found'); // Show browser notification
-        //   this.notifysent = true
-        // } else {
-        //   this.notificationService.decrementNotificationCount();// Decrement notification count
-        // }
           this.getDriverRideData()
           this.getCreateRide()
-        // }
     });
   }
   subscribeToListenDriverUpdate() {
@@ -255,13 +244,6 @@ export class ConfirmridesComponent {
        console.log(assigndriverdata);
        this.assignedDriverData = assigndriverdata
        console.log(this.assignedDriverData.length);
-      //  if (this.assignedDriverData.length == 0) {
-      //   this.notificationService.incrementNotificationCount();  // Increment notification count
-      //   this.showNotification('Driver Not Found'); // Show browser notification
-      //   this.notifysent = true
-      // } else {
-      //   this.notificationService.decrementNotificationCount();// Decrement notification count
-      // }
     });
   }
 
@@ -287,14 +269,6 @@ export class ConfirmridesComponent {
     // if (this.selectedcreateride) {
     //   // console.log(this.assignedDriverData.length);
     //   console.log(this.selectedcreateride.assigneddrivers);
-      
-    //   if (this.assignedDriverData.length == 0) {
-    //     this.notificationService.incrementNotificationCount();  // Increment notification count
-    //     this.showNotification('Driver Not Found'); // Show browser notification
-    //     this.notifysent = true
-    //   } else {
-    //     this.notificationService.decrementNotificationCount();// Decrement notification count
-    //   }
     // }  
   }
 
@@ -311,22 +285,14 @@ export class ConfirmridesComponent {
   }
   onAssignDriver(driver: any) {
     this.selectedDriver = driver;
-    // this.selectedDriver.rideStatus = "Hold";
-    // this.selectedcreateride.assigned = 1 ;
-    // this.selectedcreateride.created = Date.now()
     this.socketService.updateDriverRide(this.selectedcreateride._id, this.selectedDriver._id);
 }
  onAssignNearestDriver(selectedcreateride:any) {
-  // console.log(this.driverdatafiltered);
-  // this.selectedcreateride.assigned = 1;
-  // this.selectedcreateride.created = Date.now()
   this.socketService.updateNearestDriverRide(this.selectedcreateride);
   // this.socketService.updateNearestDriverRide(this.selectedcreateride._id, this.driverdatafiltered,this.selectedcreateride.created);
 }
 
  onDeleteConfirmRide(createrideId:any){
-  // const rideId = createrideId;
-  // console.log(rideId);
   if (confirm('Are you sure you want to delete this user?')) {
     this.socketService.deleteConfirmRide(createrideId).subscribe(
       response => {

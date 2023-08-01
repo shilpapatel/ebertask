@@ -74,7 +74,6 @@ getDriverRideData(): void {
             this.notificationService.decrementNotificationCount();// Decrement notification count
           }
         }
-        
         // if(this.createridedata.assigned == 2)
         this.getDriverRideData()
     });
