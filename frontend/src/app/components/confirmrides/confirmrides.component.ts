@@ -66,7 +66,7 @@ export class ConfirmridesComponent {
   ngOnInit(): void {
     this.getVehicleType()
     this.getDriversAllData()
-    this.getCreateRide()
+    // this.getCreateRide()
     this.getDriverRideData()
     this.subscribeToListenDriverRideUpdate()
     this.subscribeToListenDriverStatusUpdate()
@@ -81,22 +81,22 @@ export class ConfirmridesComponent {
       this.vehicles = res['vehicletype'];
     });
   }
-  getCreateRide():void{
-    this.createrideService.getCreateRide(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder,this.statusFilter, this.vehicleTypeFilter, this.fromFilter, this.toFilter,this.startDateFilter,
-      this.endDateFilter).subscribe(
-      (data: any) => {
-        console.log(data);
-        console.log(data.driverridedata);
-        this.createridedata = data.driverridedata;
-        // this.createridedata = data.driverridedata.filter(createride => createride.assigned === 'cancelled');
-        this.totalPages = data.totalPages;
-        this.currentPage = data.currentPage
-      },
-      (error: any) => {
-        console.error(error);
-      }
-    );
-  }
+  // getCreateRide():void{
+  //   this.createrideService.getCreateRide(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder,this.statusFilter, this.vehicleTypeFilter, this.fromFilter, this.toFilter,this.startDateFilter,
+  //     this.endDateFilter).subscribe(
+  //     (data: any) => {
+  //       console.log(data);
+  //       console.log(data.driverridedata);
+  //       this.createridedata = data.driverridedata;
+  //       // this.createridedata = data.driverridedata.filter(createride => createride.assigned === 'cancelled');
+  //       this.totalPages = data.totalPages;
+  //       this.currentPage = data.currentPage
+  //     },
+  //     (error: any) => {
+  //       console.error(error);
+  //     }
+  //   );
+  // }
 
   getDriverRideData(): void {
     this.socketService.getDriverRideData(this.currentPage, this.pageSize, this.searchQuery,this.sortField,this.sortOrder,this.statusFilter, this.vehicleTypeFilter, this.fromFilter, this.toFilter,this.startDateFilter,
@@ -115,7 +115,7 @@ export class ConfirmridesComponent {
   applyFilter(): void {
     this.currentPage = 1; // Reset to the first page when applying filters
     this.getDriverRideData();
-    this.getCreateRide()
+    // this.getCreateRide()
   }
   clearFilter(): void {
     this.statusFilter = '';
@@ -126,7 +126,7 @@ export class ConfirmridesComponent {
     this.endDateFilter = '';
     this.currentPage = 1; // Reset to the first page when clearing filters
     this.getDriverRideData();
-    this.getCreateRide()
+    // this.getCreateRide()
   }
 
   generatePageArray(): number[] {
@@ -137,20 +137,20 @@ export class ConfirmridesComponent {
     console.log('Search query:', this.searchQuery);
     this.currentPage = 1; // Reset to the first page when searching
     this.getDriverRideData()
-    this.getCreateRide()
+    // this.getCreateRide()
   }
   prevPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
     }
     this.getDriverRideData()
-    this.getCreateRide()
+    // this.getCreateRide()
   }
   
   goToPage(page: number): void {
     this.currentPage = page;
     this.getDriverRideData()
-    this.getCreateRide()
+    // this.getCreateRide()
   }
   // Function to go to the next page
   nextPage() {
@@ -158,13 +158,13 @@ export class ConfirmridesComponent {
       this.currentPage++;
     }
     this.getDriverRideData()
-    this.getCreateRide()
+    // this.getCreateRide()
   }
 
   onSort() {
     this.currentPage = 1; // Reset to the first page when sorting
     this.getDriverRideData()
-    this.getCreateRide()
+    // this.getCreateRide()
   }
   clearSearch(): void {
     this.searchQuery = '';
@@ -179,7 +179,7 @@ export class ConfirmridesComponent {
           this.createridedata[index].assigned = updatedDriverRide.assigned;
         }
           this.getDriverRideData()
-          this.getCreateRide()
+          // this.getCreateRide()
     });
   }
   subscribeToListenDriverUpdate() {
@@ -298,7 +298,7 @@ export class ConfirmridesComponent {
       response => {
         
         this.getDriverRideData();
-        this.getCreateRide()
+        // this.getCreateRide()
       },
       error => {
         console.log(error);
