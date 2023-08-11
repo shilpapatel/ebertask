@@ -45,7 +45,6 @@ adminSchema.pre('save', async function(next) {
     }
     next();
   });
-
   // Methods
   adminSchema.methods.verifyPassword = function (password) {
       return bcrypt.compareSync(password, this.password);

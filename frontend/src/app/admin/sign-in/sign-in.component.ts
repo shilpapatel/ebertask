@@ -38,7 +38,7 @@ export class SignInComponent implements OnInit {
          
          this.adminService.setToken(res['token']);
          this.toastr.success('Login Successfully');
-         this.router.navigateByUrl('/adminpanel');
+         this.router.navigateByUrl('/adminpanel/dashboard');
          // this.toastr.error(res.error.message);
    
       },

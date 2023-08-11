@@ -37,6 +37,7 @@ import { AdminpanelModule } from './components/adminpanel/adminpanel.module';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
 
 @NgModule({
   declarations: [
@@ -56,6 +57,7 @@ import { MatBadgeModule } from '@angular/material/badge';
     CityComponent,
     VehiclepricingComponent,
     SettingsComponent,
+    DashboardComponent
   ],
   imports: [
     BrowserModule,

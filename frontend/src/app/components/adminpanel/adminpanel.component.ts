@@ -16,12 +16,12 @@ export class AdminpanelComponent implements OnInit {
   notificationCount: number = 0;
 
  menuSidebar = [
-   // {
-   //   link_name: "Dashboard",
-   //   link: "/dashboard",
-   //   icon: "bx bx-grid-alt",
-   //   sub_menu: []
-   // }, 
+   {
+     link_name: "Dashboard",
+     link: "dashboard",
+     icon: "fa-solid fa-house",
+     sub_menu: []
+   }, 
    {
      link_name: "Rides",
      link: null,

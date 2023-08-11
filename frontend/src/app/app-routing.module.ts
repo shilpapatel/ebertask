@@ -4,18 +4,6 @@ import { AdminComponent } from './admin/admin.component';
 import { SignUpComponent } from './admin/sign-up/sign-up.component';
 import { SignInComponent } from './admin/sign-in/sign-in.component';
 import { AuthGuard } from './auth/auth.guard';
-import { AdminpanelComponent } from './components/adminpanel/adminpanel.component';
-import { VehicletypeComponent } from './components/vehicletype/vehicletype.component';
-import { CountryComponent } from './components/country/country.component';
-import { UsersComponent } from './components/users/users.component';
-import { CreaterideComponent } from './components/createride/createride.component';
-import { ConfirmridesComponent } from './components/confirmrides/confirmrides.component';
-import { RidehistoryComponent } from './components/ridehistory/ridehistory.component';
-import { ListComponent } from './components/list/list.component';
-import { RunningrequestComponent } from './components/runningrequest/runningrequest.component';
-import { CityComponent } from './components/city/city.component';
-import { VehiclepricingComponent } from './components/vehiclepricing/vehiclepricing.component';
-import { SettingsComponent } from './components/settings/settings.component';
 
 const routes: Routes = [
 
@@ -35,6 +23,18 @@ const routes: Routes = [
 })
 export class AppRoutingModule { }
 
+// import { AdminpanelComponent } from './components/adminpanel/adminpanel.component';
+// import { VehicletypeComponent } from './components/vehicletype/vehicletype.component';
+// import { CountryComponent } from './components/country/country.component';
+// import { UsersComponent } from './components/users/users.component';
+// import { CreaterideComponent } from './components/createride/createride.component';
+// import { ConfirmridesComponent } from './components/confirmrides/confirmrides.component';
+// import { RidehistoryComponent } from './components/ridehistory/ridehistory.component';
+// import { ListComponent } from './components/list/list.component';
+// import { RunningrequestComponent } from './components/runningrequest/runningrequest.component';
+// import { CityComponent } from './components/city/city.component';
+// import { VehiclepricingComponent } from './components/vehiclepricing/vehiclepricing.component';
+// import { SettingsComponent } from './components/settings/settings.component';
 
 // const routes: Routes = [
 

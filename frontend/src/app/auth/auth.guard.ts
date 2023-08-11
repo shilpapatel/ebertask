@@ -13,6 +13,7 @@ export class AuthGuard implements CanActivate, CanActivateChild {
   
   canActivate(): boolean {
     if (this.adminService.isLoggedIn()) {
+      // this.router.navigateByUrl('/adminpanel/dashboard');
       return true;
     }else{
       this.router.navigateByUrl('/signin');
@@ -26,6 +27,7 @@ export class AuthGuard implements CanActivate, CanActivateChild {
 
   canActivateChild(): boolean {
     if (this.adminService.isLoggedIn()) {
+      // this.router.navigateByUrl('/adminpanel/dashboard');
       return true;
     }else{
       this.router.navigateByUrl('/signin');

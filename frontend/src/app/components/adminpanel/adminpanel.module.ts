@@ -6,8 +6,12 @@ import { AuthGuard } from 'src/app/auth/auth.guard';
 const routes: Routes = [
   {
     path:'',canActivate: [AuthGuard], canActivateChild: [AuthGuard],
-    component: AdminpanelComponent,
+     component: AdminpanelComponent,
     children:[
+      {
+        path: 'dashboard',
+        loadChildren: () => import('../dashboard/dashboard.module').then(m => m.DashboardModule)
+      },
       {
         path: 'city',
         loadChildren: () => import('../city/city.module').then(m => m.CityModule)
