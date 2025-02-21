@@ -4,7 +4,7 @@
   
       <form [formGroup]="rideForm">
         <div class="form-group m-3">
-          <label for="requesttime">Request Time 10 to 120:</label>
+          <label for="requesttime">Request Time:</label>
           <select formControlName="requesttime" class="form-control" id="requesttime">
             <option value="10">10 seconds</option>
             <option value="20">20 seconds</option>
@@ -17,7 +17,7 @@
         </div>
   
         <div class="form-group m-3">
-          <label for="maxstops">Maximum Stops:</label>
+          <label for="maxstops">Maximum Stops 1 to 5:</label>
           <select formControlName="maxstops" class="form-control" id="maxstops">
             <option value="1">1</option>
             <option value="2">2</option>
